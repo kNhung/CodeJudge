@@ -17,7 +17,7 @@ def read_data(
     test_case, model, analyze_prompt, compare_prompt, temperature, file_name, overwrite
 ):
     data = []
-    with open(f"./data/apps/test_cases/{test_case}.jsonl") as f:
+    with open(f"./evaluation/data/apps/test_cases/{test_case}.jsonl") as f:
         for line in f:
             data.append(json.loads(line))
 
