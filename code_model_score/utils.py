@@ -9,7 +9,20 @@ from transformers import AutoTokenizer
 import transformers
 import torch
 
+try:
+    import ollama
+except ImportError:
+    ollama = None
+
 model_cache = {}
+
+
+def llama3_prompt(message):
+    prompt = "<|begin_of_text|>"
+    for sentence in message:
+        prompt += f"<|start_header_id|>{sentence['role']}<|end_header_id|>\n{sentence['content']}<|eot_id|>"
+    prompt += "<|start_header_id|>assistant<|end_header_id|>"
+    return prompt
 
 
 def load_model(model, root_path="./model"):
@@ -41,6 +54,20 @@ def load_model(model, root_path="./model"):
             pipeline.tokenizer.eos_token_id,
             pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
         ]
+    elif model.lower().startswith("llama3:"):
+        if ollama is None:
+            raise ImportError(
+                "The 'ollama' package is required to use Ollama models. Install it with 'pip install ollama'."
+            )
+        terminators = None
+        pipeline = None
+    elif model.lower().startswith("llama3.2:"):
+        if ollama is None:
+            raise ImportError(
+                "The 'ollama' package is required to use Ollama models. Install it with 'pip install ollama'."
+            )
+        terminators = None
+        pipeline = None
     elif model.startswith("gpt"):
         terminators = None
         pipeline = None
