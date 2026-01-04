@@ -10,7 +10,7 @@ def calculate_correlation(file_name):
     invalid_cnt = 0
     correct_cnt = 0
 
-    with open("data/apps/test.json", "r") as f:
+    with open("./evaluation/data/apps/test.json", "r") as f:
         m = sorted(json.load(f))
 
     for index, d in enumerate(data["data"]):

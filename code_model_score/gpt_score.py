@@ -1,5 +1,10 @@
 import copy
 
+try:
+    import ollama
+except ImportError:
+    ollama = None
+
 from .utils import openai_request
 
 
@@ -103,5 +108,15 @@ def form_filling(
             max_new_tokens=max_tokens,
             pad_token_id=pipeline.tokenizer.eos_token_id,
         )[0]["generated_text"].strip()
+    elif model.lower().startswith("llama3:"):
+        prompt = llama3_prompt(message)
+        name = model
+        response = ollama.generate(model=name, prompt=prompt, options={"temperature": temperature, "num_predict": max_tokens})
+        return response["response"]
+    elif model.lower().startswith("llama3.2:"):
+        prompt = llama3_prompt(message)
+        name = model
+        response = ollama.generate(model=name, prompt=prompt, options={"temperature": temperature, "num_predict": max_tokens})
+        return response["response"]
     else:
         raise Exception("Invalid model")
