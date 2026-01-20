@@ -1,5 +1,5 @@
-import openai
-from openai import OpenAI
+# import openai
+# from openai import OpenAI
 import json
 import re
 import time
@@ -17,16 +17,74 @@ def load_model(model, root_path="./model"):
         print(f"Loading {model} from cache.")
         return model_cache[model]
 
-    if model.startswith("CodeLlama"):
-        model_path = f"{root_path}/codellama/{model}-hf"
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
+    # --- BLOCK MỚI: Hỗ trợ Qwen (Qwen2.5-Coder-1.5B-Instruct...) ---
+    if model.startswith("Qwen"):
+        # Tự động map: Qwen2.5... -> Qwen/Qwen2.5...
+        model_name = f"Qwen/{model}"
+        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
         terminators = tokenizer.eos_token_id
         pipeline = transformers.pipeline(
             "text-generation",
-            model=model_path,
+            model=model_name,
+            torch_dtype=torch.float16, # Qwen chạy tốt với float16 hoặc bfloat16
+            device_map="auto",
+            return_full_text=False,
+            trust_remote_code=True,
+        )
+
+    # --- BLOCK MỚI: Hỗ trợ DeepSeek (deepseek-coder-1.3b-instruct...) ---
+    elif model.startswith("deepseek"):
+        # Tự động map: deepseek-coder... -> deepseek-ai/deepseek-coder...
+        model_name = f"deepseek-ai/{model}"
+        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+        terminators = tokenizer.eos_token_id
+        pipeline = transformers.pipeline(
+            "text-generation",
+            model=model_name,
             torch_dtype=torch.float16,
             device_map="auto",
             return_full_text=False,
+            trust_remote_code=True,
+        )
+
+    elif model.startswith("CodeLlama"):
+        # Load from Hugging Face Hub with correct model ID
+        model_name = f"codellama/{model.lower()}"
+        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+        terminators = tokenizer.eos_token_id
+        pipeline = transformers.pipeline(
+            "text-generation",
+            model=model_name,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            return_full_text=False,
+            trust_remote_code=True,
+        )
+    elif model.startswith("Mistral"):
+        # Use Mistral (public model, no auth needed)
+        model_name = f"mistralai/{model}"
+        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+        terminators = tokenizer.eos_token_id
+        pipeline = transformers.pipeline(
+            "text-generation",
+            model=model_name,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            return_full_text=False,
+            trust_remote_code=True,
+        )
+    elif model.startswith("TinyLlama"):
+        # Lightweight model (~1.1B, 2-3GB RAM only)
+        model_name = f"TinyLlama/{model}"
+        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+        terminators = tokenizer.eos_token_id
+        pipeline = transformers.pipeline(
+            "text-generation",
+            model=model_name,
+            torch_dtype=torch.float32,
+            device_map="auto",
+            return_full_text=False,
+            trust_remote_code=True,
         )
     elif model.startswith("Meta-Llama-3"):
         model_path = f"{root_path}/llama3/{model}-hf"
@@ -45,7 +103,21 @@ def load_model(model, root_path="./model"):
         terminators = None
         pipeline = None
     else:
-        raise ("Invalid model name")
+        # Fallback: Thử load trực tiếp nếu người dùng nhập full path (VD: google/gemma-2b)
+        try:
+            print(f"Attempting to load generic model: {model}")
+            tokenizer = AutoTokenizer.from_pretrained(model, trust_remote_code=True)
+            terminators = tokenizer.eos_token_id
+            pipeline = transformers.pipeline(
+                "text-generation",
+                model=model,
+                torch_dtype=torch.float16,
+                device_map="auto",
+                return_full_text=False,
+                trust_remote_code=True,
+            )
+        except Exception as e:
+            raise ValueError(f"Invalid model name or failed to load: {model}. Error: {e}")
 
     model_cache[model] = (terminators, pipeline)
     return terminators, pipeline

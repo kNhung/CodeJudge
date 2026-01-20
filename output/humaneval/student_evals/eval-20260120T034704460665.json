@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-01-20T03:47:04.459694",
+  "model": "Qwen2.5-Coder-1.5B-Instruct",
+  "step": 1,
+  "return_type": "bool",
+  "score": 0.0,
+  "raw": "No",
+  "code": "def sum_list(nums): result = 1; for n in nums: result *= n; return result",
+  "reference": null,
+  "problem": "Return the sum of a list of numbers"
+}

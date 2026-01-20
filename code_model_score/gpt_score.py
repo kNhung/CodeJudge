@@ -79,6 +79,32 @@ def form_filling(
         return openai_request(
             message=message, model=model, temperature=temperature, max_tokens=max_tokens
         )
+    
+    # --- BLOCK MỚI: Hỗ trợ Qwen và DeepSeek ---
+    elif model.startswith("Qwen") or model.startswith("deepseek"):
+        # Sử dụng tính năng apply_chat_template có sẵn trong Tokenizer của model
+        # Cách này đảm bảo format đúng 100% theo chuẩn của tác giả (ChatML, Alpaca, v.v.)
+        full_prompt = pipeline.tokenizer.apply_chat_template(
+            message, 
+            tokenize=False, 
+            add_generation_prompt=True
+        )
+        
+        # Đảm bảo temperature hợp lệ (không bằng 0)
+        temp = max(temperature, 0.1) if temperature > 0 else 0.1
+        
+        return pipeline(
+            full_prompt,
+            do_sample=True,
+            temperature=temp,
+            top_p=0.9,
+            num_return_sequences=1,
+            eos_token_id=terminators,
+            max_new_tokens=max_tokens,
+            pad_token_id=pipeline.tokenizer.eos_token_id,
+        )[0]["generated_text"].strip()
+    # ------------------------------------------
+
     elif model.startswith("CodeLlama"):
         prompt = code_llama_prompt(message)
         return pipeline(
@@ -97,6 +123,21 @@ def form_filling(
             prompt,
             do_sample=True,
             temperature=temperature,
+            top_p=0.9,
+            num_return_sequences=1,
+            eos_token_id=terminators,
+            max_new_tokens=max_tokens,
+            pad_token_id=pipeline.tokenizer.eos_token_id,
+        )[0]["generated_text"].strip()
+    elif model.startswith("TinyLlama") or model.startswith("Mistral"):
+        # Generic prompt for lightweight models
+        prompt = f"<s>[INST] {message[-1]['content']} [/INST]"
+        # Ensure temperature is valid (>0 when do_sample=True)
+        temp = max(temperature, 0.1) if temperature > 0 else 0.7
+        return pipeline(
+            prompt,
+            do_sample=True,
+            temperature=temp,
             top_p=0.9,
             num_return_sequences=1,
             eos_token_id=terminators,

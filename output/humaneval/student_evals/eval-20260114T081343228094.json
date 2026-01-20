@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-01-14T08:13:43.227076",
+  "model": "MOCK",
+  "step": 1,
+  "return_type": "bool",
+  "score": 1.0,
+  "raw": "[MOCK] generated evaluation",
+  "code": "def sum_list(nums):\n    \"\"\"Return the sum of a list of numbers.\"\"\"\n    total = 0\n    for n in nums:\n        total += n\n    return total\n\nif __name__ == \"__main__\":\n    print(sum_list([1,2,3]))\n",
+  "reference": null,
+  "problem": "Return the sum of a list of numbers",
+  "barem": null,
+  "grade": null
+}

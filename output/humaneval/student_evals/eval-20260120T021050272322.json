@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-01-20T02:10:50.271324",
+  "model": "MOCK",
+  "step": 1,
+  "return_type": "bool",
+  "score": 1.0,
+  "raw": "[MOCK] generated evaluation",
+  "code": "def sum_list(nums): return sum(nums)",
+  "reference": null,
+  "problem": "Return the sum of a list of numbers",
+  "barem": null,
+  "grade": null
+}

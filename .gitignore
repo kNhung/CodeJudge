@@ -13,3 +13,6 @@ test.ipynb
 /evaluation/analyze
 /evaluation/data/bigcodebench/sanitized_calibrated_samples
 humaneval-*
+/venv/
+env/
+.venv/
