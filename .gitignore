@@ -13,3 +13,13 @@ test.ipynb
 /evaluation/analyze
 /evaluation/data/bigcodebench/sanitized_calibrated_samples
 humaneval-*
+
+.env
+
+# Ignore generated result/output files and folders
+/output/
+/data/**/results/
+/data/**/test_cases/
+/**/results/
+/**/test_cases/
+.ipynb_checkpoints/
