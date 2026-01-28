@@ -4,6 +4,8 @@ import sys
 import argparse
 from tqdm.auto import tqdm
 import code_bert_score
+import requests
+import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from codegen_metrics import (
@@ -29,11 +31,45 @@ def calculate_other_metric(test_case, i):
         canonical_solution = item["solution"]
         output_name = f"other-metrics-without-prefix-sample-{i}.json"
 
-        _, _, f1, f3 = code_bert_score.score(
-            cands=[program], refs=[canonical_solution], lang=language
-        )
-        f1 = f1.tolist()
-        f3 = f3.tolist()
+        # Default: use local code_bert_score if available
+        try:
+            _, _, f1, f3 = code_bert_score.score(
+                cands=[program], refs=[canonical_solution], lang=language
+            )
+            f1 = f1.tolist()
+            f3 = f3.tolist()
+        except Exception:
+            # Fallback: try using Hugging Face Inference API embeddings if HF_API_TOKEN provided
+            hf_token = os.environ.get("HF_API_TOKEN")
+            hf_model = os.environ.get("HF_CODE_EMBEDDING_MODEL", "microsoft/codebert-base")
+            if hf_token:
+                def get_embedding(text):
+                    url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{hf_model}"
+                    headers = {"Authorization": f"Bearer {hf_token}"}
+                    resp = requests.post(url, headers=headers, json={"inputs": text, "options": {"wait_for_model": True}})
+                    resp.raise_for_status()
+                    vec = resp.json()
+                    # If returns token vectors, average them
+                    arr = np.array(vec)
+                    if arr.ndim == 2:
+                        return arr.mean(axis=0)
+                    return arr
+
+                v1 = get_embedding(program)
+                v2 = get_embedding(canonical_solution)
+                # cosine similarity
+                def cosine(a, b):
+                    denom = (np.linalg.norm(a) * np.linalg.norm(b))
+                    if denom == 0:
+                        return 0.0
+                    return float(np.dot(a, b) / denom)
+
+                sim = cosine(v1, v2)
+                # map similarity to pseudo-f1/f3 values
+                f1 = [sim]
+                f3 = [sim]
+            else:
+                raise
         out.append(
             {
                 "pass": item["pass"],
