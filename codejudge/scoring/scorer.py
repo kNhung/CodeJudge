@@ -1,0 +1,373 @@
+"""
+Scoring Algorithm - Tính toán điểm cuối cùng
+Dựa trên công thức: Điểm = Max(0, 100 - Tổng_Điểm_Phạt)
+"""
+
+import logging
+from typing import Dict, Any, List
+from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# DATA STRUCTURES
+# ============================================================================
+
+@dataclass
+class PenaltyRule:
+    """Quy tắc phạt cho một loại lỗi"""
+    error_type: str
+    penalty_points: int
+    description: str
+
+
+@dataclass
+class ScoringResult:
+    """Kết quả chấm điểm"""
+    base_score: int
+    final_score: int
+    penalty_breakdown: Dict[str, int]
+    total_penalty: int
+    reasoning: str
+
+
+# ============================================================================
+# PENALTY CONFIGURATION
+# ============================================================================
+
+class PenaltyConfig:
+    """Cấu hình mức phạt"""
+    
+    DEFAULT_PENALTIES = {
+        "Negligible": {
+            "penalty": 0,
+            "description": "Code xấu, style, missing import - Không trừ điểm"
+        },
+        "Small": {
+            "penalty": -5,
+            "description": "Thiếu xử lý biên, edge case - Trừ 5 điểm"
+        },
+        "Major": {
+            "penalty": -50,
+            "description": "Sai logic, sai công thức - Trừ 50 điểm"
+        },
+        "Fatal": {
+            "penalty": -100,
+            "description": "Code chưa hoàn thành, undefined - Trừ hết"
+        }
+    }
+    
+    @staticmethod
+    def get_penalty(error_type: str) -> int:
+        """Lấy mức phạt cho một loại lỗi"""
+        penalties = PenaltyConfig.DEFAULT_PENALTIES
+        if error_type in penalties:
+            return penalties[error_type]["penalty"]
+        
+        logger.warning(f"Unknown error type: {error_type}. Using Negligible (0)")
+        return 0
+
+
+# ============================================================================
+# SCORER - HÀM TÍNH ĐIỂM
+# ============================================================================
+
+class Scorer:
+    """
+    Tính toán điểm từ danh sách lỗi
+    
+    Công thức:
+    Điểm = Max(0, 100 - Tổng_Điểm_Phạt)
+    """
+    
+    def __init__(self, base_score: int = 100):
+        """
+        Khởi tạo Scorer
+        
+        Args:
+            base_score: Điểm gốc trước khi trừ penalty (mặc định: 100)
+        """
+        self.base_score = base_score
+    
+    def calculate_score(
+        self,
+        errors: List[Dict[str, Any]]
+    ) -> ScoringResult:
+        """
+        Tính điểm từ danh sách lỗi
+        
+        Args:
+            errors: Danh sách lỗi từ TaxonomyAssessor
+                    [
+                        {
+                            "type": "Major",
+                            "description": "...",
+                            "code_snippet": "..."
+                        }
+                    ]
+        
+        Returns:
+            ScoringResult với các thông tin chi tiết
+        """
+        logger.info(f"Calculating score for {len(errors)} errors")
+        
+        # Tính toán penalty
+        penalty_breakdown = self._calculate_penalties(errors)
+        total_penalty = sum(penalty_breakdown.values())
+        
+        # Công thức: Max(0, 100 - total_penalty)
+        final_score = max(0, self.base_score + total_penalty)
+        
+        # Reasoning
+        reasoning = self._generate_reasoning(
+            penalty_breakdown,
+            total_penalty,
+            final_score
+        )
+        
+        logger.info(f"Final Score: {final_score}")
+        
+        return ScoringResult(
+            base_score=self.base_score,
+            final_score=final_score,
+            penalty_breakdown=penalty_breakdown,
+            total_penalty=total_penalty,
+            reasoning=reasoning
+        )
+    
+    def _calculate_penalties(self, errors: List[Dict]) -> Dict[str, int]:
+        """
+        Tính tổng penalty cho mỗi loại lỗi
+        
+        Returns:
+            {"Negligible": 0, "Small": -5, "Major": -50, ...}
+        """
+        penalty_breakdown = {}
+        
+        for error in errors:
+            error_type = error.get("type", "Negligible")
+            penalty = PenaltyConfig.get_penalty(error_type)
+            
+            if error_type not in penalty_breakdown:
+                penalty_breakdown[error_type] = 0
+            
+            penalty_breakdown[error_type] += penalty
+        
+        # Ensure all types are present
+        for error_type in ["Negligible", "Small", "Major", "Fatal"]:
+            if error_type not in penalty_breakdown:
+                penalty_breakdown[error_type] = 0
+        
+        logger.debug(f"Penalty breakdown: {penalty_breakdown}")
+        
+        return penalty_breakdown
+    
+    def _generate_reasoning(
+        self,
+        penalty_breakdown: Dict[str, int],
+        total_penalty: int,
+        final_score: int
+    ) -> str:
+        """Tạo giải thích chi tiết cho cách chấm"""
+        
+        parts = [
+            f"Base score: {self.base_score}",
+        ]
+        
+        # Chi tiết mỗi loại lỗi
+        for error_type, penalty in penalty_breakdown.items():
+            if penalty != 0:
+                parts.append(f"{error_type}: {penalty}")
+        
+        if total_penalty != 0:
+            parts.append(f"Total penalty: {total_penalty}")
+        
+        parts.append(f"Final score: {final_score}")
+        
+        return " | ".join(parts)
+    
+    def set_base_score(self, base_score: int):
+        """Đặt điểm gốc mới"""
+        self.base_score = base_score
+        logger.info(f"Base score updated to {base_score}")
+
+
+# ============================================================================
+# SCORE INTERPRETER - Phân tích kết quả
+# ============================================================================
+
+class ScoreInterpreter:
+    """
+    Giải thích kết quả chấm điểm
+    """
+    
+    # Định nghĩa các mức điểm
+    GRADE_SCALE = {
+        "A": (90, 100),      # Xuất sắc
+        "B": (80, 89),       # Tốt
+        "C": (70, 79),       # Khá
+        "D": (60, 69),       # Đủ điều kiện
+        "F": (0, 59)         # Không đạt
+    }
+    
+    # Feedback tùy theo điểm số
+    FEEDBACK_TEMPLATES = {
+        "A": "Xuất sắc! Code của bạn chạy đúng và không có lỗi nào.",
+        "B": "Tốt! Code chạy đúng nhưng có một số vấn đề nhỏ.",
+        "C": "Khá. Code có logic cơ bản đúng nhưng còn một số lỗi trung bình.",
+        "D": "Chưa tốt. Code có nhiều lỗi nhưng còn cơ hội cải thiện.",
+        "F": "Không đạt. Code cần được viết lại hoàn toàn."
+    }
+    
+    @staticmethod
+    def get_grade(score: int) -> str:
+        """Lấy grade (A-F) từ điểm số"""
+        for grade, (min_score, max_score) in ScoreInterpreter.GRADE_SCALE.items():
+            if min_score <= score <= max_score:
+                return grade
+        return "F"
+    
+    @staticmethod
+    def get_feedback(score: int) -> str:
+        """Lấy feedback tương ứng với điểm số"""
+        grade = ScoreInterpreter.get_grade(score)
+        return ScoreInterpreter.FEEDBACK_TEMPLATES.get(
+            grade,
+            "Please review your code"
+        )
+    
+    @staticmethod
+    def get_level_description(score: int) -> str:
+        """Mô tả chi tiết mức độ"""
+        grade = ScoreInterpreter.get_grade(score)
+        
+        descriptions = {
+            "A": "Code hoàn toàn chính xác, không có lỗi",
+            "B": "Code chạy đúng, có một số cải thiện nhỏ",
+            "C": "Code có logic cơ bản nhưng có lỗi",
+            "D": "Code còn nhiều vấn đề, cần sửa chữa lớn",
+            "F": "Code không thể chạy hoặc logic sai căn bản"
+        }
+        
+        return descriptions.get(grade, "Unknown")
+
+
+# ============================================================================
+# RESULT FORMATTER - Format kết quả
+# ============================================================================
+
+class ResultFormatter:
+    """
+    Định dạng kết quả chấm điểm cho hiển thị
+    """
+    
+    @staticmethod
+    def format_full_result(
+        scoring_result: ScoringResult,
+        errors: List[Dict] = None,
+        problem_statement: str = None
+    ) -> Dict[str, Any]:
+        """
+        Format kết quả chấm điểm đầy đủ
+        """
+        grade = ScoreInterpreter.get_grade(scoring_result.final_score)
+        feedback = ScoreInterpreter.get_feedback(scoring_result.final_score)
+        
+        result = {
+            "score": {
+                "final": scoring_result.final_score,
+                "base": scoring_result.base_score,
+                "penalty": scoring_result.total_penalty,
+                "grade": grade,
+                "percentage": f"{scoring_result.final_score}%"
+            },
+            "feedback": feedback,
+            "breakdown": scoring_result.penalty_breakdown,
+            "reasoning": scoring_result.reasoning
+        }
+        
+        if errors:
+            result["errors"] = {
+                "count": len(errors),
+                "critical": len([e for e in errors if e.get("type") in ["Major", "Fatal"]]),
+                "details": errors
+            }
+        
+        return result
+    
+    @staticmethod
+    def format_short_result(final_score: int) -> str:
+        """
+        Format kết quả ngắn gọn (cho display)
+        """
+        grade = ScoreInterpreter.get_grade(final_score)
+        return f"Score: {final_score}/100 ({grade})"
+    
+    @staticmethod
+    def format_detailed_report(
+        scoring_result: ScoringResult,
+        errors: List[Dict] = None
+    ) -> str:
+        """
+        Tạo báo cáo chi tiết (text format)
+        """
+        lines = [
+            "=" * 60,
+            "DETAILED SCORING REPORT",
+            "=" * 60,
+            f"Final Score: {scoring_result.final_score}/100",
+            f"Base Score: {scoring_result.base_score}",
+            f"Total Penalty: {scoring_result.total_penalty}",
+            "",
+            "PENALTY BREAKDOWN:",
+        ]
+        
+        for error_type, penalty in scoring_result.penalty_breakdown.items():
+            if penalty != 0:
+                lines.append(f"  - {error_type}: {penalty}")
+        
+        if errors:
+            lines.append("")
+            lines.append("ERRORS FOUND:")
+            
+            error_count = {}
+            for error in errors:
+                error_type = error.get("type", "Unknown")
+                error_count[error_type] = error_count.get(error_type, 0) + 1
+            
+            for error_type, count in error_count.items():
+                lines.append(f"  - {error_type}: {count}")
+        
+        lines.append("")
+        lines.append("REASONING:")
+        lines.append(f"  {scoring_result.reasoning}")
+        
+        return "\\n".join(lines)
+
+
+# ============================================================================
+# EXAMPLE USAGE
+# ============================================================================
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    
+    # Example errors
+    errors = [
+        {"type": "Small", "description": "Missing edge case handling"},
+        {"type": "Major", "description": "Wrong algorithm"},
+    ]
+    
+    # Calculate score
+    scorer = Scorer(base_score=100)
+    result = scorer.calculate_score(errors)
+    
+    print("\\n=== Scoring Result ===")
+    print(f"Base Score: {result.base_score}")
+    print(f"Final Score: {result.final_score}")
+    print(f"Grade: {ScoreInterpreter.get_grade(result.final_score)}")
+    print(f"Feedback: {ScoreInterpreter.get_feedback(result.final_score)}")
+    
+    # Detailed report
+    print("\\n" + ResultFormatter.format_detailed_report(result, errors))
