@@ -1,0 +1,77 @@
+Câu 1:
+Tuấn rất thích nghe nhạc. Vì vậy, Tuấn có một bộ sưu tập gồm n đĩa nhạc (n <=10000). Cậu đánh số hiệu cho các đĩa theo thứ tự từ 1 đến n. Ban đầu các đĩa được xếp chồng lên nhau theo đúng thứ tự từ 1 đến n, nghĩa là đĩa có số hiệu là 1 ở trên cùng, tiếp theo là đĩa 2,..., đĩa có số hiệu là n ở dưới cùng. Khi muốn nghe một đĩa nhạc nào đó, Tuấn sẽ rút đĩa đó ra, nghe xong thì để đĩa lại vào vị trí trên cùng. Hỏi sau m lần rút đĩa nghe nhạc, thứ tự chồng đĩa của Nam sẽ như thế nào?
+
+Ví dụ:
+Input:
+	Input number of disks: 7
+	Input number of changes: 3
+	Change 1. Disk Number: 5
+	Change 2. Disk Number: 3
+	Change 3. Disk Number: 7
+Output:
+	Disk stack: 7 3 5 1 2 4 6
+
+Giải thích:
+Số lượng đĩa nhạc là 7. Vì vậy, chồng đĩa ban đầu là: [1, 2, 3, 4, 5, 6, 7]
+Số lượng đĩa Tuấn đã nghe là 3.
+Lần 1. Nghe đĩa số 5 => Chồng đĩa trở thành: [5, 1, 2, 3, 4, 6, 7]
+Lần 2. Nghe đĩa số 3 => Chồng đĩa trở thành: [3, 5, 1, 2, 4, 6, 7]
+Lần 3. Nghe đĩa số 7 => Chồng đĩa trở thành: [7, 3, 5, 1, 2, 4, 6]
+
+
+Câu 2:
+Cho mảng hai chiều nguyên A kích thước m x m. Viết hàm tạo mảng đối xứng của A theo chiều dọc
+
+Input:
+[1, 2, 3,
+4, 5, 6,
+7, 8, 9]
+Output:
+[3, 2, 1,
+6, 5, 4,
+9, 8, 7]
+
+
+Câu 3:
+Cho file “pokemon.txt”:
+pokeID,pokeName,type1,type2,speed
+1,Bulbasaur,Grass,Poison,100
+2,Ivysaur,Grass,Poison,60
+3,Venusaur,Grass,Poison,80
+4,Charmander,Fire,NULL,39
+5,Charmeleon,Fire,NULL,58
+6,Charizard,Fire,Flying,78
+7,Squirtle,Water,NULL,44
+8,Wartortle,Water,NULL,59
+
+Sinh viên thực hiện các yêu cầu sau
+a. Viết hàm đọc file và lưu dữ liệu Pokemon vào mảng pokemons.
+	void ReadFile(char fileName[], Pokemon pokemons[], int &n);
+Trong đó, struct Pokemon sinh viên tự định nghĩa, bao gồm các thuộc tính sau:
+- id: mã số (tối đa 10 kí tự)
+- name: tên pokemon ( tối đa 30 kí tự)
+- type1: hệ thứ nhất (tối đa 25 kí tự)
+- type2: hệ thứ hai (tối đa 25 kí tự)
+- speed: tốc độ của pokemon
+- attack: sức tấn công của pokemon
+
+b. Viết hàm in ra danh sách pokemons.
+	void PrintPokemonList(Pokemon pokemons[], int n)
+Theo định dạng sau:
+=========================
+ID: 001
+Pokemon name: Bulbasaur
+Type: Grass, Poison
+Attack: 49
+Speed: 45
+=========================
+ID: 002
+Pokemon name: Charmander
+Type: Fire
+Attack: 52
+Speed: 65
+=========================
+
+c. Viết hàm nhận vào hệ của pokemon trả về danh sách các pokemon thuộc hệ đã cần tìm.
+	void Search(char type1[], char type2[], Pokemon pokemons[], int n, Pokemon result[])
+Viết hàm main để in danh sách Pokemon result. Sử dụng lại hàm PrintPokemonList của câu b

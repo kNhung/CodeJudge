@@ -1,0 +1,62 @@
+Bài 1 (3đ): 
+Cho ma trận n x n. Viết hàm kiểm tra mảng có đối xứng qua đường chéo hay không? Kiểm tra đối xứng qua đường chéo chính hoặc đường chéo phụ. Nếu thoả mãn một trong hai tính chất thì trả về True, không trả về False.
+VD: Input:
+9
+1 2 3 4 5 2 7 4 1
+Giải thích:
+Dòng 1 là 9, đại diện cho số lượng phần tử có trong ma trận.
+Dòng 2 là các phần tử có trong ma trận đi từ trên xuống dưới và từ trái qua phải.
+Output: True
+Giải thích:
+1 2 3 4 5 2 7 4 1 =>	
+1 2 3			
+4 5 2			
+7 4 1
+=> Đối xứng qua đường chéo phụ => True
+
+
+Bài 2 (3đ):
+Cho chuỗi kí tự s gồm các chữ cái tiếng anh viết thường. Thực hiện xóa các chữ cái trùng nhau nằm liên tiếp nhau trong chuỗi. Sau khi xóa nếu chuỗi mới vẫn tồn tại các chữ cái nằm kề nhau trùng nhau thì tiếp tục thực hiện việc xóa. Lưu ý, việc xoá diễn ra từ trái sang phải. Viết hàm thay đổi chuỗi s sau khi thực hiện việc xóa các kí tự trùng lặp trong chuỗi và in ra chuỗi s đó.
+VD:
+Input: abbaca
+Output: ca
+Giải thích: abbaca => xóa bb => aaca => xóa aa => ca
+
+
+Bài 3 (4đ):
+Để quảng bá cho kì thi Olympic Tin Học Sinh Viên Toàn Quốc & Kỳ Thi Lập Trình Viên Quốc Tế (gọi tắt là OLP&ACM/ICPC), ban tổ chức phát động cuộc thi ảnh "Khoảnh khắc OLP&ACM/ICPC". Các đội tuyển sẽ đăng ảnh của đội mình vào fanpage của cuộc thi. Dựa vào số lượt tương tác, bao gồm like, comment, và share, ban tổ chức sẽ chọn ra ba bức ảnh có điểm cao nhất để trao quà. Cách tính điểm như sau: mỗi lượt like được 1 điểm, comment được 2 điểm và share được 3 điểm. Ban tổ chức đã nhờ người thống kê số lượt tương tác của từng đội, việc còn lại của bạn là tính điểm và xác định 3 đội được trao quà.
+
+Input: gồm nhiều đội tuyển cách nhau bởi dấu xuống dòng. Dữ liệu mỗi đội tuyển được định dạng như sau:
+- Name: Tên đội
+- Like: Số lượt like
+- Comment: Số lượt comment
+- Share: Số lượt share
+Dữ liệu đầu vào kết thúc khi Tên đội là "000". Lưu ý: Tên đội tối đa là 40 kí tự. Các thông tin như Name, Like, Comment, Share đều được nhập vào từng dòng.
+
+Output: gồm các dòng ghi tên lần lượt 3 đội được trao quà theo thứ tự điểm từ cao đến thấp. Nếu nhiều đội có điểm bằng nhau thì tiếp tục so sánh dựa trên tiêu chí (đội nào có chỉ số của tiêu chí cao hơn thì được xếp trên) lần lượt là lượt share, lượt comment, lượt like. Trong trường hợp có nhiều hơn một đội xếp hạng bằng nhau thì xuất ra các đội đó.
+
+VD:
+Input:
+	Name: HCMUS Balloons
+	Like: 456
+	Comment: 215
+	Share: 34
+	Name: UP
+	Unlimited Like: 654
+	Comment: 45
+	Share: 21
+	Name: UN Explorer
+	Like: 452
+	Comment: 142
+	Share: 15
+	Name: BKAV Ashe
+	Like: 356
+	Comment: 654
+	Share: 78
+	Name: 000
+Output:
+	BKAV Ashe
+	HCMUS Balloons
+	UP Unlimited
+
+Giải thích: đội HCMUS Balloons có tổng số điểm = 456 * 1 + 215 * 2 + 34 * 3 = 988. Tương tự cho các đội còn lại, đội UP Unlimited là: 807, đội UN Explorer là: 781, đội BKAV Ashe là: 1898.
