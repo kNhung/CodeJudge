@@ -29,9 +29,9 @@ Nhiệm vụ của bạn là:
 | Cấp Độ     | Định Nghĩa                              | Mức Phạt | Ví Dụ                    |
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 | Negligible | Code xấu, thiếu import, style sai      | 0 điểm   | Thiếu comments, format  |
-| Small      | Thiếu xử lý biên, edge case không đủ  | -5 điểm  | Không xử lý empty input |
-| Major      | Sai logic thuật toán, sai công thức    | -50 điểm | Sai sort, sai condition |
-| Fatal      | Code chưa viết xong, hàm không tồn tại| -100 điểm| Gọi undefined function  |
+| Small      | Thiếu xử lý biên, edge case không đủ  | -0.5 điểm| Không xử lý empty input |
+| Major      | Sai logic thuật toán, sai công thức    | -5 điểm  | Sai sort, sai condition |
+| Fatal      | Code chưa viết xong, hàm không tồn tại| -10 điểm | Gọi undefined function  |
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 HƯỚNG DẪN CHẤM ĐIỂM:
@@ -49,7 +49,7 @@ HƯỚNG DẪN CHẤM ĐIỂM:
       "fix_suggestion": "gợi ý sửa"
     }
   ],
-  "quality_score": 90,
+    "quality_score": 9.0,
   "reasoning": "Giải thích cách chấm"
 }"""
 
@@ -57,11 +57,13 @@ HƯỚNG DẪN CHẤM ĐIỂM:
 # BINARY ASSESSMENT - Phân tích từng bước
 # ============================================================================
 
-BINARY_ASSESSMENT_ANALYZE_PROMPT = """Đề bài: 
+BINARY_ASSESSMENT_ANALYZE_PROMPT = """Ngôn ngữ code: {language}
+
+Đề bài: 
 {problem_statement}
 
 Code sinh viên:
-```python
+```
 {student_code}
 ```
 
@@ -88,11 +90,13 @@ Chỉ trả lời: "Yes" hoặc "No" (không thêm giải thích)"""
 # TAXONOMY-GUIDED - Chấm điểm chi tiết
 # ============================================================================
 
-TAXONOMY_ASSESSMENT_PROMPT = """Đề bài:
+TAXONOMY_ASSESSMENT_PROMPT = """Ngôn ngữ code: {language}
+
+Đề bài:
 {problem_statement}
 
 Code sinh viên:
-```python
+```
 {student_code}
 ```
 
@@ -101,7 +105,7 @@ Code sinh viên:
 Hãy chấm điểm code này theo tiêu chuẩn đã nêu, trả về JSON theo định dạng yêu cầu."""
 
 REFERENCE_CODE_TEMPLATE = """Code mẫu tham khảo (để giúp xác định lỗi):
-```python
+```
 {reference_code}
 ```"""
 
@@ -113,14 +117,14 @@ ERROR_SUMMARY_PROMPT = """Dựa trên danh sách lỗi sau:
 
 {errors_json}
 
-Hãy tính toán điểm cuối cùng (0-100) dựa trên công thức:
-Điểm = Max(0, 100 - Tổng_Điểm_Phạt)
+Hãy tính toán điểm cuối cùng (0-10) dựa trên công thức:
+Điểm = Max(0, 10 - Tổng_Điểm_Phạt)
 
 Với mức phạt:
 - Negligible: 0 điểm
-- Small: -5 điểm
-- Major: -50 điểm
-- Fatal: -100 điểm
+- Small: -0.5 điểm
+- Major: -5 điểm
+- Fatal: -10 điểm
 
 Trả về JSON:
 {
@@ -147,9 +151,14 @@ class PromptTemplates:
     ERROR_SUMMARY = ERROR_SUMMARY_PROMPT
     
     @staticmethod
-    def format_binary_analyze(problem_statement: str, student_code: str) -> str:
+    def format_binary_analyze(
+        problem_statement: str,
+        student_code: str,
+        language: str = "Python"
+    ) -> str:
         """Format prompt phân tích (Step 1)"""
         return BINARY_ASSESSMENT_ANALYZE_PROMPT.format(
+            language=language,
             problem_statement=problem_statement,
             student_code=student_code
         )
@@ -165,7 +174,8 @@ class PromptTemplates:
     def format_taxonomy(
         problem_statement: str, 
         student_code: str,
-        reference_code: str = None
+        reference_code: str = None,
+        language: str = "Python"
     ) -> str:
         """Format prompt chấm điểm chi tiết"""
         reference_section = ""
@@ -175,6 +185,7 @@ class PromptTemplates:
             )
         
         return TAXONOMY_ASSESSMENT_PROMPT.format(
+            language=language,
             problem_statement=problem_statement,
             student_code=student_code,
             reference_code_section=reference_section
@@ -203,7 +214,7 @@ ERROR_TAXONOMY = {
     },
     "Small": {
         "description": "Thiếu xử lý biên, edge case",
-        "penalty": -5,
+        "penalty": -0.5,
         "examples": [
             "Không xử lý empty list",
             "Không check None values",
@@ -213,7 +224,7 @@ ERROR_TAXONOMY = {
     },
     "Major": {
         "description": "Sai logic thuật toán, công thức",
-        "penalty": -50,
+        "penalty": -5,
         "examples": [
             "Sort sai thứ tự",
             "Loop condition sai",
@@ -223,7 +234,7 @@ ERROR_TAXONOMY = {
     },
     "Fatal": {
         "description": "Code chưa hoàn thành, hàm undefined",
-        "penalty": -100,
+        "penalty": -10,
         "examples": [
             "Gọi undefined function",
             "Return missing",

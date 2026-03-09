@@ -18,7 +18,7 @@ class IntegratedAssessor:
     
     Quy trình:
     1. Binary Assessment: Kiểm tra code có đạt yêu cầu cơ bản không (Yes/No)
-    2. Taxonomy Assessment: Nếu May (hoặc luôn), tính điểm chi tiết 0-100
+    2. Taxonomy Assessment: Nếu May (hoặc luôn), tính điểm chi tiết 0-10
     """
     
     def __init__(
@@ -45,7 +45,8 @@ class IntegratedAssessor:
         self,
         problem_statement: str,
         student_code: str,
-        reference_code: Optional[str] = None
+        reference_code: Optional[str] = None,
+        language: str = "Python"
     ) -> Dict[str, Any]:
         """
         Chấm điểm tích hợp
@@ -54,6 +55,7 @@ class IntegratedAssessor:
             problem_statement: Đề bài
             student_code: Code của sinh viên
             reference_code: Code mẫu (tùy chọn)
+            language: Ngôn ngữ lập trình của bài làm
         
         Returns:
             Kết quả chấm điểm tích hợp với cả Binary và Taxonomy scores
@@ -63,7 +65,8 @@ class IntegratedAssessor:
         # Bước 1: Binary Assessment
         binary_result = self.binary_assessor.assess(
             problem_statement,
-            student_code
+            student_code,
+            language=language,
         )
         
         logger.info(f"Binary Result: {binary_result['result']}")
@@ -76,7 +79,8 @@ class IntegratedAssessor:
             taxonomy_result = self.taxonomy_assessor.assess(
                 problem_statement,
                 student_code,
-                reference_code
+                reference_code,
+                language=language,
             )
         else:
             logger.info("Skipping Taxonomy Assessment (Binary = No)")
@@ -111,7 +115,8 @@ class IntegratedAssessor:
                 "result": binary_result["result"],
                 "passed": binary_result["passed"],
                 "confidence": binary_result.get("confidence", 0.9),
-                "analysis": binary_result.get("analysis", "")[:200] + "..."  # Rút gọn
+                "analysis": binary_result.get("analysis", ""),
+                "analysis_preview": binary_result.get("analysis", "")[:200] + "...",
             },
             "taxonomy": {
                 "final_score": taxonomy_result["final_score"],
@@ -152,15 +157,15 @@ class IntegratedAssessor:
         
         return breakdown
     
-    def _get_grade_letter(self, score: int) -> str:
+    def _get_grade_letter(self, score: float) -> str:
         """Lấy điểm chữ từ điểm số"""
-        if score >= 90:
+        if score >= 9.0:
             return "A"
-        elif score >= 80:
+        elif score >= 8.0:
             return "B"
-        elif score >= 70:
+        elif score >= 7.0:
             return "C"
-        elif score >= 60:
+        elif score >= 6.0:
             return "D"
         else:
             return "F"
@@ -168,19 +173,19 @@ class IntegratedAssessor:
     def _get_recommendation(
         self,
         passed_binary: bool,
-        final_score: int
+        final_score: float
     ) -> str:
         """Gợi ý dựa trên kết quả"""
         if not passed_binary:
             return "Code không đạt yêu cầu cơ bản. Cần viết lại."
         
-        if final_score >= 90:
+        if final_score >= 9.0:
             return "Xuất sắc! Không cần sửa."
-        elif final_score >= 80:
+        elif final_score >= 8.0:
             return "Tốt! Có thể cải thiện một số điểm."
-        elif final_score >= 70:
+        elif final_score >= 7.0:
             return "Khá. Cần sửa các lỗi Major."
-        elif final_score >= 60:
+        elif final_score >= 6.0:
             return "Chưa tốt. Cần sửa nhiều lỗi."
         else:
             return "Không đạt. Cần sửa các lỗi Fatal."

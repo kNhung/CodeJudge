@@ -17,7 +17,7 @@ humaneval-*
 .env
 
 # Ignore generated result/output files and folders
-/output/
+**/output/**
 /data/**/results/
 /data/**/test_cases/
 /**/results/

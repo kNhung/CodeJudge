@@ -1,6 +1,6 @@
 """
 Scoring Algorithm - Tính toán điểm cuối cùng
-Dựa trên công thức: Điểm = Max(0, 100 - Tổng_Điểm_Phạt)
+Dựa trên công thức: Điểm = Max(0, 10 - Tổng_Điểm_Phạt)
 """
 
 import logging
@@ -18,17 +18,17 @@ logger = logging.getLogger(__name__)
 class PenaltyRule:
     """Quy tắc phạt cho một loại lỗi"""
     error_type: str
-    penalty_points: int
+    penalty_points: float
     description: str
 
 
 @dataclass
 class ScoringResult:
     """Kết quả chấm điểm"""
-    base_score: int
-    final_score: int
-    penalty_breakdown: Dict[str, int]
-    total_penalty: int
+    base_score: float
+    final_score: float
+    penalty_breakdown: Dict[str, float]
+    total_penalty: float
     reasoning: str
 
 
@@ -45,21 +45,21 @@ class PenaltyConfig:
             "description": "Code xấu, style, missing import - Không trừ điểm"
         },
         "Small": {
-            "penalty": -5,
-            "description": "Thiếu xử lý biên, edge case - Trừ 5 điểm"
+            "penalty": -0.5,
+            "description": "Thiếu xử lý biên, edge case - Trừ 0.5 điểm"
         },
         "Major": {
-            "penalty": -50,
-            "description": "Sai logic, sai công thức - Trừ 50 điểm"
+            "penalty": -5,
+            "description": "Sai logic, sai công thức - Trừ 5 điểm"
         },
         "Fatal": {
-            "penalty": -100,
+            "penalty": -10,
             "description": "Code chưa hoàn thành, undefined - Trừ hết"
         }
     }
     
     @staticmethod
-    def get_penalty(error_type: str) -> int:
+    def get_penalty(error_type: str) -> float:
         """Lấy mức phạt cho một loại lỗi"""
         penalties = PenaltyConfig.DEFAULT_PENALTIES
         if error_type in penalties:
@@ -78,15 +78,15 @@ class Scorer:
     Tính toán điểm từ danh sách lỗi
     
     Công thức:
-    Điểm = Max(0, 100 - Tổng_Điểm_Phạt)
+    Điểm = Max(0, 10 - Tổng_Điểm_Phạt)
     """
     
-    def __init__(self, base_score: int = 100):
+    def __init__(self, base_score: float = 10.0):
         """
         Khởi tạo Scorer
         
         Args:
-            base_score: Điểm gốc trước khi trừ penalty (mặc định: 100)
+            base_score: Điểm gốc trước khi trừ penalty (mặc định: 10)
         """
         self.base_score = base_score
     
@@ -116,8 +116,8 @@ class Scorer:
         penalty_breakdown = self._calculate_penalties(errors)
         total_penalty = sum(penalty_breakdown.values())
         
-        # Công thức: Max(0, 100 - total_penalty)
-        final_score = max(0, self.base_score + total_penalty)
+        # Công thức: Max(0, 10 - total_penalty)
+        final_score = max(0.0, self.base_score + total_penalty)
         
         # Reasoning
         reasoning = self._generate_reasoning(
@@ -136,12 +136,12 @@ class Scorer:
             reasoning=reasoning
         )
     
-    def _calculate_penalties(self, errors: List[Dict]) -> Dict[str, int]:
+    def _calculate_penalties(self, errors: List[Dict]) -> Dict[str, float]:
         """
         Tính tổng penalty cho mỗi loại lỗi
         
         Returns:
-            {"Negligible": 0, "Small": -5, "Major": -50, ...}
+            {"Negligible": 0, "Small": -0.5, "Major": -5, ...}
         """
         penalty_breakdown = {}
         
@@ -165,9 +165,9 @@ class Scorer:
     
     def _generate_reasoning(
         self,
-        penalty_breakdown: Dict[str, int],
-        total_penalty: int,
-        final_score: int
+        penalty_breakdown: Dict[str, float],
+        total_penalty: float,
+        final_score: float
     ) -> str:
         """Tạo giải thích chi tiết cho cách chấm"""
         
@@ -187,7 +187,7 @@ class Scorer:
         
         return " | ".join(parts)
     
-    def set_base_score(self, base_score: int):
+    def set_base_score(self, base_score: float):
         """Đặt điểm gốc mới"""
         self.base_score = base_score
         logger.info(f"Base score updated to {base_score}")
@@ -204,11 +204,11 @@ class ScoreInterpreter:
     
     # Định nghĩa các mức điểm
     GRADE_SCALE = {
-        "A": (90, 100),      # Xuất sắc
-        "B": (80, 89),       # Tốt
-        "C": (70, 79),       # Khá
-        "D": (60, 69),       # Đủ điều kiện
-        "F": (0, 59)         # Không đạt
+        "A": (9.0, 10.0),    # Xuất sắc
+        "B": (8.0, 8.99),    # Tốt
+        "C": (7.0, 7.99),    # Khá
+        "D": (6.0, 6.99),    # Đủ điều kiện
+        "F": (0.0, 5.99)     # Không đạt
     }
     
     # Feedback tùy theo điểm số
@@ -221,7 +221,7 @@ class ScoreInterpreter:
     }
     
     @staticmethod
-    def get_grade(score: int) -> str:
+    def get_grade(score: float) -> str:
         """Lấy grade (A-F) từ điểm số"""
         for grade, (min_score, max_score) in ScoreInterpreter.GRADE_SCALE.items():
             if min_score <= score <= max_score:
@@ -229,7 +229,7 @@ class ScoreInterpreter:
         return "F"
     
     @staticmethod
-    def get_feedback(score: int) -> str:
+    def get_feedback(score: float) -> str:
         """Lấy feedback tương ứng với điểm số"""
         grade = ScoreInterpreter.get_grade(score)
         return ScoreInterpreter.FEEDBACK_TEMPLATES.get(
@@ -238,7 +238,7 @@ class ScoreInterpreter:
         )
     
     @staticmethod
-    def get_level_description(score: int) -> str:
+    def get_level_description(score: float) -> str:
         """Mô tả chi tiết mức độ"""
         grade = ScoreInterpreter.get_grade(score)
         
@@ -280,7 +280,7 @@ class ResultFormatter:
                 "base": scoring_result.base_score,
                 "penalty": scoring_result.total_penalty,
                 "grade": grade,
-                "percentage": f"{scoring_result.final_score}%"
+                "on_10_scale": f"{scoring_result.final_score}/10"
             },
             "feedback": feedback,
             "breakdown": scoring_result.penalty_breakdown,
@@ -297,12 +297,12 @@ class ResultFormatter:
         return result
     
     @staticmethod
-    def format_short_result(final_score: int) -> str:
+    def format_short_result(final_score: float) -> str:
         """
         Format kết quả ngắn gọn (cho display)
         """
         grade = ScoreInterpreter.get_grade(final_score)
-        return f"Score: {final_score}/100 ({grade})"
+        return f"Score: {final_score}/10 ({grade})"
     
     @staticmethod
     def format_detailed_report(
@@ -316,7 +316,7 @@ class ResultFormatter:
             "=" * 60,
             "DETAILED SCORING REPORT",
             "=" * 60,
-            f"Final Score: {scoring_result.final_score}/100",
+            f"Final Score: {scoring_result.final_score}/10",
             f"Base Score: {scoring_result.base_score}",
             f"Total Penalty: {scoring_result.total_penalty}",
             "",
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     ]
     
     # Calculate score
-    scorer = Scorer(base_score=100)
+    scorer = Scorer(base_score=10)
     result = scorer.calculate_score(errors)
     
     print("\\n=== Scoring Result ===")

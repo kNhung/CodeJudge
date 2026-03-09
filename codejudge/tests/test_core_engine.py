@@ -130,7 +130,7 @@ class TestTaxonomyAssessor:
             taxonomy = assessor.error_taxonomy[error_type]
             assert "description" in taxonomy
             assert "penalty" in taxonomy
-            assert isinstance(taxonomy["penalty"], int)
+            assert isinstance(taxonomy["penalty"], (int, float))
     
     def test_parse_json_response_valid(self):
         """Test parse JSON response đúng định dạng"""
@@ -140,7 +140,7 @@ class TestTaxonomyAssessor:
             "errors": [
                 {"type": "Major", "description": "Wrong logic"}
             ],
-            "quality_score": 50,
+            "quality_score": 5.0,
             "reasoning": "..."
         })
         
@@ -159,7 +159,7 @@ class TestTaxonomyAssessor:
         
         {
             "errors": [],
-            "quality_score": 100,
+            "quality_score": 10.0,
             "reasoning": "No errors"
         }
         
@@ -169,7 +169,7 @@ class TestTaxonomyAssessor:
         result = assessor._parse_llm_response(response)
         
         assert "errors" in result
-        assert result["quality_score"] == 100
+        assert result["quality_score"] == 10.0
     
     def test_calculate_final_score_no_errors(self):
         """Test tính điểm khi không có lỗi"""
@@ -178,37 +178,37 @@ class TestTaxonomyAssessor:
         errors = []
         score = assessor._calculate_final_score(errors)
         
-        assert score == 100  # Max(0, 100 - 0)
+        assert score == 10.0  # Max(0, 10 - 0)
     
     def test_calculate_final_score_with_small_error(self):
-        """Test tính điểm với lỗi Small (-5)"""
+        """Test tính điểm với lỗi Small (-0.5)"""
         assessor = TaxonomyAssessor()
         
         errors = [{"type": "Small", "description": "..."}]
         score = assessor._calculate_final_score(errors)
         
-        assert score == 95  # Max(0, 100 - 5)
+        assert score == 9.5  # Max(0, 10 - 0.5)
     
     def test_calculate_final_score_with_major_error(self):
-        """Test tính điểm với lỗi Major (-50)"""
+        """Test tính điểm với lỗi Major (-5)"""
         assessor = TaxonomyAssessor()
         
         errors = [{"type": "Major", "description": "..."}]
         score = assessor._calculate_final_score(errors)
         
-        assert score == 50  # Max(0, 100 - 50)
+        assert score == 5.0  # Max(0, 10 - 5)
     
     def test_calculate_final_score_multiple_errors(self):
         """Test tính điểm với nhiều lỗi"""
         assessor = TaxonomyAssessor()
         
         errors = [
-            {"type": "Small", "description": "..."},  # -5
-            {"type": "Major", "description": "..."}   # -50
+            {"type": "Small", "description": "..."},  # -0.5
+            {"type": "Major", "description": "..."}   # -5
         ]
         score = assessor._calculate_final_score(errors)
         
-        assert score == 45  # Max(0, 100 - 55)
+        assert score == 4.5  # Max(0, 10 - 5.5)
     
     def test_calculate_final_score_fatal_error(self):
         """Test tính điểm với lỗi Fatal"""
@@ -217,7 +217,7 @@ class TestTaxonomyAssessor:
         errors = [{"type": "Fatal", "description": "..."}]
         score = assessor._calculate_final_score(errors)
         
-        assert score == 0  # Max(0, 100 - 100)
+        assert score == 0  # Max(0, 10 - 10)
 
 
 class TestIntegratedAssessor:
@@ -250,11 +250,11 @@ class TestIntegratedAssessor:
         """Test lấy grade letter từ score"""
         assessor = IntegratedAssessor()
         
-        assert assessor._get_grade_letter(95) == "A"
-        assert assessor._get_grade_letter(85) == "B"
-        assert assessor._get_grade_letter(75) == "C"
-        assert assessor._get_grade_letter(65) == "D"
-        assert assessor._get_grade_letter(50) == "F"
+        assert assessor._get_grade_letter(9.5) == "A"
+        assert assessor._get_grade_letter(8.5) == "B"
+        assert assessor._get_grade_letter(7.5) == "C"
+        assert assessor._get_grade_letter(6.5) == "D"
+        assert assessor._get_grade_letter(5.0) == "F"
 
 
 # ============================================================================
@@ -266,39 +266,39 @@ class TestScorer:
     
     def test_initialization(self):
         """Test khởi tạo"""
-        scorer = Scorer(base_score=100)
-        assert scorer.base_score == 100
+        scorer = Scorer(base_score=10.0)
+        assert scorer.base_score == 10.0
     
     def test_calculate_score_no_errors(self):
         """Test tính điểm không có lỗi"""
-        scorer = Scorer(base_score=100)
+        scorer = Scorer(base_score=10.0)
         
         errors = []
         result = scorer.calculate_score(errors)
         
-        assert result.final_score == 100
+        assert result.final_score == 10.0
         assert result.total_penalty == 0
     
     def test_calculate_score_with_errors(self):
         """Test tính điểm có lỗi"""
-        scorer = Scorer(base_score=100)
+        scorer = Scorer(base_score=10.0)
         
         errors = [
-            {"type": "Small"},      # -5
-            {"type": "Major"},      # -50
+            {"type": "Small"},      # -0.5
+            {"type": "Major"},      # -5
         ]
         result = scorer.calculate_score(errors)
         
-        assert result.final_score == 45  # 100 - 55
-        assert result.total_penalty == -55
+        assert result.final_score == 4.5  # 10 - 5.5
+        assert result.total_penalty == -5.5
     
     def test_calculate_score_negative_clamping(self):
         """Test điểm không đi âm"""
-        scorer = Scorer(base_score=100)
+        scorer = Scorer(base_score=10.0)
         
         errors = [
-            {"type": "Fatal"},      # -100
-            {"type": "Fatal"},      # -100 (nếu có 2 cái)
+            {"type": "Fatal"},      # -10
+            {"type": "Fatal"},      # -10 (nếu có 2 cái)
         ]
         result = scorer.calculate_score(errors)
         
@@ -309,37 +309,37 @@ class TestScoreInterpreter:
     """Test Score Interpreter"""
     
     def test_get_grade_a(self):
-        """Test grade A (90-100)"""
-        assert ScoreInterpreter.get_grade(100) == "A"
-        assert ScoreInterpreter.get_grade(95) == "A"
-        assert ScoreInterpreter.get_grade(90) == "A"
+        """Test grade A (9.0-10.0)"""
+        assert ScoreInterpreter.get_grade(10.0) == "A"
+        assert ScoreInterpreter.get_grade(9.5) == "A"
+        assert ScoreInterpreter.get_grade(9.0) == "A"
     
     def test_get_grade_b(self):
-        """Test grade B (80-89)"""
-        assert ScoreInterpreter.get_grade(89) == "B"
-        assert ScoreInterpreter.get_grade(80) == "B"
+        """Test grade B (8.0-8.99)"""
+        assert ScoreInterpreter.get_grade(8.9) == "B"
+        assert ScoreInterpreter.get_grade(8.0) == "B"
     
     def test_get_grade_c(self):
-        """Test grade C (70-79)"""
-        assert ScoreInterpreter.get_grade(79) == "C"
-        assert ScoreInterpreter.get_grade(70) == "C"
+        """Test grade C (7.0-7.99)"""
+        assert ScoreInterpreter.get_grade(7.9) == "C"
+        assert ScoreInterpreter.get_grade(7.0) == "C"
     
     def test_get_grade_d(self):
-        """Test grade D (60-69)"""
-        assert ScoreInterpreter.get_grade(69) == "D"
-        assert ScoreInterpreter.get_grade(60) == "D"
+        """Test grade D (6.0-6.99)"""
+        assert ScoreInterpreter.get_grade(6.9) == "D"
+        assert ScoreInterpreter.get_grade(6.0) == "D"
     
     def test_get_grade_f(self):
-        """Test grade F (0-59)"""
-        assert ScoreInterpreter.get_grade(59) == "F"
+        """Test grade F (0-5.99)"""
+        assert ScoreInterpreter.get_grade(5.9) == "F"
         assert ScoreInterpreter.get_grade(0) == "F"
     
     def test_get_feedback(self):
         """Test lấy feedback"""
-        feedback_a = ScoreInterpreter.get_feedback(95)
+        feedback_a = ScoreInterpreter.get_feedback(9.5)
         assert "Xuất sắc" in feedback_a or "excellent" in feedback_a.lower()
         
-        feedback_f = ScoreInterpreter.get_feedback(30)
+        feedback_f = ScoreInterpreter.get_feedback(3.0)
         assert "Không" in feedback_f or "không đạt" in feedback_f
 
 
@@ -360,15 +360,15 @@ class TestIntegration:
         ]
         
         # Tính điểm
-        scorer = Scorer(base_score=100)
+        scorer = Scorer(base_score=10.0)
         scoring_result = scorer.calculate_score(errors)
         
         # Lấy grade
         grade = ScoreInterpreter.get_grade(scoring_result.final_score)
         
         # Assertions
-        assert scoring_result.final_score == 45  # 100 - 5 - 50
-        assert grade == "F"  # Dưới 60
+        assert scoring_result.final_score == 4.5  # 10 - 0.5 - 5
+        assert grade == "F"  # Dưới 6.0
     
     def test_full_assessment_pipeline(self):
         """Test toàn bộ pipeline"""
