@@ -1,5 +1,5 @@
 """
-Taxonomy Assessor - Chấm điểm chi tiết (0-100)
+Taxonomy Assessor - Chấm điểm chi tiết (0-10)
 Sử dụng phân loại lỗi: Negligible, Small, Major, Fatal
 """
 
@@ -45,7 +45,8 @@ class TaxonomyAssessor:
         self,
         problem_statement: str,
         student_code: str,
-        reference_code: Optional[str] = None
+        reference_code: Optional[str] = None,
+        language: str = "Python"
     ) -> Dict[str, Any]:
         """
         Chấm điểm chi tiết code
@@ -54,6 +55,7 @@ class TaxonomyAssessor:
             problem_statement: Đề bài
             student_code: Code của sinh viên
             reference_code: Code mẫu (tùy chọn, giúp xác định lỗi tốt hơn)
+            language: Ngôn ngữ lập trình của bài làm
         
         Returns:
             {
@@ -65,15 +67,15 @@ class TaxonomyAssessor:
                         "fix_suggestion": "..."
                     }
                 ],
-                "quality_score": 90,
+                "quality_score": 9.0,
                 "reasoning": "...",
                 "penalty_breakdown": {
                     "Negligible": 0,
                     "Small": 0,
-                    "Major": -50,
+                    "Major": -5,
                     "Fatal": 0
                 },
-                "final_score": 50
+                "final_score": 5.0
             }
         """
         logger.info("=== Taxonomy Assessment ===")
@@ -83,7 +85,8 @@ class TaxonomyAssessor:
         user_prompt = PromptTemplates.format_taxonomy(
             problem_statement=problem_statement,
             student_code=student_code,
-            reference_code=reference_code
+            reference_code=reference_code,
+            language=language,
         )
         
         # Gọi LLM
@@ -95,9 +98,21 @@ class TaxonomyAssessor:
         
         # Parse response
         result = self._parse_llm_response(llm_response)
+
+        # Normalize nested error payloads (e.g. per-submission lists)
+        flat_errors = self._flatten_errors(result.get("errors", []))
+        result["errors"] = flat_errors
         
-        # Tính toán final score
-        final_score = self._calculate_final_score(result["errors"])
+        # Tính final_score theo taxonomy khi có lỗi hợp lệ.
+        # Nếu không parse được taxonomy errors, fallback sang quality_score từ LLM.
+        if self._has_typed_errors(flat_errors):
+            final_score = self._calculate_final_score(flat_errors)
+        else:
+            fallback_score = self._coerce_score_10(result.get("quality_score"))
+            if fallback_score is not None:
+                final_score = fallback_score
+            else:
+                final_score = self._calculate_final_score(flat_errors)
         result["final_score"] = final_score
         
         logger.info(f"Final Score: {final_score}")
@@ -113,13 +128,38 @@ class TaxonomyAssessor:
         try:
             # Thử parse JSON trực tiếp
             data = json.loads(response)
+
+            # Gemini/smaller models sometimes return a JSON list.
+            # Normalize into the expected dict schema.
+            if isinstance(data, list):
+                if all(isinstance(item, dict) for item in data):
+                    data = {
+                        "errors": data,
+                        "quality_score": 10.0,
+                        "reasoning": "Parsed from list response"
+                    }
+                else:
+                    logger.warning("JSON list response is not list[dict]. Using fallback schema")
+                    data = {
+                        "errors": [],
+                        "quality_score": 10.0,
+                        "reasoning": "LLM returned non-dict list response"
+                    }
+
+            if not isinstance(data, dict):
+                logger.warning(f"Unexpected JSON type: {type(data).__name__}. Using fallback schema")
+                data = {
+                    "errors": [],
+                    "quality_score": 10.0,
+                    "reasoning": f"LLM returned unsupported JSON type: {type(data).__name__}"
+                }
             
             # Validate structure
             if "errors" not in data:
                 data["errors"] = []
             
             if "quality_score" not in data:
-                data["quality_score"] = 100
+                data["quality_score"] = 10.0
             
             if "reasoning" not in data:
                 data["reasoning"] = ""
@@ -145,32 +185,85 @@ class TaxonomyAssessor:
             logger.warning("Using fallback: No errors detected")
             return {
                 "errors": [],
-                "quality_score": 100,
+                "quality_score": 10.0,
                 "reasoning": "LLM response could not be parsed",
                 "raw_response": response[:500]
             }
+
+    def _flatten_errors(self, errors: Any) -> List[Dict[str, Any]]:
+        """Flatten nested error payloads into a list of dicts that contain `type`."""
+        flattened: List[Dict[str, Any]] = []
+
+        def walk(node: Any, submission_name: Optional[str] = None) -> None:
+            if isinstance(node, list):
+                for item in node:
+                    walk(item, submission_name)
+                return
+
+            if not isinstance(node, dict):
+                return
+
+            current_submission = node.get("submission_name") or submission_name
+            error_type = node.get("type")
+
+            if isinstance(error_type, str):
+                item = dict(node)
+                if current_submission and "submission_name" not in item:
+                    item["submission_name"] = current_submission
+                flattened.append(item)
+                return
+
+            # Common nested schema: {submission_name, errors: [...]}.
+            nested_errors = node.get("errors")
+            if isinstance(nested_errors, list):
+                walk(nested_errors, current_submission)
+
+            # Best-effort recursion for other nested list/dict fields.
+            for key, value in node.items():
+                if key == "errors":
+                    continue
+                if isinstance(value, (list, dict)):
+                    walk(value, current_submission)
+
+        walk(errors)
+        return flattened
+
+    def _has_typed_errors(self, errors: List[Dict[str, Any]]) -> bool:
+        """Check whether we have at least one recognized taxonomy error type."""
+        for error in errors:
+            if error.get("type") in self.error_taxonomy:
+                return True
+        return False
+
+    def _coerce_score_10(self, value: Any) -> Optional[float]:
+        """Convert an arbitrary score into [0, 10] float if possible."""
+        try:
+            score = float(value)
+        except (TypeError, ValueError):
+            return None
+        return max(0.0, min(10.0, score))
     
-    def _calculate_final_score(self, errors: List[Dict]) -> int:
+    def _calculate_final_score(self, errors: List[Dict]) -> float:
         """
         Tính điểm cuối cùng dựa trên lỗi
         
         Công thức:
-        Điểm = Max(0, 100 - Tổng_Điểm_Phạt)
+        Điểm = Max(0, 10 - Tổng_Điểm_Phạt)
         
         Mức phạt:
         - Negligible: 0 điểm
-        - Small: -5 điểm
-        - Major: -50 điểm
-        - Fatal: -100 điểm
+        - Small: -0.5 điểm
+        - Major: -5 điểm
+        - Fatal: -10 điểm
         """
         logger.debug("Calculating final score...")
         
-        total_penalty = 0
+        total_penalty = 0.0
         penalty_breakdown = {
-            "Negligible": 0,
-            "Small": 0,
-            "Major": 0,
-            "Fatal": 0
+            "Negligible": 0.0,
+            "Small": 0.0,
+            "Major": 0.0,
+            "Fatal": 0.0
         }
         
         for error in errors:
@@ -188,23 +281,23 @@ class TaxonomyAssessor:
             
             logger.debug(f"Error: {error_type}, Penalty: {penalty}")
         
-        # Công thức: Max(0, 100 - total_penalty)
-        final_score = max(0, 100 + total_penalty)  # total_penalty đã là âm
+        # Công thức: Max(0, 10 - total_penalty)
+        final_score = max(0.0, 10.0 + total_penalty)  # total_penalty đã là âm
         
         logger.debug(f"Total penalty: {total_penalty}, Final score: {final_score}")
         logger.debug(f"Breakdown: {penalty_breakdown}")
         
         return final_score
     
-    def get_penalty_breakdown(self, final_score: int, total_penalty: int) -> Dict:
+    def get_penalty_breakdown(self, final_score: float, total_penalty: float) -> Dict:
         """
         Chi tiết cách tính penalty
         """
         return {
-            "base_score": 100,
+            "base_score": 10.0,
             "total_penalty": total_penalty,
             "final_score": final_score,
-            "formula": "Max(0, 100 - TotalPenalty)"
+            "formula": "Max(0, 10 - TotalPenalty)"
         }
     
     def set_system_prompt(self, custom_prompt: str):

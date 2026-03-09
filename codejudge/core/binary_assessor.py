@@ -40,7 +40,8 @@ class BinaryAssessor:
     def assess(
         self,
         problem_statement: str,
-        student_code: str
+        student_code: str,
+        language: str = "Python"
     ) -> Dict[str, Any]:
         """
         Chấm điểm binary cho code
@@ -48,6 +49,7 @@ class BinaryAssessor:
         Args:
             problem_statement: Đề bài
             student_code: Code của sinh viên
+            language: Ngôn ngữ lập trình của bài làm
         
         Returns:
             {
@@ -61,7 +63,7 @@ class BinaryAssessor:
         logger.info(f"Problem: {problem_statement[:100]}...")
         
         # Bước 1: Phân tích (Analyze)
-        analysis = self._analyze_step(problem_statement, student_code)
+        analysis = self._analyze_step(problem_statement, student_code, language)
         logger.info(f"Analysis completed")
         
         # Bước 2: Tóm tắt (Summarize)
@@ -70,7 +72,12 @@ class BinaryAssessor:
         
         return result
     
-    def _analyze_step(self, problem_statement: str, student_code: str) -> str:
+    def _analyze_step(
+        self,
+        problem_statement: str,
+        student_code: str,
+        language: str = "Python"
+    ) -> str:
         """
         Bước 1: Phân tích code chi tiết từng bước
         Không yêu cầu sửa code, chỉ phân tích
@@ -80,7 +87,8 @@ class BinaryAssessor:
         # Format prompt
         user_prompt = PromptTemplates.format_binary_analyze(
             problem_statement=problem_statement,
-            student_code=student_code
+            student_code=student_code,
+            language=language,
         )
         
         # Gọi LLM

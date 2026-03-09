@@ -6,12 +6,56 @@ Hỗ trợ: OpenAI (GPT-4), Anthropic (Claude), Local LLM
 import os
 import json
 import re
+import time
+import random
 from typing import Optional, Dict, Any
 from abc import ABC, abstractmethod
 import logging
+from pathlib import Path
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+
+def _load_env_from_repo_root() -> None:
+    """Load .env from repository root into process environment.
+
+    This allows CLI scripts to pick up updated API keys without requiring
+    `source .env` in the shell beforehand.
+    """
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+    if not env_path.is_file():
+        return
+
+    try:
+        for raw_line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            if line.startswith("export "):
+                line = line[len("export ") :].strip()
+
+            if "=" not in line:
+                continue
+
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip()
+            if not key:
+                continue
+
+            # Strip matching quotes around values when present.
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in {"\"", "'"}:
+                value = value[1:-1]
+
+            # Override current process env so latest .env edits are respected.
+            os.environ[key] = value
+    except Exception as e:
+        logger.warning(f"Could not auto-load .env: {e}")
+
+
+_load_env_from_repo_root()
 
 # ============================================================================
 # ABSTRACT BASE CLASS
@@ -182,10 +226,13 @@ class LocalLLMClient(LLMClient):
     def __init__(
         self,
         model_name: str = "llama2",
-        base_url: str = "http://localhost:11434"
+        base_url: str = "http://localhost:11434",
+        timeout: int = 300,
     ):
         super().__init__(model_name)
         self.base_url = base_url
+        # Allow overriding timeout via env for slow local models.
+        self.timeout = int(os.getenv("LOCAL_LLM_TIMEOUT", str(timeout)))
         
         try:
             import requests
@@ -211,7 +258,7 @@ class LocalLLMClient(LLMClient):
             response = self.requests.post(
                 f"{self.base_url}/api/generate",
                 json=payload,
-                timeout=120
+                timeout=self.timeout
             )
             response.raise_for_status()
             
@@ -227,6 +274,164 @@ class LocalLLMClient(LLMClient):
 
 
 # ============================================================================
+# GEMINI CLIENT
+# ============================================================================
+
+class GeminiClient(LLMClient):
+    """Client cho Google Gemini (REST API)"""
+
+    def __init__(
+        self,
+        model_name: str = "gemini-1.5-flash",
+        api_key: Optional[str] = None,
+        base_url: str = "https://generativelanguage.googleapis.com/v1beta",
+        timeout: int = 300,
+    ):
+        super().__init__(model_name)
+        self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
+        if not self.api_key:
+            raise ValueError("GOOGLE_API_KEY not found in environment")
+
+        self.base_url = base_url.rstrip("/")
+        self.timeout = int(os.getenv("GEMINI_TIMEOUT", str(timeout)))
+        self.min_retry_delay = float(os.getenv("GEMINI_MIN_RETRY_DELAY", "10"))
+        self.max_retry_delay = float(os.getenv("GEMINI_MAX_RETRY_DELAY", "120"))
+
+        try:
+            import requests
+            self.requests = requests
+        except ImportError:
+            raise ImportError("requests package not installed. Run: pip install requests")
+
+    def call(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        format_json: bool = False,
+    ) -> str:
+        """Gọi Gemini GenerateContent API"""
+        payload: Dict[str, Any] = {
+            "system_instruction": {
+                "parts": [{"text": system_prompt}],
+            },
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [{"text": user_prompt}],
+                }
+            ],
+            "generationConfig": {
+                "temperature": self.temperature,
+            },
+        }
+
+        if format_json:
+            payload["generationConfig"]["response_mime_type"] = "application/json"
+
+        url = f"{self.base_url}/models/{self.model_name}:generateContent"
+
+        last_error: Optional[Exception] = None
+        max_attempts = self.max_retries + 1
+
+        def _extract_retry_delay_seconds(resp) -> Optional[float]:
+            # 1) Standard Retry-After header
+            retry_after = resp.headers.get("Retry-After")
+            if retry_after:
+                try:
+                    return max(1.0, float(retry_after))
+                except Exception:
+                    pass
+
+            # 2) Google-style error details: retryDelay like "24s"
+            try:
+                payload = resp.json()
+                details = payload.get("error", {}).get("details", [])
+                for item in details:
+                    retry_delay = item.get("retryDelay")
+                    if isinstance(retry_delay, str):
+                        m = re.match(r"^(\d+(?:\.\d+)?)s$", retry_delay.strip())
+                        if m:
+                            return float(m.group(1))
+            except Exception:
+                pass
+            return None
+
+        for attempt in range(1, max_attempts + 1):
+            try:
+                response = self.requests.post(
+                    url,
+                    params={"key": self.api_key},
+                    json=payload,
+                    timeout=self.timeout,
+                )
+
+                if response.status_code == 429:
+                    wait_sec = _extract_retry_delay_seconds(response)
+                    if wait_sec is None:
+                        # Exponential backoff with safer lower bound for quota limits.
+                        wait_sec = max(self.min_retry_delay, min(self.max_retry_delay, float(2 ** attempt)))
+
+                    # Add small jitter to reduce synchronized retries.
+                    wait_sec = min(self.max_retry_delay, wait_sec + random.uniform(0.0, 1.5))
+
+                    logger.warning(
+                        f"Gemini rate-limited (429). attempt={attempt}/{max_attempts}, sleeping {wait_sec:.1f}s"
+                    )
+                    if attempt < max_attempts:
+                        time.sleep(wait_sec)
+                        continue
+
+                response.raise_for_status()
+                data = response.json()
+
+                candidates = data.get("candidates", [])
+                if not candidates:
+                    logger.warning("Gemini returned empty candidates")
+                    return ""
+
+                parts = candidates[0].get("content", {}).get("parts", [])
+                texts = [p.get("text", "") for p in parts if isinstance(p, dict)]
+                return "\n".join(t for t in texts if t)
+
+            except self.requests.exceptions.HTTPError as e:
+                last_error = e
+                status = getattr(e.response, "status_code", None)
+                logger.error(f"Gemini API HTTP error (status={status})")
+
+                # Retry transient server errors.
+                if status in {500, 502, 503, 504} and attempt < max_attempts:
+                    wait_sec = float(min(30, 2 ** attempt))
+                    logger.warning(
+                        f"Gemini transient server error (status={status}). retry in {wait_sec:.1f}s"
+                    )
+                    time.sleep(wait_sec)
+                    continue
+                break
+
+            except self.requests.exceptions.RequestException as e:
+                last_error = e
+                logger.error(f"Gemini request error: {type(e).__name__}")
+                if attempt < max_attempts:
+                    wait_sec = float(min(30, 2 ** attempt))
+                    logger.warning(f"Retrying Gemini request in {wait_sec:.1f}s")
+                    time.sleep(wait_sec)
+                    continue
+                break
+
+            except Exception as e:
+                last_error = e
+                logger.error(f"Gemini unexpected error: {type(e).__name__}")
+                break
+
+        if isinstance(last_error, self.requests.exceptions.HTTPError):
+            status = getattr(last_error.response, "status_code", None)
+            raise RuntimeError(f"Gemini API request failed with HTTP status {status}") from last_error
+        if last_error is not None:
+            raise RuntimeError("Gemini API request failed") from last_error
+        raise RuntimeError("Gemini API request failed with unknown error")
+
+
+# ============================================================================
 # LLM FACTORY
 # ============================================================================
 
@@ -236,7 +441,8 @@ class LLMFactory:
     _providers = {
         "openai": OpenAIClient,
         "anthropic": AnthropicClient,
-        "local": LocalLLMClient
+        "local": LocalLLMClient,
+        "gemini": GeminiClient,
     }
     
     @staticmethod
@@ -249,7 +455,7 @@ class LLMFactory:
         Tạo LLM client dựa trên provider
         
         Args:
-            provider: "openai", "anthropic", hoặc "local"
+            provider: "openai", "anthropic", "local", hoặc "gemini"
             model_name: Tên mô hình (mặc định trong mỗi client)
             **kwargs: Các argument khác (api_key, base_url, etc.)
         
