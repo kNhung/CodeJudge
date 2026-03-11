@@ -1,4 +1,4 @@
-Câu 1:
+Câu 1 (3đ):
 Tuấn rất thích nghe nhạc. Vì vậy, Tuấn có một bộ sưu tập gồm n đĩa nhạc (n <=10000). Cậu đánh số hiệu cho các đĩa theo thứ tự từ 1 đến n. Ban đầu các đĩa được xếp chồng lên nhau theo đúng thứ tự từ 1 đến n, nghĩa là đĩa có số hiệu là 1 ở trên cùng, tiếp theo là đĩa 2,..., đĩa có số hiệu là n ở dưới cùng. Khi muốn nghe một đĩa nhạc nào đó, Tuấn sẽ rút đĩa đó ra, nghe xong thì để đĩa lại vào vị trí trên cùng. Hỏi sau m lần rút đĩa nghe nhạc, thứ tự chồng đĩa của Nam sẽ như thế nào?
 
 Ví dụ:
@@ -19,7 +19,7 @@ Lần 2. Nghe đĩa số 3 => Chồng đĩa trở thành: [3, 5, 1, 2, 4, 6, 7]
 Lần 3. Nghe đĩa số 7 => Chồng đĩa trở thành: [7, 3, 5, 1, 2, 4, 6]
 
 
-Câu 2:
+Câu 2 (2đ):
 Cho mảng hai chiều nguyên A kích thước m x m. Viết hàm tạo mảng đối xứng của A theo chiều dọc
 
 Input:
@@ -32,7 +32,7 @@ Output:
 9, 8, 7]
 
 
-Câu 3:
+Câu 3 (5đ):
 Cho file “pokemon.txt”:
 pokeID,pokeName,type1,type2,speed
 1,Bulbasaur,Grass,Poison,100
