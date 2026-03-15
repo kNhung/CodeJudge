@@ -49,3 +49,13 @@ Ghi chu:
 - KQ jsonl: `evaluation/hcmus/output/$RUN_NAME/$RUN_NAME.jsonl`
 - Metrics: `evaluation/hcmus/output/$RUN_NAME/${RUN_NAME}_metrics.json`
 - Co the lap lai Buoc 4-5 nhieu lan cho den khi xong dataset.
+
+
+Test trên dataset
+```bash
+cd /home/knhung/KLTN/CodeJudge && source /home/knhung/miniconda3/bin/activate base && conda activate codejudge && python evaluation/hcmus/test_modes.py --provider gemini --model gemini-2.5-flash --mode taxonomy --start 67 --run-name hcmus_from_48_taxonomy --resume --stop-on-rate-limit
+```
+Tính điểm
+```bash
+cd /home/knhung/KLTN/CodeJudge && source /home/knhung/miniconda3/bin/activate base && conda activate codejudge && python test_modes.py --provider gemini --model gemini-2.5-flash --mode taxonomy --start 999999 --run-name hcmus_from_48_taxonomy --resume --metrics-scope file
+```

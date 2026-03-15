@@ -36,6 +36,29 @@ def split_questions(problem_text: str) -> List[str]:
     return blocks if blocks else [problem_text.strip()]
 
 
+def parse_question_max(question_text: str) -> Optional[float]:
+    """Extract per-question max score from heading, e.g. '(3đ)' or '(2.5 điểm)'."""
+    patterns = [
+        r"\((\d+(?:[\.,]\d+)?)\s*đ\)",
+        r"\((\d+(?:[\.,]\d+)?)\s*điểm\)",
+        r"\b(\d+(?:[\.,]\d+)?)\s*đ\b",
+        r"\b(\d+(?:[\.,]\d+)?)\s*điểm\b",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, question_text, flags=re.IGNORECASE)
+        if match:
+            raw = match.group(1).replace(",", ".")
+            try:
+                value = float(raw)
+                if value > 0:
+                    return value
+            except ValueError:
+                continue
+
+    return None
+
+
 def list_code_files(student_dir: Path) -> List[Path]:
     """Sort Bai01/Bai02/... files in stable numeric order."""
 
@@ -130,10 +153,14 @@ def evaluate_row(
         return results
 
     questions = split_questions(problem_text)
+    per_question_results: List[Dict[str, object]] = []
+
     for idx, code_file in enumerate(code_files, start=1):
         if idx > len(questions):
             break
         code_text = code_file.read_text(encoding="utf-8", errors="ignore")
+        question_text = questions[idx - 1]
+        question_max = parse_question_max(question_text)
 
         item: Dict[str, object] = {
             "id": row_id,
@@ -143,26 +170,91 @@ def evaluate_row(
             "question_index": idx,
             "code_file": code_file.name,
             "language": language,
+            "question_max": question_max,
             "run_both_assessments": run_both_assessments,
             "scoring_mode": scoring_mode,
         }
 
         if dry_run:
             item["status"] = "dry_run"
-            item["question_preview"] = questions[idx - 1][:120]
+            item["question_preview"] = question_text[:120]
             results.append(item)
+            per_question_results.append(item)
             continue
 
         assert assessor is not None
-        problem_statement = questions[idx - 1]
+        problem_statement = question_text
         integrated = assessor.assess(
             problem_statement=problem_statement,
             student_code=code_text,
             reference_code=None,
             language=language,
+            question_max=question_max,
         )
         item["result"] = integrated
         results.append(item)
+        per_question_results.append(item)
+
+    # Add one summary line for full exam score when scoring per question.
+    if per_question_results:
+        total_max = 0.0
+        total_scaled = 0.0
+        has_scaled = False
+
+        for item in per_question_results:
+            qmax = item.get("question_max")
+            if isinstance(qmax, (int, float)):
+                total_max += float(qmax)
+
+            res = item.get("result")
+            if isinstance(res, dict):
+                summary = res.get("summary", {}) if isinstance(res.get("summary"), dict) else {}
+                scaled = summary.get("score_scaled")
+                raw_score = summary.get("score")
+                if isinstance(scaled, (int, float)):
+                    total_scaled += float(scaled)
+                    has_scaled = True
+                elif isinstance(raw_score, (int, float)) and isinstance(qmax, (int, float)):
+                    total_scaled += float(raw_score) / 10.0 * float(qmax)
+                    has_scaled = True
+
+        summary_item: Dict[str, object] = {
+            "id": row_id,
+            "student_id": row.get("student_id", ""),
+            "problem_id": problem_id,
+            "expect_grade": row.get("expect_grade", ""),
+            "language": language,
+            "scoring_mode": scoring_mode,
+            "record_type": "exam_summary",
+            "questions_count": len(per_question_results),
+            "max_total_score": round(total_max, 4),
+        }
+
+        if has_scaled:
+            summary_item["predicted_total_score"] = round(total_scaled, 4)
+            if total_max > 0:
+                summary_item["predicted_total_score_ratio"] = round(total_scaled / total_max, 4)
+
+        if not dry_run:
+            summary_item["question_details"] = [
+                {
+                    "question_index": item.get("question_index"),
+                    "question_max": item.get("question_max"),
+                    "score_on_10": (
+                        item.get("result", {}).get("summary", {}).get("score")
+                        if isinstance(item.get("result"), dict)
+                        else None
+                    ),
+                    "score_scaled": (
+                        item.get("result", {}).get("summary", {}).get("score_scaled")
+                        if isinstance(item.get("result"), dict)
+                        else None
+                    ),
+                }
+                for item in per_question_results
+            ]
+
+        results.append(summary_item)
 
     return results
 

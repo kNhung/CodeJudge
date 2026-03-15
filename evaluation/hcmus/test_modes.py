@@ -229,6 +229,100 @@ def run_mode(
     return metrics
 
 
+def recompute_metrics_from_output(mode: str, output_file: Path) -> Dict[str, Any]:
+    """Recompute metrics from the whole JSONL output file."""
+    if not output_file.exists():
+        return {
+            "mode": mode,
+            "samples": 0,
+            "output_file": str(output_file),
+            "invalid_cnt": 0,
+            "total_cnt": 0,
+            "correct_cnt": 0,
+            "processed_unique_ids": 0,
+            "rate_limit_hit": False,
+        }
+
+    total = 0
+    invalid_cnt = 0
+    correct_cnt = 0
+    processed_ids = set()
+    pass_refs: List[float] = []
+    pass_preds: List[float] = []
+    grade_pairs: List[Tuple[float, float]] = []
+
+    with output_file.open("r", encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            total += 1
+            try:
+                record = json.loads(line)
+            except Exception:
+                invalid_cnt += 1
+                continue
+
+            row_id = record.get("id")
+            if row_id is not None:
+                processed_ids.add(str(row_id))
+
+            expected = bool(record.get("expected_pass", False))
+            predicted_pass_raw = record.get("predicted_pass", None)
+            predicted_score_raw = record.get("predicted_score_10", None)
+
+            try:
+                predicted_score = float(predicted_score_raw) if predicted_score_raw is not None else None
+            except Exception:
+                predicted_score = None
+
+            if isinstance(predicted_pass_raw, bool):
+                predicted_pass = predicted_pass_raw
+            elif predicted_score is not None:
+                predicted_pass = predicted_score >= 5.0
+            else:
+                predicted_pass = False
+
+            if predicted_score is not None:
+                correct_cnt += int(predicted_pass == expected)
+                pass_refs.append(1.0 if expected else 0.0)
+                pass_preds.append(1.0 if predicted_pass else 0.0)
+
+                try:
+                    expected_score_10 = float(record.get("expect_grade", 0))
+                    grade_pairs.append((predicted_score, expected_score_10))
+                except Exception:
+                    pass
+
+    metrics: Dict[str, Any] = {
+        "mode": mode,
+        "samples": total,
+        "output_file": str(output_file),
+        "invalid_cnt": invalid_cnt,
+        "total_cnt": total,
+        "correct_cnt": correct_cnt,
+        "processed_unique_ids": len(processed_ids),
+        "rate_limit_hit": False,
+    }
+
+    valid_cnt = len(pass_refs)
+    if valid_cnt > 0:
+        metrics["accuracy"] = correct_cnt / valid_cnt
+        metrics["kendalltau"] = round(_safe_corr("kendalltau", pass_refs, pass_preds), 3)
+        metrics["spearmanr"] = round(_safe_corr("spearmanr", pass_refs, pass_preds), 3)
+
+    if grade_pairs:
+        preds = [p for p, _ in grade_pairs]
+        exps = [e for _, e in grade_pairs]
+        mae = sum(abs(p - e) for p, e in grade_pairs) / len(grade_pairs)
+        metrics["mae_on_10"] = round(mae, 3)
+        metrics["rmse_on_10"] = round(_rmse(preds, exps), 3)
+        metrics["pearson_grade"] = round(_safe_corr("pearsonr", preds, exps), 3)
+
+    return metrics
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run HCMUS benchmarking for binary/taxonomy/integrated modes")
     parser.add_argument("--csv", type=Path, default=DEFAULT_CSV)
@@ -251,6 +345,13 @@ def main() -> None:
         "--stop-on-rate-limit",
         action="store_true",
         help="Stop run immediately when HTTP 429 is detected (recommended with --resume)",
+    )
+    parser.add_argument(
+        "--metrics-scope",
+        type=str,
+        default="batch",
+        choices=["batch", "file"],
+        help="batch: metrics for current run only, file: recompute metrics from full output JSONL",
     )
     args = parser.parse_args()
 
@@ -276,7 +377,7 @@ def main() -> None:
         run_dir.mkdir(parents=True, exist_ok=True)
 
         output_file = run_dir / f"{run_name}.jsonl"
-        metrics = run_mode(
+        batch_metrics = run_mode(
             mode=mode,
             rows=rows,
             output_file=output_file,
@@ -285,6 +386,15 @@ def main() -> None:
             resume=args.resume,
             stop_on_rate_limit=args.stop_on_rate_limit,
         )
+        if args.metrics_scope == "file":
+            metrics = recompute_metrics_from_output(mode=mode, output_file=output_file)
+            metrics["metric_scope"] = "file"
+            metrics["last_batch_samples"] = batch_metrics.get("samples", 0)
+            metrics["last_batch_rate_limit_hit"] = batch_metrics.get("rate_limit_hit", False)
+        else:
+            metrics = batch_metrics
+            metrics["metric_scope"] = "batch"
+
         metrics_all.append(metrics)
         print(json.dumps(metrics, ensure_ascii=False))
 

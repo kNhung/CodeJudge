@@ -6,7 +6,7 @@ Sử dụng phân loại lỗi: Negligible, Small, Major, Fatal
 import json
 import re
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from .llm_client import LLMClient, LLMFactory
 from .prompts import PromptTemplates, SYSTEM_PROMPT_TAXONOMY_ASSESSMENT, ERROR_TAXONOMY
 
@@ -40,6 +40,20 @@ class TaxonomyAssessor:
         self.llm_client = llm_client or LLMFactory.create()
         self.system_prompt = system_prompt
         self.error_taxonomy = error_taxonomy or ERROR_TAXONOMY
+        self.additive_rubric_max = {
+            "idea": 3.0,
+            "flow": 2.0,
+            "syntax_execution": 2.0,
+            "correctness": 2.0,
+            "clarity": 1.0,
+        }
+        self.additive_rubric_keys = [
+            "idea",
+            "flow",
+            "syntax_execution",
+            "correctness",
+            "clarity",
+        ]
     
     def assess(
         self,
@@ -103,16 +117,47 @@ class TaxonomyAssessor:
         flat_errors = self._flatten_errors(result.get("errors", []))
         result["errors"] = flat_errors
         
-        # Tính final_score theo taxonomy khi có lỗi hợp lệ.
-        # Nếu không parse được taxonomy errors, fallback sang quality_score từ LLM.
-        if self._has_typed_errors(flat_errors):
-            final_score = self._calculate_final_score(flat_errors)
+        # Ưu tiên mode cộng điểm: score_breakdown -> quality_score.
+        # Chỉ fallback penalty taxonomy khi không có dữ liệu cộng điểm.
+        score_breakdown, has_breakdown = self._normalize_score_breakdown(
+            result.get("score_breakdown")
+        )
+        result["score_breakdown"] = score_breakdown
+
+        if has_breakdown:
+            final_score = self._sum_score_breakdown(score_breakdown)
+            result["quality_score"] = final_score
         else:
             fallback_score = self._coerce_score_10(result.get("quality_score"))
             if fallback_score is not None:
                 final_score = fallback_score
+                result["quality_score"] = fallback_score
             else:
-                final_score = self._calculate_final_score(flat_errors)
+                inferred_breakdown = self._infer_additive_breakdown_from_errors(flat_errors)
+                if inferred_breakdown is not None:
+                    result["score_breakdown"] = inferred_breakdown
+                    final_score = self._sum_score_breakdown(inferred_breakdown)
+                    result["quality_score"] = final_score
+                elif self._has_typed_errors(flat_errors):
+                    final_score = self._calculate_final_score(flat_errors)
+                    result["quality_score"] = final_score
+                else:
+                    final_score = 0.0
+                    result["quality_score"] = 0.0
+
+            if result.get("reasoning") == "Parsed from list response" and result.get("score_breakdown"):
+                result["reasoning"] = (
+                    "LLM returned list format. Converted to additive rubric score via fallback mapping from errors."
+                )
+
+        # Nếu response có nhiều submission_* và đề có điểm tối đa từng câu,
+        # tính điểm cuối cùng theo tổng điểm quy đổi từng câu.
+        exam_aggregation = self._aggregate_exam_score(result, problem_statement)
+        if exam_aggregation is not None:
+            final_score = exam_aggregation["total_score"]
+            result["quality_score"] = final_score
+            result["exam_aggregation"] = exam_aggregation
+
         result["final_score"] = final_score
         
         logger.info(f"Final Score: {final_score}")
@@ -135,14 +180,14 @@ class TaxonomyAssessor:
                 if all(isinstance(item, dict) for item in data):
                     data = {
                         "errors": data,
-                        "quality_score": 10.0,
+                        "quality_score": None,
                         "reasoning": "Parsed from list response"
                     }
                 else:
                     logger.warning("JSON list response is not list[dict]. Using fallback schema")
                     data = {
                         "errors": [],
-                        "quality_score": 10.0,
+                        "quality_score": None,
                         "reasoning": "LLM returned non-dict list response"
                     }
 
@@ -150,7 +195,7 @@ class TaxonomyAssessor:
                 logger.warning(f"Unexpected JSON type: {type(data).__name__}. Using fallback schema")
                 data = {
                     "errors": [],
-                    "quality_score": 10.0,
+                    "quality_score": None,
                     "reasoning": f"LLM returned unsupported JSON type: {type(data).__name__}"
                 }
             
@@ -159,7 +204,10 @@ class TaxonomyAssessor:
                 data["errors"] = []
             
             if "quality_score" not in data:
-                data["quality_score"] = 10.0
+                data["quality_score"] = None
+
+            if "score_breakdown" not in data:
+                data["score_breakdown"] = {}
             
             if "reasoning" not in data:
                 data["reasoning"] = ""
@@ -185,10 +233,191 @@ class TaxonomyAssessor:
             logger.warning("Using fallback: No errors detected")
             return {
                 "errors": [],
-                "quality_score": 10.0,
+                "quality_score": None,
+                "score_breakdown": {},
                 "reasoning": "LLM response could not be parsed",
                 "raw_response": response[:500]
             }
+
+    def _normalize_score_breakdown(self, score_breakdown: Any) -> Tuple[Dict[str, float], bool]:
+        """Normalize additive score breakdown into rubric keys and bounds."""
+        normalized = {key: 0.0 for key in self.additive_rubric_keys}
+        if not isinstance(score_breakdown, dict):
+            return normalized, False
+
+        # Chỉ xem breakdown là hợp lệ khi có đủ 5 tiêu chí additive.
+        if not all(key in score_breakdown for key in self.additive_rubric_keys):
+            return normalized, False
+
+        for key, max_score in self.additive_rubric_max.items():
+            value = score_breakdown.get(key, 0)
+            try:
+                value = float(value)
+            except (TypeError, ValueError):
+                value = 0.0
+            normalized[key] = max(0.0, min(max_score, value))
+
+        return normalized, True
+
+    def _sum_score_breakdown(self, score_breakdown: Dict[str, float]) -> float:
+        """Sum normalized additive rubric and clamp into [0, 10]."""
+        total = sum(score_breakdown.values())
+        return max(0.0, min(10.0, round(total, 4)))
+
+    def _aggregate_exam_score(
+        self,
+        result: Dict[str, Any],
+        problem_statement: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Aggregate exam score from submission_i scores scaled to each question max."""
+        submission_scores = self._extract_submission_scores(result)
+        if not submission_scores:
+            return None
+
+        question_max_scores = self._extract_question_max_scores(problem_statement)
+        if not question_max_scores:
+            return None
+
+        count = min(len(submission_scores), len(question_max_scores))
+        if count <= 0:
+            return None
+
+        details: List[Dict[str, Any]] = []
+        total_score = 0.0
+        total_max = 0.0
+
+        for i in range(count):
+            submission_name, score_on_10 = submission_scores[i]
+            question_max = question_max_scores[i]
+            scaled_score = round((score_on_10 / 10.0) * question_max, 4)
+
+            details.append(
+                {
+                    "submission": submission_name,
+                    "score_on_10": score_on_10,
+                    "question_max": question_max,
+                    "scaled_score": scaled_score,
+                }
+            )
+            total_score += scaled_score
+            total_max += question_max
+
+        return {
+            "method": "sum_scaled_by_question_max",
+            "submission_count": len(submission_scores),
+            "question_count": len(question_max_scores),
+            "used_count": count,
+            "details": details,
+            "total_score": round(total_score, 4),
+            "total_max": round(total_max, 4),
+        }
+
+    def _extract_submission_scores(self, result: Dict[str, Any]) -> List[Tuple[str, float]]:
+        """Extract per-submission 0-10 scores from keys like submission_1_* in LLM JSON."""
+        items: List[Tuple[int, str, float]] = []
+
+        for key, value in result.items():
+            if not isinstance(value, dict):
+                continue
+
+            m = re.match(r"submission_(\d+)(?:_.*)?$", str(key))
+            if not m:
+                continue
+
+            order = int(m.group(1))
+            score = self._coerce_score_10(value.get("quality_score"))
+
+            if score is None:
+                breakdown, has_breakdown = self._normalize_score_breakdown(value.get("score_breakdown"))
+                if has_breakdown:
+                    score = self._sum_score_breakdown(breakdown)
+
+            if score is None:
+                score = self._coerce_score_10(value.get("final_score"))
+
+            if score is not None:
+                items.append((order, key, score))
+
+        items.sort(key=lambda x: x[0])
+        return [(name, score) for _, name, score in items]
+
+    def _extract_question_max_scores(self, problem_statement: str) -> List[float]:
+        """Extract question max points from headings like 'Câu 1. (3đ)' in order."""
+        if not isinstance(problem_statement, str) or not problem_statement.strip():
+            return []
+
+        scores: List[float] = []
+        lines = problem_statement.splitlines()
+        heading_pattern = re.compile(
+            r"^\s*(?:c\S*u|b\S*i)\s*\d+.*?\((\d+(?:[\.,]\d+)?)\s*đ\)",
+            flags=re.IGNORECASE,
+        )
+
+        for line in lines:
+            m = heading_pattern.search(line)
+            if not m:
+                continue
+            raw = m.group(1).replace(",", ".")
+            try:
+                scores.append(float(raw))
+            except ValueError:
+                continue
+
+        return scores
+
+    def _infer_additive_breakdown_from_errors(self, errors: List[Dict[str, Any]]) -> Optional[Dict[str, float]]:
+        """
+        Fallback cho trường hợp model không trả đúng schema additive.
+        Heuristic này giữ tinh thần cộng điểm thay vì mặc định về 0.
+        """
+        if errors is None:
+            return None
+
+        if not errors:
+            return {
+                "idea": 3.0,
+                "flow": 2.0,
+                "syntax_execution": 2.0,
+                "correctness": 2.0,
+                "clarity": 1.0,
+            }
+
+        # Mặc định cho bài có lỗi nhưng vẫn có ý tưởng cơ bản.
+        breakdown = {
+            "idea": 2.0,
+            "flow": 1.5,
+            "syntax_execution": 1.5,
+            "correctness": 1.5,
+            "clarity": 0.5,
+        }
+
+        for error in errors:
+            error_type = str(error.get("type", "")).lower()
+            error_desc = str(error.get("description", "")).lower()
+            text = f"{error_type} {error_desc}"
+
+            if "fatal" in text:
+                breakdown["correctness"] = 0.0
+                breakdown["syntax_execution"] = min(breakdown["syntax_execution"], 0.5)
+
+            if "logic" in text or "major" in text:
+                breakdown["correctness"] -= 1.0
+                breakdown["flow"] -= 0.5
+                breakdown["idea"] -= 0.5
+
+            if "edge" in text or "boundary" in text:
+                breakdown["correctness"] -= 0.5
+
+            if "syntax" in text or "runtime" in text or "compile" in text:
+                breakdown["syntax_execution"] -= 1.0
+
+            if "style" in text or "efficiency" in text or "clarity" in text:
+                breakdown["clarity"] -= 0.5
+
+        for key, max_score in self.additive_rubric_max.items():
+            breakdown[key] = max(0.0, min(max_score, round(breakdown[key], 4)))
+
+        return breakdown
 
     def _flatten_errors(self, errors: Any) -> List[Dict[str, Any]]:
         """Flatten nested error payloads into a list of dicts that contain `type`."""

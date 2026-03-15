@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional
 from .llm_client import LLMClient, LLMFactory
 from .binary_assessor import BinaryAssessor
 from .taxonomy_assessor import TaxonomyAssessor
+from ..scoring.scorer import Scorer
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,8 @@ class IntegratedAssessor:
         problem_statement: str,
         student_code: str,
         reference_code: Optional[str] = None,
-        language: str = "Python"
+        language: str = "Python",
+        question_max: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Chấm điểm tích hợp
@@ -56,6 +58,7 @@ class IntegratedAssessor:
             student_code: Code của sinh viên
             reference_code: Code mẫu (tùy chọn)
             language: Ngôn ngữ lập trình của bài làm
+            question_max: Điểm tối đa của câu (nếu cần quy đổi từ thang 10)
         
         Returns:
             Kết quả chấm điểm tích hợp với cả Binary và Taxonomy scores
@@ -94,7 +97,8 @@ class IntegratedAssessor:
         # Kết hợp kết quả
         integrated_result = self._combine_results(
             binary_result,
-            taxonomy_result
+            taxonomy_result,
+            question_max,
         )
         
         return integrated_result
@@ -102,14 +106,15 @@ class IntegratedAssessor:
     def _combine_results(
         self,
         binary_result: Dict[str, Any],
-        taxonomy_result: Dict[str, Any]
+        taxonomy_result: Dict[str, Any],
+        question_max: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Kết hợp kết quả từ hai luồng
         """
         logger.debug("Combining assessment results...")
         
-        return {
+        result = {
             "assessment_type": "integrated",
             "binary": {
                 "result": binary_result["result"],
@@ -140,6 +145,17 @@ class IntegratedAssessor:
                 )
             }
         }
+
+        if question_max is not None:
+            score_on_10 = float(taxonomy_result["final_score"])
+            scaled_score = Scorer(base_score=10.0).to_question_scale(score_on_10, question_max)
+
+            result["summary"]["question_max"] = question_max
+            result["summary"]["score_on_10"] = score_on_10
+            result["summary"]["score_scaled"] = scaled_score
+            result["taxonomy"]["score_scaled"] = scaled_score
+
+        return result
     
     def _count_errors_by_type(self, errors: list) -> Dict[str, int]:
         """Đếm lỗi theo type"""
@@ -147,13 +163,17 @@ class IntegratedAssessor:
             "Negligible": 0,
             "Small": 0,
             "Major": 0,
-            "Fatal": 0
+            "Fatal": 0,
+            "Improvement": 0,
+            "Other": 0,
         }
         
         for error in errors:
             error_type = error.get("type", "Negligible")
             if error_type in breakdown:
                 breakdown[error_type] += 1
+            else:
+                breakdown["Other"] += 1
         
         return breakdown
     
