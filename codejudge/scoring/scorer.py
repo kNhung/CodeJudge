@@ -1,6 +1,8 @@
 """
 Scoring Algorithm - Tính toán điểm cuối cùng
-Dựa trên công thức: Điểm = Max(0, 10 - Tổng_Điểm_Phạt)
+
+Mặc định ưu tiên rubric cộng điểm (0 -> 10).
+Vẫn hỗ trợ tương thích ngược với mode penalty.
 """
 
 import logging
@@ -77,8 +79,11 @@ class Scorer:
     """
     Tính toán điểm từ danh sách lỗi
     
-    Công thức:
-    Điểm = Max(0, 10 - Tổng_Điểm_Phạt)
+    Mặc định (additive):
+    Điểm = idea + flow + syntax_execution + correctness + clarity
+
+    Tương thích ngược (penalty):
+    Điểm = Max(0, base_score + Tổng_Điểm_Phạt)
     """
     
     def __init__(self, base_score: float = 10.0):
@@ -86,19 +91,29 @@ class Scorer:
         Khởi tạo Scorer
         
         Args:
-            base_score: Điểm gốc trước khi trừ penalty (mặc định: 10)
+            base_score: Điểm tối đa mặc định (mặc định: 10)
         """
         self.base_score = base_score
+        self.additive_rubric_max = {
+            "idea": 3.0,
+            "flow": 2.0,
+            "syntax_execution": 2.0,
+            "correctness": 2.0,
+            "clarity": 1.0,
+        }
     
     def calculate_score(
         self,
-        errors: List[Dict[str, Any]]
+        errors: List[Dict[str, Any]] = None,
+        score_breakdown: Dict[str, Any] = None,
     ) -> ScoringResult:
         """
-        Tính điểm từ danh sách lỗi
+        Tính điểm theo thứ tự ưu tiên:
+        1) score_breakdown (additive)
+        2) errors (penalty - tương thích ngược)
         
         Args:
-            errors: Danh sách lỗi từ TaxonomyAssessor
+            errors: Danh sách lỗi từ TaxonomyAssessor (legacy)
                     [
                         {
                             "type": "Major",
@@ -106,10 +121,32 @@ class Scorer:
                             "code_snippet": "..."
                         }
                     ]
+            score_breakdown: Rubric cộng điểm
+                    {
+                        "idea": 2.5,
+                        "flow": 1.5,
+                        "syntax_execution": 2.0,
+                        "correctness": 1.0,
+                        "clarity": 0.5
+                    }
         
         Returns:
             ScoringResult với các thông tin chi tiết
         """
+        if score_breakdown is not None:
+            normalized = self._normalize_additive_breakdown(score_breakdown)
+            final_score = max(0.0, min(self.base_score, round(sum(normalized.values()), 4)))
+            reasoning = self._generate_additive_reasoning(normalized, final_score)
+
+            return ScoringResult(
+                base_score=self.base_score,
+                final_score=final_score,
+                penalty_breakdown=normalized,
+                total_penalty=0.0,
+                reasoning=reasoning,
+            )
+
+        errors = errors or []
         logger.info(f"Calculating score for {len(errors)} errors")
         
         # Tính toán penalty
@@ -186,6 +223,48 @@ class Scorer:
         parts.append(f"Final score: {final_score}")
         
         return " | ".join(parts)
+
+    def _normalize_additive_breakdown(self, score_breakdown: Dict[str, Any]) -> Dict[str, float]:
+        """Normalize additive breakdown and clamp each component to rubric max."""
+        normalized = {key: 0.0 for key in self.additive_rubric_max}
+
+        for key, max_score in self.additive_rubric_max.items():
+            value = score_breakdown.get(key, 0) if isinstance(score_breakdown, dict) else 0
+            try:
+                value = float(value)
+            except (TypeError, ValueError):
+                value = 0.0
+            normalized[key] = max(0.0, min(max_score, value))
+
+        return normalized
+
+    def _generate_additive_reasoning(
+        self,
+        score_breakdown: Dict[str, float],
+        final_score: float,
+    ) -> str:
+        """Generate reasoning text for additive score mode."""
+        parts = [f"Scoring mode: additive", f"Base score: {self.base_score}"]
+
+        for key in ["idea", "flow", "syntax_execution", "correctness", "clarity"]:
+            parts.append(f"{key}: {score_breakdown.get(key, 0.0)}")
+
+        parts.append(f"Final score: {final_score}")
+        return " | ".join(parts)
+
+    def to_question_scale(self, final_score: float, question_max: float) -> float:
+        """
+        Chuyển điểm từ thang 0-`base_score` sang thang điểm câu hỏi (tỉ lệ).
+
+        Công thức đơn giản: scaled = clamp(final_score / base_score * question_max, 0, question_max)
+        """
+        if question_max <= 0:
+            logger.warning("question_max must be > 0, returning 0")
+            return 0.0
+
+        denom = self.base_score if self.base_score > 0 else 10.0
+        scaled = (max(0.0, min(final_score, denom)) / denom) * question_max
+        return round(scaled, 4)
     
     def set_base_score(self, base_score: float):
         """Đặt điểm gốc mới"""
