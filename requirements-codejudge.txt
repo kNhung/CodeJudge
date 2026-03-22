@@ -1,0 +1,21 @@
+# CodeJudge Core Requirements
+# Các thư viện cần thiết cho Core Engine
+
+# LLM Providers
+openai>=1.0.0              # OpenAI API (for GPT-4, GPT-3.5-turbo)
+anthropic>=0.7.0           # Anthropic API (for Claude)
+requests>=2.31.0           # HTTP requests for local LLM
+
+# Configuration
+python-dotenv>=1.0.0       # Environment variables management
+
+# Development & Testing  
+pytest>=7.4.0              # Testing framework
+pytest-asyncio>=0.21.0     # Async test support
+pytest-cov>=4.1.0          # Code coverage
+
+# Logging & Monitoring
+loguru>=0.7.0              # Better logging
+
+# Optional: For performance
+pydantic>=2.0.0            # Data validation
