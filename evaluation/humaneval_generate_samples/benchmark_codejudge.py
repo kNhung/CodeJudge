@@ -76,7 +76,8 @@ class HumanEvalGeneratedBenchmark:
         run_name: Optional[str] = None,
         resume: bool = False,
         stop_on_rate_limit: bool = False,
-        verbose: bool = False
+        verbose: bool = False,
+        delay: float = 0.0
     ):
         """
         Args:
@@ -88,6 +89,7 @@ class HumanEvalGeneratedBenchmark:
             resume: Resume from checkpoint
             stop_on_rate_limit: Stop on rate limit error
             verbose: Verbose output
+            delay: Delay in seconds between requests
         """
         self.data_file = data_file
         self.provider = provider
@@ -97,6 +99,7 @@ class HumanEvalGeneratedBenchmark:
         self.resume = resume
         self.stop_on_rate_limit = stop_on_rate_limit
         self.verbose = verbose
+        self.delay = delay
         
         # Create output directory
         self.output_dir = Path(__file__).parent / "output" / self.run_name
@@ -300,6 +303,10 @@ class HumanEvalGeneratedBenchmark:
                 # Write record to JSONL (both success and error)
                 f.write(json.dumps(record) + "\n")
                 f.flush()
+                
+                # Delay between requests to avoid rate limits
+                if self.delay > 0:
+                    time.sleep(self.delay)
                 
                 # Save checkpoint every 10 items
                 if (idx + 1) % 10 == 0:
@@ -618,6 +625,8 @@ def main():
                        help="Stop on rate limit (429) error")
     parser.add_argument("--verbose", action="store_true",
                        help="Verbose output")
+    parser.add_argument("--delay", type=float, default=0.0,
+                       help="Delay in seconds between requests (default: 0.0)")
     
     args = parser.parse_args()
     
@@ -630,7 +639,8 @@ def main():
         run_name=args.run_name,
         resume=args.resume,
         stop_on_rate_limit=args.stop_on_rate_limit,
-        verbose=args.verbose
+        verbose=args.verbose,
+        delay=args.delay
     )
     
     # Run benchmark
