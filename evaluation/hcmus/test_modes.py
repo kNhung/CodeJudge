@@ -22,6 +22,33 @@ HCMUS_ROOT = Path(__file__).resolve().parent
 OUTPUT_ROOT = HCMUS_ROOT / "output"
 
 
+AUTHOR_TAXONOMY_SYSTEM_PROMPT = """You will be provided with a problem statement, a code snippet that supposedly addresses the problem,
+and a catalog of code inconsistencies.
+Evaluation Steps:
+1. Read the problem statement carefully to identify the functionalities required for the
+implementation.
+2. Read the code snippet and compare it to the problem statement. Check if the code snippet covers
+the required functionalities.
+3. Output your answer in a JSON format list.
+a) If the code snippet is correct, output: [{"inconsistency": "None", "severity": "Negligible"}].
+b) If the code snippet is incorrect, output the identified inconsistencies and their severity
+according to the catalog of code inconsistencies. For example: [{"inconsistency": "<inconsistency1>",
+"severity": "<severity1>"}, {"inconsistency": "<inconsistency2>", "severity": "<severity2>"}, ...]
+Problem: {PROBLEM}
+Code Snippet: {CODE}
+Taxonomy of Common Inconsistencies:
+1. Missing dependency declarations: Negligible
+2. No error messages for unexpected input cases: Negligible
+3. Inefficiency, unnecessary statements: Negligible
+4. Edge case not handled: Small
+5. Logic error: Major
+6. Function or variable not defined: Fatal
+7. Code not completed: Fatal
+Evaluation Form:
+JSON output (a JSON list only):
+[{"inconsistency": "None", "severity": "Negligible"}]"""
+
+
 def build_whole_exam_inputs(row: Dict[str, str]) -> Tuple[str, str, str]:
     row_id = row["id"].strip()
     language = row.get("language", "").strip() or "C++"
@@ -85,11 +112,15 @@ def run_mode(
     run_both_assessments: bool,
     resume: bool,
     stop_on_rate_limit: bool,
+    taxonomy_system_prompt: str,
 ) -> Dict[str, Any]:
     if mode == "binary":
         assessor = BinaryAssessor(llm_client=llm_client)
     elif mode == "taxonomy":
-        assessor = TaxonomyAssessor(llm_client=llm_client)
+        if taxonomy_system_prompt:
+            assessor = TaxonomyAssessor(llm_client=llm_client, system_prompt=taxonomy_system_prompt)
+        else:
+            assessor = TaxonomyAssessor(llm_client=llm_client)
     elif mode == "integrated":
         assessor = IntegratedAssessor(
             llm_client=llm_client,
@@ -353,6 +384,13 @@ def main() -> None:
         choices=["batch", "file"],
         help="batch: metrics for current run only, file: recompute metrics from full output JSONL",
     )
+    parser.add_argument(
+        "--taxonomy-system-prompt",
+        type=str,
+        default="improved",
+        choices=["improved", "author"],
+        help="Prompt used by taxonomy mode: improved (current core prompt) or author (paper prompt)",
+    )
     args = parser.parse_args()
 
     rows = load_rows(args.csv)
@@ -365,6 +403,12 @@ def main() -> None:
         kwargs["base_url"] = args.base_url
 
     llm_client = LLMFactory.create(provider=args.provider, model_name=args.model, **kwargs)
+
+    taxonomy_system_prompt = (
+        AUTHOR_TAXONOMY_SYSTEM_PROMPT
+        if args.taxonomy_system_prompt == "author"
+        else None
+    )
 
     ts = datetime.now().strftime("%y%m%d_%H%M")
     safe_model = args.model.replace("/", "-").replace(" ", "-")
@@ -385,6 +429,7 @@ def main() -> None:
             run_both_assessments=args.run_both_assessments,
             resume=args.resume,
             stop_on_rate_limit=args.stop_on_rate_limit,
+            taxonomy_system_prompt=taxonomy_system_prompt,
         )
         if args.metrics_scope == "file":
             metrics = recompute_metrics_from_output(mode=mode, output_file=output_file)

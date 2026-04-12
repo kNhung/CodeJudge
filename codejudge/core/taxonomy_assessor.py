@@ -116,6 +116,9 @@ class TaxonomyAssessor:
         # Normalize nested error payloads (e.g. per-submission lists)
         flat_errors = self._flatten_errors(result.get("errors", []))
         result["errors"] = flat_errors
+
+        reasoning_text = str(result.get("reasoning", "")).strip()
+        parse_failed = "could not be parsed" in reasoning_text.lower()
         
         # Ưu tiên mode cộng điểm: score_breakdown -> quality_score.
         # Chỉ fallback penalty taxonomy khi không có dữ liệu cộng điểm.
@@ -124,7 +127,11 @@ class TaxonomyAssessor:
         )
         result["score_breakdown"] = score_breakdown
 
-        if has_breakdown:
+        if parse_failed:
+            # Parse failure should be marked as invalid score instead of default perfect score.
+            final_score = -1.0
+            result["quality_score"] = -1.0
+        elif has_breakdown:
             final_score = self._sum_score_breakdown(score_breakdown)
             result["quality_score"] = final_score
         else:
