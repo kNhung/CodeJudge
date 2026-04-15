@@ -10,6 +10,9 @@ validation/
 /evaluation/analyze/comments/*
 test.ipynb
 /evaluation/data/apps/APPS/
+/evaluation/hcmus/data_code
+/evaluation/hcmus/problems
+/evaluation/hcmus/hcmus_dataset.csv
 /evaluation/analyze
 /evaluation/data/bigcodebench/sanitized_calibrated_samples
 humaneval-*
