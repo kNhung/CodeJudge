@@ -13,3 +13,9 @@ test.ipynb
 /evaluation/analyze
 /evaluation/data/bigcodebench/sanitized_calibrated_samples
 humaneval-*
+
+*.jsonl
+*.json
+*.csv
+
+.env
