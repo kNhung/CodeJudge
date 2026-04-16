@@ -5,9 +5,19 @@ import re
 import time
 import os
 from collections import Counter
-from transformers import AutoTokenizer
-import transformers
-import torch
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+try:
+    from transformers import AutoTokenizer
+    import transformers
+    import torch
+except Exception:
+    AutoTokenizer = None
+    transformers = None
+    torch = None
 
 model_cache = {}
 
@@ -18,6 +28,11 @@ def load_model(model, root_path="./model"):
         return model_cache[model]
 
     if model.startswith("CodeLlama"):
+        if AutoTokenizer is None or transformers is None or torch is None:
+            raise Exception(
+                "transformers/torch are required for local CodeLlama models. "
+                "Install requirements or use an API model (e.g., gpt/gemini)."
+            )
         model_path = f"{root_path}/codellama/{model}-hf"
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         terminators = tokenizer.eos_token_id
@@ -29,6 +44,11 @@ def load_model(model, root_path="./model"):
             return_full_text=False,
         )
     elif model.startswith("Meta-Llama-3"):
+        if transformers is None or torch is None:
+            raise Exception(
+                "transformers/torch are required for local Meta-Llama models. "
+                "Install requirements or use an API model (e.g., gpt/gemini)."
+            )
         model_path = f"{root_path}/llama3/{model}-hf"
         pipeline = transformers.pipeline(
             "text-generation",
@@ -41,7 +61,7 @@ def load_model(model, root_path="./model"):
             pipeline.tokenizer.eos_token_id,
             pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
         ]
-    elif model.startswith("gpt"):
+    elif model.startswith("gpt") or model.startswith("gemini") or "/" in model:
         terminators = None
         pipeline = None
     else:
@@ -291,11 +311,15 @@ def answer_to_score(answer, return_type):
 
 
 def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
-    if os.environ.get("OPENAI_API_KEY") is None:
-        raise Exception("Please set the environment variable OPENAI_API_KEY=<API-KEY>")
-    client = OpenAI(
-        api_key=os.environ.get("OPENAI_API_KEY"),
-    )
+    api_key = os.environ.get("OPENAI_API_KEY")    
+    if api_key is None:
+        raise Exception("Please set OPENAI_API_KEY in environment")
+
+    base_url = os.environ.get("OPENAI_BASE_URL") 
+    if base_url:
+        client = OpenAI(api_key=api_key, base_url=base_url)
+    else:
+        client = OpenAI(api_key=api_key)
     # print(message[0]["content"])
     # print(message[1]["content"])
     # print(message[2]["content"])
@@ -336,3 +360,63 @@ def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop
             print(f">>> API connection error, retrying attempt {i + 1} of {retries}...")
 
     raise Exception("Failed to get a response after multiple retries.")
+
+
+def gemini_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    if api_key is None:
+        raise Exception("Please set GEMINI_API_KEY or OPENAI_API_KEY in environment")
+
+    base_url = os.environ.get("GEMINI_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
+    if not base_url:
+        base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+    # Ensure OpenAI-compatible Gemini endpoint shape for OpenAI SDK calls.
+    if "generativelanguage.googleapis.com" in base_url and "/openai" not in base_url:
+        base_url = base_url.rstrip("/") + "/openai/"
+
+    client = OpenAI(api_key=api_key, base_url=base_url)
+
+    # Gemini OpenAI-compatible chat endpoint requires at least one user content message.
+    # Some author-baseline prompts are system-only, so convert them into a user prompt.
+    gemini_messages = message
+    has_user_or_assistant = any(
+        isinstance(item, dict) and item.get("role") in {"user", "assistant"}
+        for item in message
+    )
+    if not has_user_or_assistant:
+        merged_content = "\n\n".join(
+            str(item.get("content", "")) for item in message if isinstance(item, dict)
+        ).strip()
+        gemini_messages = [{"role": "user", "content": merged_content}]
+
+    retries = 5
+    time_out_delay = 1
+    rate_limit_delay = 60
+    for i in range(retries):
+        try:
+            request_kwargs = {
+                "model": model,
+                "messages": gemini_messages,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "top_p": top_p,
+            }
+            if stop is not None:
+                request_kwargs["stop"] = stop
+
+            response = client.chat.completions.create(**request_kwargs).choices[0].message.content
+            return response
+        except openai.APITimeoutError:
+            print(f">>> Timeout, retrying attempt {i + 1} of {retries}...")
+            time.sleep(time_out_delay)
+        except openai.RateLimitError as e:
+            print(e)
+            time.sleep(rate_limit_delay)
+            print(f">>> Rate limit exceeded, retrying attempt {i + 1} of {retries}...")
+        except openai.APIConnectionError as e:
+            print(e)
+            time.sleep(time_out_delay)
+            print(f">>> API connection error, retrying attempt {i + 1} of {retries}...")
+
+    raise Exception("Failed to get a Gemini response after multiple retries.")

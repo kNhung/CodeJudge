@@ -1,6 +1,6 @@
 import copy
 
-from .utils import openai_request
+from .utils import gemini_request, openai_request
 
 
 def code_llama_prompt(message):
@@ -75,7 +75,11 @@ def form_filling(
                 if place_holder in item["content"]:
                     item["content"] = item["content"].replace(place_holder, text).strip()
 
-    if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo"):
+    if model.startswith("gemini") or "gemini" in model.lower():
+        return gemini_request(
+            message=message, model=model, temperature=temperature, max_tokens=max_tokens
+        )
+    if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo") or "/" in model:
         return openai_request(
             message=message, model=model, temperature=temperature, max_tokens=max_tokens
         )
