@@ -13,6 +13,8 @@ test.ipynb
 /evaluation/hcmus/data_code
 /evaluation/hcmus/problems
 /evaluation/hcmus/hcmus_dataset.csv
+/evaluation/data/hcmus/
+
 /evaluation/analyze
 /evaluation/data/bigcodebench/sanitized_calibrated_samples
 humaneval-*
