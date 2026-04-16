@@ -1,6 +1,6 @@
 import copy
 
-from .utils import openai_request
+from .utils import openai_request, gemini_request
 
 
 def code_llama_prompt(message):
@@ -77,6 +77,10 @@ def form_filling(
 
     if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo"):
         return openai_request(
+            message=message, model=model, temperature=temperature, max_tokens=max_tokens
+        )
+    elif model.startswith("gemini"):
+        return gemini_request(
             message=message, model=model, temperature=temperature, max_tokens=max_tokens
         )
     elif model.startswith("CodeLlama"):

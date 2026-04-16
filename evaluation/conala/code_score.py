@@ -60,8 +60,15 @@ def single_step_workflow(
     temperature,
     file_name,
     return_type,
+    limit,
 ):
     data, out = read_data(model, temperature, file_name, compare_prompt=compare_prompt)
+    if len(out["data"]) == len(data):
+        return
+
+    if limit is not None:
+        data = data[:limit]
+        
     if len(out["data"]) == len(data):
         return
 
@@ -195,6 +202,7 @@ def router(
     return_type,
     num_samples,
     start_index,
+    limit,
 ):
     for index in range(start_index, start_index + num_samples):
         if step == 1:
@@ -209,6 +217,7 @@ def router(
                 temperature,
                 file_name,
                 return_type,
+                limit
             )
         elif step == 2:
             analyze_prompt = dual_step_prompt["analyze_prompt"][analyze_prompt_index]
@@ -223,6 +232,7 @@ def router(
                 temperature,
                 file_name,
                 return_type,
+                limit
             )
 
 
@@ -237,6 +247,7 @@ def main():
     parser.add_argument("--return_type", type=str, default="bool")
     parser.add_argument("--num_samples", type=int, default=1)
     parser.add_argument("--start_index", type=int, default=0)
+    parser.add_argument("--limit", type=int, default=None)
 
     args = parser.parse_args()
 
@@ -248,6 +259,7 @@ def main():
     return_type = args.return_type
     num_samples = args.num_samples
     start_index = args.start_index
+    limit = args.limit
 
     router(
         model,
@@ -258,6 +270,7 @@ def main():
         return_type,
         num_samples,
         start_index,
+        limit,
     )
 
 

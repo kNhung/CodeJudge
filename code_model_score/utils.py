@@ -41,11 +41,43 @@ def load_model(model, root_path="./model"):
             pipeline.tokenizer.eos_token_id,
             pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
         ]
-    elif model.startswith("gpt"):
+def load_model(model, root_path="./model"):
+    if model in model_cache:
+        print(f"Loading {model} from cache.")
+        return model_cache[model]
+
+    if model.startswith("CodeLlama"):
+        model_path = f"{root_path}/codellama/{model}-hf"
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        terminators = tokenizer.eos_token_id
+        pipeline = transformers.pipeline(
+            "text-generation",
+            model=model_path,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            return_full_text=False,
+        )
+    elif model.startswith("Meta-Llama-3"):
+        model_path = f"{root_path}/llama3/{model}-hf"
+        pipeline = transformers.pipeline(
+            "text-generation",
+            model=model_path,
+            model_kwargs={"torch_dtype": torch.bfloat16},
+            device_map="auto",
+            return_full_text=False,
+        )
+        terminators = [
+            pipeline.tokenizer.eos_token_id,
+            pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
+        ]
+    elif model.startswith("gpt") or model.startswith("gemini"):
         terminators = None
         pipeline = None
     else:
         raise ("Invalid model name")
+
+    model_cache[model] = (terminators, pipeline)
+    return terminators, pipeline
 
     model_cache[model] = (terminators, pipeline)
     return terminators, pipeline
@@ -335,4 +367,69 @@ def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop
             time.sleep(time_out_delay)
             print(f">>> API connection error, retrying attempt {i + 1} of {retries}...")
 
+def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+    if os.environ.get("OPENAI_API_KEY") is None:
+        raise Exception("Please set the environment variable OPENAI_API_KEY=<API-KEY>")
+    client = OpenAI(
+        api_key=os.environ.get("OPENAI_API_KEY"),
+    )
+    # print(message[0]["content"])
+    # print(message[1]["content"])
+    # print(message[2]["content"])
+    retries = 5
+    time_out_delay = 1
+    rate_limit_delay = 60
+    for i in range(retries):
+        try:
+            if model == "davinci-002":
+                response = client.completions.create(
+                    model=model,
+                    prompt=message,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    stop=stop,
+                ).choices[0].text
+            else:
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=message,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    stop=stop,
+                ).choices[0].message.content
+            return response
+        except openai.APITimeoutError:
+            print(f">>> Timeout, retrying attempt {i + 1} of {retries}...")
+            time.sleep(time_out_delay)
+        except openai.RateLimitError as e:
+            print(openai.api_key)
+            print(e)
+            time.sleep(rate_limit_delay)
+            print(f">>> Rate limit exceeded, retrying attempt {i + 1} of {retries}...")
+        except openai.APIConnectionError as e:
+            print(e)
+            time.sleep(time_out_delay)
+            print(f">>> API connection error, retrying attempt {i + 1} of {retries}...")
+
     raise Exception("Failed to get a response after multiple retries.")
+
+
+def gemini_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+    from codejudge.core.llm_client import GeminiClient
+    client = GeminiClient(model_name=model)
+    # Convert message to prompt string
+    if isinstance(message, list):
+        prompt = ""
+        for msg in message:
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            if role == "system":
+                prompt += f"System: {content}\n"
+            elif role == "user":
+                prompt += f"User: {content}\n"
+            elif role == "assistant":
+                prompt += f"Assistant: {content}\n"
+    else:
+        prompt = message
+    return client.generate(prompt, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop)

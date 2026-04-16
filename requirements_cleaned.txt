@@ -1,0 +1,32 @@
+
+# --- Core AI/ML Libs ---
+accelerate
+transformers
+datasets
+huggingface-hub
+openai
+scikit-learn
+scipy
+numpy
+pandas
+matplotlib
+seaborn
+tqdm
+
+# --- CodeJudge Specifics ---
+# Các thư viện đặc thù để đánh giá code
+human_eval
+javalang
+tree-sitter
+code_bert_score
+rouge_score
+sacrebleu
+sacremoses
+nltk
+fuzzywuzzy
+
+# --- Utilities ---
+editdistance  # Bản mới nhất
+fire
+jsonlines
+pyarrow
