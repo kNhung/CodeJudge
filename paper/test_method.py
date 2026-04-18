@@ -25,8 +25,7 @@ def single_step_workflow(program, canonical_solution, problem):
             tokenizer=None,
             pipeline=None,
             temperature=0,
-            code1=program,
-            code2=canonical_solution,
+            code1=program,            code2=canonical_solution,
             problem=problem,
         )
         

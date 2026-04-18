@@ -28,3 +28,4 @@ humaneval-*
 /.venv/
 env/
 venv/
+.venv/

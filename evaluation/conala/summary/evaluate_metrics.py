@@ -52,7 +52,8 @@ def calculate_metrics(group_records):
     }
 
 def main():
-    file_path = '260409_0841_gemini-2.5-flash_all.jsonl'
+    file_path = r'C:\Users\ADMIN\Downloads\CodeJudge\evaluation\conala\summary\260409_0841_gemini-2.5-flash_all.jsonl'
+    output_path = 'metrics_result.json'  # Tên file đầu ra bạn muốn lưu
     records = []
     
     # Đọc file JSONL
@@ -87,8 +88,11 @@ def main():
     # Thêm nhóm 'all' (tổng hợp tất cả)
     final_output['all'] = calculate_metrics(records)
     
-    # In ra định dạng JSON đẹp mắt (thư viện json mặc định in float('nan') thành NaN theo đúng chuẩn bạn cần)
-    print(json.dumps(final_output, indent=2))
+    # Ghi kết quả ra file JSON
+    with open(output_path, 'w', encoding='utf-8') as out_f:
+        json.dump(final_output, out_f, indent=2)
+        
+    print(f"Đã ghi kết quả thành công ra file: {output_path}")
 
 if __name__ == "__main__":
     main()
