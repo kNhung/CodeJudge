@@ -142,8 +142,7 @@ Catalog of Code Inconsistencies:
 6. Function or variable not defined: Fatal
 7. Code not completed: Fatal
 
-Evaluation Form:
-JSON output (a JSON list only):
+Evaluation Form: JSON output (strictly a raw JSON list only). DO NOT wrap your response in markdown ```json``` tags. Output ONLY the JSON list. No explanation. No introduction.:
 """,
         }
     ],
@@ -179,8 +178,7 @@ Catalog of Code Inconsistencies:
 6. Function or variable not defined: Fatal
 7. Code not completed: Fatal
 
-Evaluation Form:
-JSON output (a JSON list only):
+Evaluation Form: JSON output (strictly a raw JSON list only). DO NOT wrap your response in markdown ```json``` tags. Output ONLY the JSON list. No explanation. No introduction.:
 """,
         }
     ],

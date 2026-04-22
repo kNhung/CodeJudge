@@ -1,11 +1,9 @@
 import copy
-
+import re
 from .utils import openai_request, gemini_request
-
 
 def code_llama_prompt(message):
     if len(message) == 1:
-        # only user prompt
         user = message[0]["content"].strip()
         prompt = f"<s>[INST] {user} [/INST]"
     elif len(message) == 2:
@@ -21,9 +19,7 @@ def code_llama_prompt(message):
         system = message[0]["content"].strip()
         user = message[1]["content"].strip()
         assistant = message[2]["content"].strip()
-        prompt = (
-            f"<s>[INST] <<SYS>>\\n{system}\\n<</SYS>>\\n\\n{user}[/INST] {assistant}"
-        )
+        prompt = (f"<s>[INST] <<SYS>>\\n{system}\\n<</SYS>>\\n\\n{user}[/INST] {assistant}")
     elif len(message) == 4:
         system = message[0]["content"].strip()
         user_1 = message[1]["content"].strip()
@@ -44,18 +40,15 @@ def code_llama_prompt(message):
         prompt += f"<s>[INST] {user_2} [/INST] {answer_2} </s>"
         prompt += f"<s>[INST] {user_3} [/INST]"
     else:
-        print(message)
         raise Exception("Invalid message length")
     return prompt
-
 
 def llama3_prompt(message):
     prompt = "<|begin_of_text|>"
     for sentence in message:
         prompt += f"<|start_header_id|>{sentence['role']}<|end_header_id|>\n{sentence['content']}<|eot_id|>"
-    prompt += "<|start_header_id|>assistant<|end_header_id|>"
+    prompt += "<|start_header_id|>assistant<|end_header_id|>\n"
     return prompt
-
 
 def form_filling(
     model,
@@ -71,41 +64,35 @@ def form_filling(
         for item in message:
             for place_holder in info:
                 text = info[place_holder]
-                place_holder = "{{" + place_holder + "}}"
-                if place_holder in item["content"]:
-                    item["content"] = item["content"].replace(place_holder, text).strip()
+                placeholder_tag = "{{" + place_holder + "}}"
+                if placeholder_tag in item["content"]:
+                    item["content"] = item["content"].replace(placeholder_tag, str(text)).strip()
 
+    # 1. Xử lý mô hình API
     if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo"):
-        return openai_request(
-            message=message, model=model, temperature=temperature, max_tokens=max_tokens
-        )
-    elif model.startswith("gemini"):
-        return gemini_request(
-            message=message, model=model, temperature=temperature, max_tokens=max_tokens
-        )
-    elif model.startswith("CodeLlama"):
-        prompt = code_llama_prompt(message)
-        return pipeline(
-            prompt,
-            do_sample=True,
-            temperature=temperature,
-            top_p=0.9,
-            num_return_sequences=1,
-            eos_token_id=terminators,
-            max_new_tokens=max_tokens,
-            pad_token_id=pipeline.tokenizer.eos_token_id,
-        )[0]["generated_text"].strip()
-    elif model.startswith("Meta-Llama-3"):
-        prompt = llama3_prompt(message)
-        return pipeline(
-            prompt,
-            do_sample=True,
-            temperature=temperature,
-            top_p=0.9,
-            num_return_sequences=1,
-            eos_token_id=terminators,
-            max_new_tokens=max_tokens,
-            pad_token_id=pipeline.tokenizer.eos_token_id,
-        )[0]["generated_text"].strip()
+        return openai_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
+    elif "gemini" in model.lower():
+        return gemini_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
+
+    # 2. Xử lý mô hình Local (CodeLlama hoặc Llama 3)
+    # Tự động điều chỉnh do_sample để tránh lỗi khi temperature = 0
+    do_sample = temperature > 0 #
+    
+    # Kiểm tra tên model linh hoạt hơn (dùng 'in' thay vì 'startswith')
+    if "CodeLlama" in model: #
+        formatted_prompt = code_llama_prompt(message)
+    elif "Meta-Llama-3" in model: #
+        formatted_prompt = llama3_prompt(message)
     else:
-        raise Exception("Invalid model")
+        raise Exception(f"Invalid model name: {model}")
+
+    return pipeline(
+        formatted_prompt,
+        do_sample=do_sample, #
+        temperature=temperature if do_sample else None, #
+        top_p=0.9 if do_sample else None,
+        num_return_sequences=1,
+        eos_token_id=terminators,
+        max_new_tokens=max_tokens,
+        pad_token_id=pipeline.tokenizer.eos_token_id,
+    )[0]["generated_text"].strip()
