@@ -2,6 +2,7 @@ import argparse
 import json
 import math
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -147,6 +148,7 @@ def evaluate_example(
         return item
 
     assert assessor is not None
+    start_time = time.time()
     if mode == "binary":
         result = assessor.assess(
             problem_statement=intent,
@@ -223,6 +225,8 @@ def evaluate_example(
             if result_summary.get("score") is not None:
                 result_summary["score_on_4"] = round(float(result_summary["score"]) / 10.0 * 4.0, 4)
                 result["summary"] = result_summary
+    end_time = time.time()
+    item["assessment_time_seconds"] = round(end_time - start_time, 4)
     item["result"] = result
     return item
 
@@ -255,6 +259,8 @@ def main() -> None:
     )
     parser.add_argument("--metrics-output", type=Path, default=None, help="Metrics JSON output path")
     args = parser.parse_args()
+
+    start_total = time.time()
 
     if args.start < 0:
         raise ValueError("--start must be >= 0")
@@ -319,6 +325,9 @@ def main() -> None:
 
         print(f"Saved metrics to {args.metrics_output}")
         print(json.dumps(metrics, ensure_ascii=False, indent=2))
+
+    end_total = time.time()
+    print(f"Total execution time: {end_total - start_total:.2f} seconds")
 
 
 if __name__ == "__main__":
