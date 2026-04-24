@@ -1,0 +1,86 @@
+{
+  "tranx-annot": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 1.3167,
+    "average_predicted_scaled": 2.0967,
+    "mae": 1.3333,
+    "rmse": 1.7489,
+    "pearson": 0.438,
+    "spearman": 0.4577,
+    "kendalltau": 0.37,
+    "exact_match_rate": 0.2
+  },
+  "baseline": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 0.35,
+    "average_predicted_scaled": 1.2867,
+    "mae": 1.0967,
+    "rmse": 1.7665,
+    "pearson": 0.187,
+    "spearman": 0.2247,
+    "kendalltau": 0.2108,
+    "exact_match_rate": 0.2833
+  },
+  "snippet": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 3.6475,
+    "average_predicted_scaled": 3.4333,
+    "mae": 0.6708,
+    "rmse": 1.0037,
+    "pearson": -0.1059,
+    "spearman": -0.0087,
+    "kendalltau": -0.0055,
+    "exact_match_rate": 0.2667
+  },
+  "codex": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 2.25,
+    "average_predicted_scaled": 3.1133,
+    "mae": 1.43,
+    "rmse": 1.8756,
+    "pearson": 0.2302,
+    "spearman": 0.2339,
+    "kendalltau": 0.1824,
+    "exact_match_rate": 0.1333
+  },
+  "best-tranx-rerank": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 1.5167,
+    "average_predicted_scaled": 2.2833,
+    "mae": 1.4667,
+    "rmse": 1.8967,
+    "pearson": 0.3176,
+    "spearman": 0.3196,
+    "kendalltau": 0.2474,
+    "exact_match_rate": 0.1333
+  },
+  "best-tranx": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 1.3167,
+    "average_predicted_scaled": 2.3333,
+    "mae": 1.5633,
+    "rmse": 2.0035,
+    "pearson": 0.2139,
+    "spearman": 0.1752,
+    "kendalltau": 0.1394,
+    "exact_match_rate": 0.1167
+  },
+  "all": {
+    "samples": 360,
+    "grade_scale": 4.0,
+    "average_true_grade": 1.7329,
+    "average_predicted_scaled": 2.4244,
+    "mae": 1.2601,
+    "rmse": 1.7472,
+    "pearson": 0.4666,
+    "spearman": 0.4406,
+    "kendalltau": 0.3503,
+    "exact_match_rate": 0.1889
+  }
+}
