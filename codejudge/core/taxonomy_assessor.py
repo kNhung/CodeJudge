@@ -109,6 +109,7 @@ class TaxonomyAssessor:
             user_prompt=user_prompt,
             format_json=True
         )
+        llm_usage = self.llm_client.get_last_usage()
         
         # Parse response
         result = self._parse_llm_response(llm_response)
@@ -166,6 +167,10 @@ class TaxonomyAssessor:
             result["exam_aggregation"] = exam_aggregation
 
         result["final_score"] = final_score
+        # Keep the original model output for debugging/auditing.
+        result["raw_llm_response"] = llm_response
+        if llm_usage:
+            result["usage"] = llm_usage
         
         logger.info(f"Final Score: {final_score}")
         

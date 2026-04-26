@@ -5,7 +5,7 @@ Sử dụng kỹ thuật "Analyze then Summarize"
 
 import re
 import logging
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List, Optional
 from .llm_client import LLMClient, LLMFactory
 from .prompts import PromptTemplates, SYSTEM_PROMPT_BINARY_ASSESSMENT
 
@@ -64,13 +64,47 @@ class BinaryAssessor:
         
         # Bước 1: Phân tích (Analyze)
         analysis = self._analyze_step(problem_statement, student_code, language)
+        analyze_usage = self.llm_client.get_last_usage()
         logger.info(f"Analysis completed")
         
         # Bước 2: Tóm tắt (Summarize)
         result = self._summarize_step(analysis)
+        summarize_usage = self.llm_client.get_last_usage()
+
+        result["usage"] = {
+            "analyze": analyze_usage,
+            "summarize": summarize_usage,
+            "total": self._sum_usages([analyze_usage, summarize_usage]),
+        }
         logger.info(f"Result: {result}")
         
         return result
+
+    def _sum_usages(self, usages: List[Optional[Dict[str, Any]]]) -> Dict[str, Any]:
+        total_input = 0
+        total_output = 0
+        has_any = False
+
+        for usage in usages:
+            if not isinstance(usage, dict):
+                continue
+            in_tok = usage.get("input_tokens")
+            out_tok = usage.get("output_tokens")
+            if isinstance(in_tok, int):
+                total_input += in_tok
+                has_any = True
+            if isinstance(out_tok, int):
+                total_output += out_tok
+                has_any = True
+
+        if not has_any:
+            return {}
+
+        return {
+            "input_tokens": total_input,
+            "output_tokens": total_output,
+            "total_tokens": total_input + total_output,
+        }
     
     def _analyze_step(
         self,

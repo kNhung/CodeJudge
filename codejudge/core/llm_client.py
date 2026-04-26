@@ -69,6 +69,38 @@ class LLMClient(ABC):
         self.temperature = temperature
         self.max_retries = 3
         self.retry_count = 0
+        self.last_usage: Optional[Dict[str, Any]] = None
+
+    def _set_last_usage(
+        self,
+        input_tokens: Optional[int],
+        output_tokens: Optional[int],
+        total_tokens: Optional[int] = None,
+        raw_usage: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        """Store usage info from the most recent LLM call."""
+        in_tok = int(input_tokens) if isinstance(input_tokens, (int, float)) else None
+        out_tok = int(output_tokens) if isinstance(output_tokens, (int, float)) else None
+        total_tok = int(total_tokens) if isinstance(total_tokens, (int, float)) else None
+
+        if total_tok is None and in_tok is not None and out_tok is not None:
+            total_tok = in_tok + out_tok
+
+        self.last_usage = {
+            "input_tokens": in_tok,
+            "output_tokens": out_tok,
+            "total_tokens": total_tok,
+            "raw_usage": raw_usage or {},
+        }
+
+    def _clear_last_usage(self) -> None:
+        self.last_usage = None
+
+    def get_last_usage(self) -> Optional[Dict[str, Any]]:
+        """Get usage from the most recent successful call."""
+        if self.last_usage is None:
+            return None
+        return dict(self.last_usage)
     
     @abstractmethod
     def call(
@@ -144,6 +176,7 @@ class OpenAIClient(LLMClient):
         format_json: bool = False
     ) -> str:
         """Gọi OpenAI API"""
+        self._clear_last_usage()
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
@@ -156,6 +189,20 @@ class OpenAIClient(LLMClient):
                 temperature=self.temperature,
                 max_tokens=2048
             )
+
+            usage = getattr(response, "usage", None)
+            if usage is None and isinstance(response, dict):
+                usage = response.get("usage")
+
+            if usage is not None:
+                if not isinstance(usage, dict):
+                    usage = dict(usage)
+                self._set_last_usage(
+                    input_tokens=usage.get("prompt_tokens"),
+                    output_tokens=usage.get("completion_tokens"),
+                    total_tokens=usage.get("total_tokens"),
+                    raw_usage=usage,
+                )
             
             return response.choices[0].message.content
         
@@ -195,6 +242,7 @@ class AnthropicClient(LLMClient):
         format_json: bool = False
     ) -> str:
         """Gọi Anthropic API"""
+        self._clear_last_usage()
         try:
             response = self.client.messages.create(
                 model=self.model_name,
@@ -204,6 +252,27 @@ class AnthropicClient(LLMClient):
                     {"role": "user", "content": user_prompt}
                 ]
             )
+
+            usage = getattr(response, "usage", None)
+            usage_dict: Dict[str, Any] = {}
+            if usage is not None:
+                if isinstance(usage, dict):
+                    usage_dict = usage
+                else:
+                    usage_dict = {
+                        "input_tokens": getattr(usage, "input_tokens", None),
+                        "output_tokens": getattr(usage, "output_tokens", None),
+                        "cache_creation_input_tokens": getattr(usage, "cache_creation_input_tokens", None),
+                        "cache_read_input_tokens": getattr(usage, "cache_read_input_tokens", None),
+                    }
+
+            if usage_dict:
+                self._set_last_usage(
+                    input_tokens=usage_dict.get("input_tokens"),
+                    output_tokens=usage_dict.get("output_tokens"),
+                    total_tokens=None,
+                    raw_usage=usage_dict,
+                )
             
             return response.content[0].text
         
@@ -247,6 +316,7 @@ class LocalLLMClient(LLMClient):
         format_json: bool = False
     ) -> str:
         """Gọi Local LLM through API"""
+        self._clear_last_usage()
         payload = {
             "model": self.model_name,
             "prompt": f"{system_prompt}\n\n{user_prompt}",
@@ -261,8 +331,23 @@ class LocalLLMClient(LLMClient):
                 timeout=self.timeout
             )
             response.raise_for_status()
+            body = response.json()
+
+            # Ollama-compatible usage fields.
+            prompt_eval_count = body.get("prompt_eval_count")
+            eval_count = body.get("eval_count")
+            if isinstance(prompt_eval_count, int) or isinstance(eval_count, int):
+                self._set_last_usage(
+                    input_tokens=prompt_eval_count,
+                    output_tokens=eval_count,
+                    total_tokens=None,
+                    raw_usage={
+                        "prompt_eval_count": prompt_eval_count,
+                        "eval_count": eval_count,
+                    },
+                )
             
-            return response.json().get("response", "")
+            return body.get("response", "")
         
         except Exception as e:
             logger.error(f"Local LLM error: {e}")
@@ -310,6 +395,7 @@ class GeminiClient(LLMClient):
         format_json: bool = False,
     ) -> str:
         """Gọi Gemini GenerateContent API"""
+        self._clear_last_usage()
         payload: Dict[str, Any] = {
             "system_instruction": {
                 "parts": [{"text": system_prompt}],
@@ -383,6 +469,15 @@ class GeminiClient(LLMClient):
 
                 response.raise_for_status()
                 data = response.json()
+
+                usage = data.get("usageMetadata", {}) if isinstance(data, dict) else {}
+                if isinstance(usage, dict) and usage:
+                    self._set_last_usage(
+                        input_tokens=usage.get("promptTokenCount"),
+                        output_tokens=usage.get("candidatesTokenCount"),
+                        total_tokens=usage.get("totalTokenCount"),
+                        raw_usage=usage,
+                    )
 
                 candidates = data.get("candidates", [])
                 if not candidates:

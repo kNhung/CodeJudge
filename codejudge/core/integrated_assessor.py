@@ -4,7 +4,7 @@ Kết hợp Binary Assessment và Taxonomy-Guided Assessment
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from .llm_client import LLMClient, LLMFactory
 from .binary_assessor import BinaryAssessor
 from .taxonomy_assessor import TaxonomyAssessor
@@ -146,6 +146,16 @@ class IntegratedAssessor:
             }
         }
 
+        binary_usage_total = None
+        if isinstance(binary_result.get("usage"), dict):
+            binary_usage_total = binary_result["usage"].get("total")
+        taxonomy_usage = taxonomy_result.get("usage") if isinstance(taxonomy_result.get("usage"), dict) else None
+        result["usage"] = {
+            "binary": binary_usage_total,
+            "taxonomy": taxonomy_usage,
+            "total": self._sum_usages([binary_usage_total, taxonomy_usage]),
+        }
+
         if question_max is not None:
             score_on_10 = float(taxonomy_result["final_score"])
             scaled_score = Scorer(base_score=10.0).to_question_scale(score_on_10, question_max)
@@ -156,6 +166,32 @@ class IntegratedAssessor:
             result["taxonomy"]["score_scaled"] = scaled_score
 
         return result
+
+    def _sum_usages(self, usages: List[Optional[Dict[str, Any]]]) -> Dict[str, int]:
+        total_input = 0
+        total_output = 0
+        has_any = False
+
+        for usage in usages:
+            if not isinstance(usage, dict):
+                continue
+            in_tok = usage.get("input_tokens")
+            out_tok = usage.get("output_tokens")
+            if isinstance(in_tok, int):
+                total_input += in_tok
+                has_any = True
+            if isinstance(out_tok, int):
+                total_output += out_tok
+                has_any = True
+
+        if not has_any:
+            return {}
+
+        return {
+            "input_tokens": total_input,
+            "output_tokens": total_output,
+            "total_tokens": total_input + total_output,
+        }
     
     def _count_errors_by_type(self, errors: list) -> Dict[str, int]:
         """Đếm lỗi theo type"""
