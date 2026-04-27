@@ -1,10 +1,16 @@
 import torch
+import hashlib
+import logging
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
 
+logger = logging.getLogger(__name__)
+
 class LLMClient:
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", api_key=None, **kwargs):
+    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", api_key=None, use_cache=True, **kwargs):
         print(f"🚀 [CodeJudge] Đang nạp model: {model_name}")
         self.model_name = model_name
+        self.use_cache = use_cache
+        self.request_cache = {}  # Cache LLM requests
         
         # Cấu hình 4-bit để không bị văng khỏi Kaggle
         bnb_config = BitsAndBytesConfig(
@@ -42,6 +48,17 @@ class LLMClient:
 
     def call(self, system_prompt, user_prompt, format_json=False):
         """Hàm call mà Binary/Taxonomy Assessor đang yêu cầu"""
+        
+        # Tạo cache key
+        if self.use_cache:
+            cache_key = hashlib.md5(
+                f"{system_prompt}|{user_prompt}".encode()
+            ).hexdigest()
+            
+            if cache_key in self.request_cache:
+                logger.debug(f"✓ Cache hit for LLM request")
+                return self.request_cache[cache_key]
+        
         # Format theo Chat Template chuẩn của Llama-3
         full_prompt = (
             f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|>"
@@ -49,7 +66,14 @@ class LLMClient:
             f"<|start_header_id|>assistant<|end_header_id|>\n\n"
         )
         # Giảm temperature xuống thấp nhất để có kết quả JSON ổn định
-        return self.generate(full_prompt, temperature=0.01)
+        response = self.generate(full_prompt, temperature=0.01)
+        
+        # Lưu vào cache
+        if self.use_cache:
+            self.request_cache[cache_key] = response
+            logger.debug(f"Cached LLM response (cache size: {len(self.request_cache)})")
+        
+        return response
 
 # Các class hỗ trợ để thỏa mãn file __init__.py
 class LLMConfig: 
@@ -58,8 +82,8 @@ class LLMConfig:
 
 class LLMFactory:
     @staticmethod
-    def create(provider="local", model_name="meta-llama/Meta-Llama-3-8B-Instruct", **kwargs):
-        return LLMClient(model_name=model_name, **kwargs)
+    def create(provider="local", model_name="meta-llama/Meta-Llama-3-8B-Instruct", use_cache=True, **kwargs):
+        return LLMClient(model_name=model_name, use_cache=use_cache, **kwargs)
 
 # Thiết lập các Alias (Bí danh)
 OpenAIClient = LLMClient

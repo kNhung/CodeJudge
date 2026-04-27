@@ -76,9 +76,22 @@ def evaluate_example(example: Dict[str, Any], assessor, source: str, dry_run: bo
     item = {"source": source, "intent": intent, "grade_reference": grade_reference}
     if dry_run: return item
     result = assessor.assess(problem_statement=intent, student_code=student_code, reference_code=None, language=language)
-    # Normalize kết quả taxonomy
-    if mode == "taxonomy":
+    
+    # Normalize kết quả tùy theo mode
+    if mode == "integrated":
+        # IntegratedAssessor format
+        final_score = result.get("summary", {}).get("score", 
+                                 result.get("taxonomy", {}).get("final_score", 0))
         result = {
+            "assessment_type": "integrated",
+            "binary": result.get("binary", {}),
+            "taxonomy": result.get("taxonomy", {}),
+            "summary": {"score": final_score, "score_on_4": round(final_score / 10 * 4, 4)}
+        }
+    else:  # mode == "taxonomy"
+        # TaxonomyAssessor format (legacy)
+        result = {
+            "assessment_type": "taxonomy",
             "taxonomy": result,
             "summary": {"score": result.get("final_score", 0), "score_on_4": round(result.get("final_score", 0) / 10 * 4, 4)}
         }
@@ -93,7 +106,9 @@ def main() -> None:
     parser.add_argument("--model", type=str, default="meta-llama/Meta-Llama-3-8B-Instruct")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--start", type=int, default=0)
-    parser.add_argument("--mode", type=str, default="taxonomy")
+    parser.add_argument("--mode", type=str, default="integrated", 
+                        choices=["integrated", "taxonomy"],
+                        help="integrated: Binary + Taxonomy (recommended), taxonomy: Chi tiết (legacy)")
     args = parser.parse_args()
 
     sources = CANDIDATE_FIELDS if args.source == "all" else [args.source]
@@ -101,8 +116,14 @@ def main() -> None:
     if args.limit > 0: examples = examples[:args.limit]
 
     # Khởi tạo assessor
-    llm_client = LLMFactory.create(provider=args.provider, model_name=args.model)
-    assessor = TaxonomyAssessor(llm_client=llm_client)
+    llm_client = LLMFactory.create(provider=args.provider, model_name=args.model, use_cache=True)
+    
+    if args.mode == "integrated":
+        print("📋 Mode: INTEGRATED (Binary + Taxonomy)")
+        assessor = IntegratedAssessor(llm_client=llm_client, run_both_assessments=True)
+    else:
+        print("📋 Mode: TAXONOMY (Chi tiết)")
+        assessor = TaxonomyAssessor(llm_client=llm_client)
 
     output_path = build_default_output_path(args.model, args.source)
     output_path.parent.mkdir(parents=True, exist_ok=True)
