@@ -28,6 +28,13 @@ from .taxonomy_assessor import (
 
 from .integrated_assessor import IntegratedAssessor
 
+from .examples_library import (
+    CALIBRATION_EXAMPLES,
+    get_calibration_examples,
+    format_examples_for_prompt,
+    get_score_distribution
+)
+
 __all__ = [
     # LLM Clients
     "LLMClient",

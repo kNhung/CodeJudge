@@ -16,8 +16,7 @@ if str(REPO_ROOT) not in sys.path:
 from codejudge.core import BinaryAssessor, IntegratedAssessor, LLMFactory, TaxonomyAssessor
 
 CONALA_ROOT = Path(__file__).resolve().parent
-# Ép dùng đường dẫn tuyệt đối cho dataset trên Kaggle
-DEFAULT_JSON = Path("/kaggle/working/CodeJudge/evaluation/conala/conala-aggregated-grades.json")
+DEFAULT_JSON = CONALA_ROOT / "conala.json"
 CANDIDATE_FIELDS = ["baseline", "tranx-annot", "best-tranx", "best-tranx-rerank", "codex", "snippet"]
 
 # ... (Các hàm build_default_output_path, load_examples, normalize_code giữ nguyên)
@@ -73,7 +72,7 @@ def evaluate_example(example: Dict[str, Any], assessor, source: str, dry_run: bo
     intent = example.get("intent", "").strip()
     student_code = normalize_code(example.get(source))
     grade_reference = get_grade_reference(example, source)
-    item = {"source": source, "intent": intent, "grade_reference": grade_reference}
+    item = {"source": source, "grade_reference": grade_reference}
     if dry_run: return item
     result = assessor.assess(problem_statement=intent, student_code=student_code, reference_code=None, language=language)
     
@@ -100,51 +99,91 @@ def evaluate_example(example: Dict[str, Any], assessor, source: str, dry_run: bo
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--json", type=Path, default=DEFAULT_JSON)
-    parser.add_argument("--source", type=str, default="codex")
-    parser.add_argument("--provider", type=str, default="local")
-    parser.add_argument("--model", type=str, default="meta-llama/Meta-Llama-3-8B-Instruct")
-    parser.add_argument("--limit", type=int, default=0)
-    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--json", type=Path, default=DEFAULT_JSON,
+                        help="Path to the CoNaLa dataset JSON file (default: evaluation/conala/conala.json)")
+    parser.add_argument("--source", type=str, default="codex",
+                        help="Which source field to evaluate (default: codex). Use 'all' to score all candidate fields.")
+    parser.add_argument("--provider", type=str, default="local",
+                        help="LLM provider name")
+    parser.add_argument("--model", type=str, default="meta-llama/Meta-Llama-3-8B-Instruct",
+                        help="Model name to score with")
+    parser.add_argument("--output", type=Path, default=None,
+                        help="Output JSONL file. If omitted, auto-generate one under evaluation/conala/output")
+    parser.add_argument("--limit", type=int, default=0,
+                        help="Only process first N examples")
+    parser.add_argument("--start", type=int, default=0,
+                        help="Start index in dataset examples")
     parser.add_argument("--mode", type=str, default="integrated", 
                         choices=["integrated", "taxonomy"],
-                        help="integrated: Binary + Taxonomy (recommended), taxonomy: Chi tiết (legacy)")
+                        help="integrated: Binary + Taxonomy (recommended), taxonomy: detailed legacy output")
+    parser.add_argument("--use-examples", action="store_true", default=False,
+                        help="Use calibration examples (few-shot) when scoring")
+    parser.add_argument("--num-examples", type=int, default=2,
+                        help="Number of calibration examples per prompt (recommended ≤ 3)")
+    parser.add_argument("--dry-run", action="store_true", default=False,
+                        help="Validate dataset and CLI without calling the LLM")
     args = parser.parse_args()
 
     sources = CANDIDATE_FIELDS if args.source == "all" else [args.source]
     examples = load_examples(args.json)[args.start:]
-    if args.limit > 0: examples = examples[:args.limit]
+    if args.limit > 0:
+        examples = examples[: args.limit]
+
+    if args.output is None:
+        output_path = build_default_output_path(args.model, args.source)
+    else:
+        output_path = args.output
 
     # Khởi tạo assessor
-    llm_client = LLMFactory.create(provider=args.provider, model_name=args.model, use_cache=True)
+    assessor = None
+    llm_client = None
+    if not args.dry_run:
+        llm_client = LLMFactory.create(provider=args.provider, model_name=args.model, use_cache=True)
     
-    if args.mode == "integrated":
+    if args.dry_run:
+        print("📋 Dry run mode: no LLM calls will be made")
+    elif args.mode == "integrated":
         print("📋 Mode: INTEGRATED (Binary + Taxonomy)")
         assessor = IntegratedAssessor(llm_client=llm_client, run_both_assessments=True)
     else:
         print("📋 Mode: TAXONOMY (Chi tiết)")
-        assessor = TaxonomyAssessor(llm_client=llm_client)
-
-    output_path = build_default_output_path(args.model, args.source)
+        assessor = TaxonomyAssessor(
+            llm_client=llm_client,
+            use_examples=args.use_examples,
+            num_examples=args.num_examples
+        )
+    
+    if args.use_examples:
+        print(f"📚 Sử dụng calibration examples ({args.num_examples} examples/prompt)")
+    
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    print(f"🚀 Bắt đầu chấm điểm {len(examples)} mẫu trên nhánh stage04...")
+    print(f"🚀 Bắt đầu chấm điểm {len(examples)} mẫu từ {args.json}...")
+    print(f"📤 Kết quả sẽ được lưu vào: {output_path}")
     start_total = time.time() # Lưu thời gian bắt đầu
     records = []
 
     # Thêm thanh tiến trình tqdm ở đây
     with output_path.open("w", encoding="utf-8") as f:
         for idx, example in enumerate(tqdm(examples, desc="Đang chấm điểm", unit="mẫu"), start=args.start):
+            example_record = {
+                "example_index": idx,
+                "intent": example.get("intent", "").strip(),
+                "results": []
+            }
             for source in sources:
-                if source not in example: continue
+                if source not in example:
+                    continue
                 item = evaluate_example(example, assessor, source, False, "Python", args.mode)
-                item["example_index"] = idx
-                f.write(json.dumps(item, ensure_ascii=False) + "\n")
-                records.append(item)
+                example_record["results"].append(item)
+            if not example_record["results"]:
+                continue
+            f.write(json.dumps(example_record, ensure_ascii=False) + "\n")
+            records.append(example_record)
 
     end_total = time.time()
     duration = end_total - start_total
-    print(f"\n✅ Hoàn thành! Đã lưu {len(records)} hàng vào {output_path}")
+    print(f"\n✅ Hoàn thành! Đã lưu {len(records)} mẫu vào {output_path}")
     print(f"⏱️ Tổng thời gian chạy: {duration:.2f} giây ({duration/60:.2f} phút)")
     if len(records) > 0:
         print(f"📊 Trung bình: {duration/len(records):.2f} giây/mẫu")

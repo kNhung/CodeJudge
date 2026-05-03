@@ -27,7 +27,9 @@ class TaxonomyAssessor:
         self,
         llm_client: LLMClient = None,
         system_prompt: str = SYSTEM_PROMPT_TAXONOMY_ASSESSMENT,
-        error_taxonomy: Dict = None
+        error_taxonomy: Dict = None,
+        use_examples: bool = False,
+        num_examples: int = 2
     ):
         """
         Khởi tạo Taxonomy Assessor
@@ -36,10 +38,14 @@ class TaxonomyAssessor:
             llm_client: LLM client instance
             system_prompt: Custom system prompt
             error_taxonomy: Custom error taxonomy (nếu None, dùng default)
+            use_examples: Sử dụng calibration examples (few-shot learning)?
+            num_examples: Số lượng ví dụ (nên ≤ 3 để không quá dài)
         """
         self.llm_client = llm_client or LLMFactory.create()
         self.system_prompt = system_prompt
         self.error_taxonomy = error_taxonomy or ERROR_TAXONOMY
+        self.use_examples = use_examples
+        self.num_examples = num_examples
         self.additive_rubric_max = {
             "idea": 3.0,
             "flow": 2.0,
@@ -96,12 +102,22 @@ class TaxonomyAssessor:
         logger.info(f"Problem: {problem_statement[:100]}...")
         
         # Gửi prompt yêu cầu LLM chấm điểm
-        user_prompt = PromptTemplates.format_taxonomy(
-            problem_statement=problem_statement,
-            student_code=student_code,
-            reference_code=reference_code,
-            language=language,
-        )
+        if self.use_examples:
+            user_prompt = PromptTemplates.format_taxonomy_with_examples(
+                problem_statement=problem_statement,
+                student_code=student_code,
+                reference_code=reference_code,
+                language=language,
+                include_examples=True,
+                num_examples=self.num_examples
+            )
+        else:
+            user_prompt = PromptTemplates.format_taxonomy(
+                problem_statement=problem_statement,
+                student_code=student_code,
+                reference_code=reference_code,
+                language=language,
+            )
         
         # Gọi LLM
         llm_response = self.llm_client.call(

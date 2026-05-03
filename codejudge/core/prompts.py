@@ -3,6 +3,10 @@ Prompt Templates cho System Prompting
 Sử dụng cho Binary Assessment và Taxonomy-Guided Scoring
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # ============================================================================
 # SYSTEM PROMPTS - Định nghĩa vai trò và context cho LLM
 # ============================================================================
@@ -245,6 +249,61 @@ class PromptTemplates:
     def format_error_summary(errors_json: str) -> str:
         """Format prompt tính toán điểm cuối"""
         return ERROR_SUMMARY_PROMPT.format(errors_json=errors_json)
+    
+    @staticmethod
+    def format_taxonomy_with_examples(
+        problem_statement: str,
+        student_code: str,
+        reference_code: str = None,
+        language: str = "Python",
+        include_examples: bool = True,
+        num_examples: int = 3
+    ) -> str:
+        """
+        Format prompt chấm điểm với ví dụ calibration (few-shot learning)
+        
+        Args:
+            problem_statement: Đề bài
+            student_code: Code sinh viên
+            reference_code: Code mẫu (tùy chọn)
+            language: Ngôn ngữ lập trình
+            include_examples: Có thêm examples không?
+            num_examples: Số lượng ví dụ (nên ≤ 3 để không quá dài)
+        
+        Returns:
+            Prompt đầy đủ với examples
+        """
+        try:
+            from .examples_library import format_examples_for_prompt
+        except ImportError:
+            logger.warning("Could not import examples_library, skipping examples")
+            include_examples = False
+        
+        # Format base taxonomy prompt
+        base_prompt = PromptTemplates.format_taxonomy(
+            problem_statement=problem_statement,
+            student_code=student_code,
+            reference_code=reference_code,
+            language=language
+        )
+        
+        # Thêm examples nếu có
+        if include_examples:
+            try:
+                # Tạo key từ problem statement (hash đơn giản)
+                problem_key = "all_elements_same"  # Default
+                
+                examples_section = format_examples_for_prompt(
+                    problem_key=problem_key,
+                    num_examples=num_examples
+                )
+                
+                base_prompt = examples_section + "\n" + base_prompt
+                logger.debug(f"Added {num_examples} calibration examples to prompt")
+            except Exception as e:
+                logger.warning(f"Failed to add examples: {e}")
+        
+        return base_prompt
 
 
 # ============================================================================
