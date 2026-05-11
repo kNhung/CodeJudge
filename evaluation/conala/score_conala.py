@@ -95,6 +95,15 @@ def evaluate_example(example: Dict[str, Any], assessor, source: str, dry_run: bo
             "summary": {"score": result.get("final_score", 0), "score_on_4": round(result.get("final_score", 0) / 10 * 4, 4)}
         }
     item["result"] = result
+    
+    # Parse comparison if it's a string
+    for key in ['binary', 'taxonomy']:
+        if key in result and 'comparison' in result[key] and isinstance(result[key]['comparison'], str):
+            try:
+                result[key]['comparison'] = json.loads(result[key]['comparison'])
+            except json.JSONDecodeError:
+                pass  # leave as string if parsing fails
+    
     return item
 
 def main() -> None:
