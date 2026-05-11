@@ -233,17 +233,44 @@ class TaxonomyAssessor:
         except json.JSONDecodeError:
             logger.warning(f"Failed to parse JSON. Trying extraction...")
             
-            # Thử trích xuất JSON từ text
-            json_pattern = r'\{[\s\S]*\}'
-            matches = re.findall(json_pattern, response)
+            # First, try to extract from markdown code blocks
+            import re
+            code_block_pattern = r'```(?:json)?\s*(\{[\s\S]*?\})\s*```'
+            code_matches = re.findall(code_block_pattern, response, re.IGNORECASE)
+            if code_matches:
+                for json_str in code_matches:
+                    try:
+                        data = json.loads(json_str)
+                        return self._parse_llm_response(json.dumps(data))
+                    except json.JSONDecodeError:
+                        continue
             
-            if matches:
-                json_str = max(matches, key=len)
+            # Try simple greedy extraction
+            simple_pattern = r'\{.*\}'
+            simple_matches = re.findall(simple_pattern, response, re.DOTALL)
+            simple_matches = sorted(set(simple_matches), key=len, reverse=True)
+            for json_str in simple_matches:
                 try:
                     data = json.loads(json_str)
                     return self._parse_llm_response(json.dumps(data))
                 except json.JSONDecodeError:
-                    logger.error(f"Could not parse extracted JSON")
+                    continue
+            
+            # Fallback to complex regex extraction of JSON-like structures
+            json_pattern = r'\{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*\}'
+            matches = re.findall(json_pattern, response)
+            
+            # Sort matches by length descending and try parsing each
+            matches = sorted(set(matches), key=len, reverse=True)
+            logger.debug(f"Found {len(matches)} JSON extraction candidates")
+            for json_str in matches:
+                try:
+                    data = json.loads(json_str)
+                    return self._parse_llm_response(json.dumps(data))
+                except json.JSONDecodeError:
+                    continue
+            
+            logger.error(f"Could not parse any extracted JSON from {len(matches)} candidates")
             
             # Fallback: No errors found
             logger.warning("Using fallback: No errors detected")
