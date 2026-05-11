@@ -46,20 +46,27 @@ class TaxonomyAssessor:
         self.error_taxonomy = error_taxonomy or ERROR_TAXONOMY
         self.use_examples = use_examples
         self.num_examples = num_examples
+        # NHÓM 1: Cộng điểm (Tư duy, không bao gồm cú pháp)
         self.additive_rubric_max = {
             "idea": 3.0,
             "flow": 2.0,
-            "syntax_execution": 2.0,
             "correctness": 2.0,
             "clarity": 1.0,
         }
         self.additive_rubric_keys = [
             "idea",
             "flow",
-            "syntax_execution",
             "correctness",
             "clarity",
         ]
+        
+        # NHÓM 2: Trừ điểm (Dựa trên lỗi phát hiện)
+        self.penalty_map = {
+            "Negligible": 0.0,    # Không trừ
+            "Small": -0.5,        # Lỗi logic bộ phận
+            "Major": -1.0,        # Lỗi logic phần lớn
+            "Fatal": -1.5,        # Lỗi cú pháp/crash
+        }
     
     def assess(
         self,
@@ -79,23 +86,24 @@ class TaxonomyAssessor:
         
         Returns:
             {
+                "quality_score": 8.0,
+                "score_breakdown": {
+                    "idea": 3.0,
+                    "flow": 2.0,
+                    "correctness": 2.0,
+                    "clarity": 1.0
+                },
                 "errors": [
-                    {
-                        "type": "Major",
-                        "description": "...",
-                        "code_snippet": "...",
-                        "fix_suggestion": "..."
-                    }
+                    {"type": "Fatal", "description": "...", "code_snippet": "...", "fix_suggestion": "..."}
                 ],
-                "quality_score": 9.0,
-                "reasoning": "...",
                 "penalty_breakdown": {
                     "Negligible": 0,
-                    "Small": 0,
-                    "Major": -5,
-                    "Fatal": 0
+                    "Small": -0.5,
+                    "Major": 0,
+                    "Fatal": -1.5
                 },
-                "final_score": 5.0
+                "total_penalty": -2.0,
+                "final_score": 6.0
             }
         """
         logger.info("=== Taxonomy Assessment ===")
