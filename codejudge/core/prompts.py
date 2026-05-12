@@ -3,6 +3,10 @@ Prompt Templates cho System Prompting
 Sử dụng cho Binary Assessment và Taxonomy-Guided Scoring
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # ============================================================================
 # SYSTEM PROMPTS - Định nghĩa vai trò và context cho LLM
 # ============================================================================
@@ -245,6 +249,42 @@ class PromptTemplates:
     def format_error_summary(errors_json: str) -> str:
         """Format prompt tính toán điểm cuối"""
         return ERROR_SUMMARY_PROMPT.format(errors_json=errors_json)
+
+    @staticmethod
+    def format_taxonomy_with_examples(
+        problem_statement: str,
+        student_code: str,
+        reference_code: str = None,
+        language: str = "Python",
+        include_examples: bool = True,
+        num_examples: int = 3,
+    ) -> str:
+        """Format prompt chấm điểm với ví dụ calibration."""
+        try:
+            from .examples_library import format_examples_for_prompt
+        except ImportError:
+            logger.warning("Could not import examples_library, skipping examples")
+            include_examples = False
+
+        base_prompt = PromptTemplates.format_taxonomy(
+            problem_statement=problem_statement,
+            student_code=student_code,
+            reference_code=reference_code,
+            language=language,
+        )
+
+        if include_examples:
+            try:
+                examples_section = format_examples_for_prompt(
+                    problem_key="all_elements_same",
+                    num_examples=num_examples,
+                )
+                base_prompt = examples_section + "\n" + base_prompt
+                logger.debug("Added %s calibration examples to prompt", num_examples)
+            except Exception as exc:
+                logger.warning("Failed to add examples: %s", exc)
+
+        return base_prompt
 
 
 # ============================================================================

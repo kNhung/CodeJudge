@@ -28,3 +28,9 @@ humaneval-*
 /**/results/
 /**/test_cases/
 .ipynb_checkpoints/
+
+/venv/
+/.venv/
+env/
+venv/
+.venv/

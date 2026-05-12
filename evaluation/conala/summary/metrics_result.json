@@ -1,0 +1,86 @@
+{
+  "baseline": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 0.35,
+    "average_predicted_scaled": 0.5133,
+    "mae": 0.4367,
+    "rmse": 0.8274,
+    "pearson": 0.43,
+    "spearman": 0.4888,
+    "kendalltau": 0.4325,
+    "exact_match_rate": 0.5667
+  },
+  "snippet": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 3.6475,
+    "average_predicted_scaled": 3.6467,
+    "mae": 0.4275,
+    "rmse": 0.7255,
+    "pearson": 0.3374,
+    "spearman": 0.2937,
+    "kendalltau": 0.2498,
+    "exact_match_rate": 0.4
+  },
+  "best-tranx-rerank": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 1.5167,
+    "average_predicted_scaled": 1.0467,
+    "mae": 0.9033,
+    "rmse": 1.3198,
+    "pearson": 0.6153,
+    "spearman": 0.5896,
+    "kendalltau": 0.4837,
+    "exact_match_rate": 0.2667
+  },
+  "tranx-annot": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 1.3167,
+    "average_predicted_scaled": 0.5933,
+    "mae": 0.95,
+    "rmse": 1.3955,
+    "pearson": 0.6307,
+    "spearman": 0.574,
+    "kendalltau": 0.5039,
+    "exact_match_rate": 0.3333
+  },
+  "best-tranx": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 1.3167,
+    "average_predicted_scaled": 0.87,
+    "mae": 0.8733,
+    "rmse": 1.2644,
+    "pearson": 0.5784,
+    "spearman": 0.5292,
+    "kendalltau": 0.4399,
+    "exact_match_rate": 0.3167
+  },
+  "codex": {
+    "samples": 60,
+    "grade_scale": 4.0,
+    "average_true_grade": 2.25,
+    "average_predicted_scaled": 2.26,
+    "mae": 1.2367,
+    "rmse": 1.7059,
+    "pearson": 0.3939,
+    "spearman": 0.378,
+    "kendalltau": 0.3061,
+    "exact_match_rate": 0.1833
+  },
+  "all": {
+    "samples": 360,
+    "grade_scale": 4.0,
+    "average_true_grade": 1.7329,
+    "average_predicted_scaled": 1.4883,
+    "mae": 0.8046,
+    "rmse": 1.2523,
+    "pearson": 0.7052,
+    "spearman": 0.6933,
+    "kendalltau": 0.5697,
+    "exact_match_rate": 0.3444
+  }
+}
