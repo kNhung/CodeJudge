@@ -1,0 +1,1427 @@
+{
+  "input_file": "/home/knhung/KLTN/CodeJudge/evaluation/conala/output/io_text_runs.jsonl",
+  "mode": "agnostic",
+  "include_strengths": false,
+  "metrics": [
+    "readability-flesch_kincaid_reading_ease-sm",
+    "familiarity-freq-exclude_stop_words-sm",
+    "convergence-specificity-bert-base"
+  ],
+  "summary": {
+    "samples": 30,
+    "total_hints": 143,
+    "metrics": {
+      "readability-flesch_kincaid_reading_ease-sm": {
+        "mean": 136.069,
+        "max": 178.9,
+        "min": 70.102,
+        "count": 143
+      },
+      "familiarity-freq-exclude_stop_words-sm": {
+        "mean": 0.790042,
+        "max": 1.0,
+        "min": 0.545,
+        "count": 143
+      },
+      "convergence-specificity-bert-base": {
+        "mean": 0.867133,
+        "max": 1.0,
+        "min": 0.0,
+        "count": 143
+      }
+    }
+  },
+  "samples": [
+    {
+      "row_index": 0,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "send a signal `signal.SIGUSR1` to the current process",
+      "reference_code": "",
+      "student_code": "os.kill(os.getpid(), signal.SIGUSR1)",
+      "hints": [
+        "Không có điểm cần cải thiện rõ ràng cho đoạn code này, vì nó đã hoàn thành xuất sắc yêu cầu đề bài."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Không có điểm cần cải thiện rõ ràng cho đoạn code này, vì nó đã hoàn thành xuất sắc yêu cầu đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 131.994,
+          "familiarity-freq-exclude_stop_words-sm": 0.85,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 1
+    },
+    {
+      "row_index": 5,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "get rid of None values in dictionary `kwargs`",
+      "reference_code": "",
+      "student_code": "kwargs.pop(None)",
+      "hints": [
+        "Cần hiểu rõ yêu cầu đề bài: loại bỏ các cặp khóa-giá trị có giá trị là None, không phải loại bỏ khóa có tên là None.",
+        "Nắm vững cách duyệt qua các cặp khóa-giá trị trong dictionary và cách kiểm tra điều kiện cho giá trị.",
+        "Để loại bỏ các cặp khóa-giá trị có giá trị là `None`, bạn cần duyệt qua tất cả các cặp khóa-giá trị và chỉ giữ lại những cặp có giá trị khác `None`. Ví dụ, có thể dùng dictionary comprehension: `new_kwargs = {k: v for k, v in kwargs.items() if v is not None}`.",
+        "Đảm bảo rằng logic xử lý của bạn không chỉ đúng về mặt cú pháp mà còn phải đúng về mặt ngữ nghĩa và xử lý được các trường hợp không mong muốn (như khóa không tồn tại)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ yêu cầu đề bài: loại bỏ các cặp khóa-giá trị có giá trị là None, không phải loại bỏ khóa có tên là None.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.239,
+          "familiarity-freq-exclude_stop_words-sm": 0.849,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nắm vững cách duyệt qua các cặp khóa-giá trị trong dictionary và cách kiểm tra điều kiện cho giá trị.",
+          "readability-flesch_kincaid_reading_ease-sm": 117.034,
+          "familiarity-freq-exclude_stop_words-sm": 0.789,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để loại bỏ các cặp khóa-giá trị có giá trị là `None`, bạn cần duyệt qua tất cả các cặp khóa-giá trị và chỉ giữ lại những cặp có giá trị khác `None`. Ví dụ, có thể dùng dictionary comprehension: `new_kwargs = {k: v for k, v in kwargs.items() if v is not None}`.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.465,
+          "familiarity-freq-exclude_stop_words-sm": 0.808,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đảm bảo rằng logic xử lý của bạn không chỉ đúng về mặt cú pháp mà còn phải đúng về mặt ngữ nghĩa và xử lý được các trường hợp không mong muốn (như khóa không tồn tại).",
+          "readability-flesch_kincaid_reading_ease-sm": 143.776,
+          "familiarity-freq-exclude_stop_words-sm": 0.799,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 6,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "soup.find_element_by_css_selector('li.png',re.compile('unicode_escape'))",
+      "hints": [
+        "Cần đọc và hiểu rõ yêu cầu của đề bài trước khi bắt đầu viết code.",
+        "Nắm vững các module cơ bản của Python để thực hiện các tác vụ khác nhau (ví dụ: `subprocess` cho lệnh hệ thống, `re` cho regex).",
+        "Kiểm tra cú pháp và đảm bảo các biến, thư viện được định nghĩa/import trước khi sử dụng.",
+        "Đọc kỹ đề bài để xác định đúng mục tiêu. Để thực thi lệnh hệ thống trong Python, cần sử dụng module `subprocess`.",
+        "Đảm bảo tất cả các biến được định nghĩa hoặc gán giá trị trước khi được gọi. Nếu bạn định dùng thư viện web scraping, cần khởi tạo đối tượng `soup` (ví dụ: `from bs4 import BeautifulSoup; soup = BeautifulSoup(...)` hoặc `from selenium import webdriver; driver = webdriver.Chrome(); soup = driver`).",
+        "Thêm `import re` ở đầu file để sử dụng module này.",
+        "Tham khảo tài liệu của thư viện bạn đang sử dụng để biết cách gọi hàm/phương thức đúng cú pháp và đối số."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc và hiểu rõ yêu cầu của đề bài trước khi bắt đầu viết code.",
+          "readability-flesch_kincaid_reading_ease-sm": 127.145,
+          "familiarity-freq-exclude_stop_words-sm": 0.919,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nắm vững các module cơ bản của Python để thực hiện các tác vụ khác nhau (ví dụ: `subprocess` cho lệnh hệ thống, `re` cho regex).",
+          "readability-flesch_kincaid_reading_ease-sm": 134.085,
+          "familiarity-freq-exclude_stop_words-sm": 0.758,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Kiểm tra cú pháp và đảm bảo các biến, thư viện được định nghĩa/import trước khi sử dụng.",
+          "readability-flesch_kincaid_reading_ease-sm": 147.476,
+          "familiarity-freq-exclude_stop_words-sm": 0.819,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đọc kỹ đề bài để xác định đúng mục tiêu. Để thực thi lệnh hệ thống trong Python, cần sử dụng module `subprocess`.",
+          "readability-flesch_kincaid_reading_ease-sm": 150.156,
+          "familiarity-freq-exclude_stop_words-sm": 0.841,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đảm bảo tất cả các biến được định nghĩa hoặc gán giá trị trước khi được gọi. Nếu bạn định dùng thư viện web scraping, cần khởi tạo đối tượng `soup` (ví dụ: `from bs4 import BeautifulSoup; soup = BeautifulSoup(...)` hoặc `from selenium import webdriver; driver = webdriver.Chrome(); soup = driver`).",
+          "readability-flesch_kincaid_reading_ease-sm": 122.104,
+          "familiarity-freq-exclude_stop_words-sm": 0.793,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `import re` ở đầu file để sử dụng module này.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.578,
+          "familiarity-freq-exclude_stop_words-sm": 0.828,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Tham khảo tài liệu của thư viện bạn đang sử dụng để biết cách gọi hàm/phương thức đúng cú pháp và đối số.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.7,
+          "familiarity-freq-exclude_stop_words-sm": 0.83,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": 6,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "sys.stdout.capture(`ps-ef | grep something | wc-l`)",
+      "hints": [
+        "Cần tìm hiểu cách thực thi lệnh hệ thống (shell commands) từ Python.",
+        "Nắm vững cú pháp chuẩn của Python, đặc biệt là cách định nghĩa chuỗi.",
+        "Tìm hiểu về module `subprocess` trong Python để tương tác với hệ điều hành và chạy các lệnh bên ngoài.",
+        "Thay thế bằng dấu nháy đơn hoặc kép thông thường của Python, ví dụ: `'ps-ef | grep something | wc-l'`.",
+        "Để thực thi lệnh shell và bắt output, bạn cần sử dụng module `subprocess`, ví dụ: `subprocess.check_output('your command', shell=True)` hoặc `subprocess.run('your command', shell=True, capture_output=True, text=True).stdout`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần tìm hiểu cách thực thi lệnh hệ thống (shell commands) từ Python.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.071,
+          "familiarity-freq-exclude_stop_words-sm": 0.905,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nắm vững cú pháp chuẩn của Python, đặc biệt là cách định nghĩa chuỗi.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.239,
+          "familiarity-freq-exclude_stop_words-sm": 0.806,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Tìm hiểu về module `subprocess` trong Python để tương tác với hệ điều hành và chạy các lệnh bên ngoài.",
+          "readability-flesch_kincaid_reading_ease-sm": 119.132,
+          "familiarity-freq-exclude_stop_words-sm": 0.8,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế bằng dấu nháy đơn hoặc kép thông thường của Python, ví dụ: `'ps-ef | grep something | wc-l'`.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.175,
+          "familiarity-freq-exclude_stop_words-sm": 0.878,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để thực thi lệnh shell và bắt output, bạn cần sử dụng module `subprocess`, ví dụ: `subprocess.check_output('your command', shell=True)` hoặc `subprocess.run('your command', shell=True, capture_output=True, text=True).stdout`.",
+          "readability-flesch_kincaid_reading_ease-sm": 86.988,
+          "familiarity-freq-exclude_stop_words-sm": 0.751,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 6,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "subprocess.call(`ps-ef | grep something | wc-l`, * * subprocess.check_output(`ps-ef | grep something | wc-l`),shell = True)",
+      "hints": [
+        "Cần sử dụng cú pháp chuỗi đúng trong Python (dùng dấu nháy đơn hoặc kép thay vì dấu backtick).",
+        "Hiểu rõ sự khác biệt giữa `subprocess.call` (trả về mã thoát) và `subprocess.check_output` (trả về output của lệnh) để chọn đúng hàm cho mục tiêu 'capture final output'.",
+        "Sử dụng đúng cách các tham số khi gọi hàm `subprocess` (ví dụ: tránh dùng `**` không đúng chỗ).",
+        "Kiểm tra lại cú pháp của lệnh hệ thống (`ps -ef` thay vì `ps-ef`).",
+        "Thay bằng dấu nháy đơn hoặc kép, ví dụ: `'ps -ef | grep something | wc -l'`.",
+        "Nếu muốn capture output, chỉ cần dùng `subprocess.check_output` một lần. Nếu muốn truyền output của lệnh này làm input cho lệnh khác, cần xử lý output đó thành chuỗi hoặc bytes rồi truyền vào tham số `input` của lệnh tiếp theo (nếu cần).",
+        "Để capture output, hãy dùng `subprocess.check_output`.",
+        "Sửa thành `ps -ef`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần sử dụng cú pháp chuỗi đúng trong Python (dùng dấu nháy đơn hoặc kép thay vì dấu backtick).",
+          "readability-flesch_kincaid_reading_ease-sm": 129.666,
+          "familiarity-freq-exclude_stop_words-sm": 0.673,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Hiểu rõ sự khác biệt giữa `subprocess.call` (trả về mã thoát) và `subprocess.check_output` (trả về output của lệnh) để chọn đúng hàm cho mục tiêu 'capture final output'.",
+          "readability-flesch_kincaid_reading_ease-sm": 100.33,
+          "familiarity-freq-exclude_stop_words-sm": 0.667,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng đúng cách các tham số khi gọi hàm `subprocess` (ví dụ: tránh dùng `**` không đúng chỗ).",
+          "readability-flesch_kincaid_reading_ease-sm": 157.587,
+          "familiarity-freq-exclude_stop_words-sm": 0.64,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Kiểm tra lại cú pháp của lệnh hệ thống (`ps -ef` thay vì `ps-ef`).",
+          "readability-flesch_kincaid_reading_ease-sm": 156.382,
+          "familiarity-freq-exclude_stop_words-sm": 0.691,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay bằng dấu nháy đơn hoặc kép, ví dụ: `'ps -ef | grep something | wc -l'`.",
+          "readability-flesch_kincaid_reading_ease-sm": 147.476,
+          "familiarity-freq-exclude_stop_words-sm": 0.863,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nếu muốn capture output, chỉ cần dùng `subprocess.check_output` một lần. Nếu muốn truyền output của lệnh này làm input cho lệnh khác, cần xử lý output đó thành chuỗi hoặc bytes rồi truyền vào tham số `input` của lệnh tiếp theo (nếu cần).",
+          "readability-flesch_kincaid_reading_ease-sm": 112.783,
+          "familiarity-freq-exclude_stop_words-sm": 0.793,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để capture output, hãy dùng `subprocess.check_output`.",
+          "readability-flesch_kincaid_reading_ease-sm": 71.815,
+          "familiarity-freq-exclude_stop_words-sm": 0.737,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa thành `ps -ef`.",
+          "readability-flesch_kincaid_reading_ease-sm": 172.545,
+          "familiarity-freq-exclude_stop_words-sm": 0.582,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 8
+    },
+    {
+      "row_index": 6,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "self.treeview.connect(`ps-ef | grep something | wc-l`, self.ps-ef | grep something | wc-l)",
+      "hints": [
+        "Cần phân biệt rõ ràng giữa việc tương tác với giao diện người dùng (GUI) và việc thực thi các lệnh hệ thống.",
+        "Nghiên cứu về module `subprocess` trong Python để thực thi các lệnh shell và lấy kết quả.",
+        "Thay thế bằng `'ps -ef | grep something | wc -l'` hoặc `\"ps -ef | grep something | wc -l\"`.",
+        "Phần này hoàn toàn sai về mặt ý tưởng và cú pháp. Nếu muốn thực thi lệnh, cần dùng module `subprocess` và không truyền chuỗi lệnh trực tiếp như một thuộc tính hay biểu thức.",
+        "Để chạy lệnh hệ thống và lấy output, bạn cần sử dụng module `subprocess` của Python, cụ thể là hàm `subprocess.check_output()` hoặc `subprocess.run()`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần phân biệt rõ ràng giữa việc tương tác với giao diện người dùng (GUI) và việc thực thi các lệnh hệ thống.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.351,
+          "familiarity-freq-exclude_stop_words-sm": 0.836,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Nghiên cứu về module `subprocess` trong Python để thực thi các lệnh shell và lấy kết quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 125.213,
+          "familiarity-freq-exclude_stop_words-sm": 0.817,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế bằng `'ps -ef | grep something | wc -l'` hoặc `\"ps -ef | grep something | wc -l\"`.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.175,
+          "familiarity-freq-exclude_stop_words-sm": 1.0,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Phần này hoàn toàn sai về mặt ý tưởng và cú pháp. Nếu muốn thực thi lệnh, cần dùng module `subprocess` và không truyền chuỗi lệnh trực tiếp như một thuộc tính hay biểu thức.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.3,
+          "familiarity-freq-exclude_stop_words-sm": 0.834,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để chạy lệnh hệ thống và lấy output, bạn cần sử dụng module `subprocess` của Python, cụ thể là hàm `subprocess.check_output()` hoặc `subprocess.run()`.",
+          "readability-flesch_kincaid_reading_ease-sm": 107.386,
+          "familiarity-freq-exclude_stop_words-sm": 0.741,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 6,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "subprocess.check_output(['ps', '-ef', '|', 'grep', 'something', '|', 'wc', '-l'])",
+      "hints": [
+        "Cần hiểu rõ hơn về cách `subprocess` xử lý các lệnh shell phức tạp, đặc biệt là khi có các toán tử như pipe (`|`).",
+        "Luôn kiểm tra kết quả thực thi của lệnh để đảm bảo nó hoạt động đúng như mong đợi.",
+        "Để thực thi một chuỗi lệnh shell có pipe, bạn cần truyền toàn bộ chuỗi lệnh dưới dạng một string và bật `shell=True`. Ví dụ: `subprocess.check_output('ps -ef | grep something | wc -l', shell=True)`"
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ hơn về cách `subprocess` xử lý các lệnh shell phức tạp, đặc biệt là khi có các toán tử như pipe (`|`).",
+          "readability-flesch_kincaid_reading_ease-sm": 145.31,
+          "familiarity-freq-exclude_stop_words-sm": 0.762,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Luôn kiểm tra kết quả thực thi của lệnh để đảm bảo nó hoạt động đúng như mong đợi.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.024,
+          "familiarity-freq-exclude_stop_words-sm": 0.812,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Để thực thi một chuỗi lệnh shell có pipe, bạn cần truyền toàn bộ chuỗi lệnh dưới dạng một string và bật `shell=True`. Ví dụ: `subprocess.check_output('ps -ef | grep something | wc -l', shell=True)`",
+          "readability-flesch_kincaid_reading_ease-sm": 135.163,
+          "familiarity-freq-exclude_stop_words-sm": 0.795,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": 10,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "datetime.datetime.now()",
+      "hints": [
+        "Cần đọc và hiểu kỹ đề bài để xác định đúng yêu cầu đầu vào và đầu ra.",
+        "Học cách phân tích chuỗi (string parsing) thành đối tượng `datetime`.",
+        "Học cách trích xuất các phần cụ thể (như ngày, giờ) từ đối tượng `datetime`.",
+        "Cần định nghĩa một hàm nhận `when` làm tham số và sử dụng tham số đó trong logic xử lý.",
+        "Sử dụng `datetime.datetime.strptime(when, format_string)` để chuyển đổi chuỗi `when` thành đối tượng datetime. Cần xác định `format_string` phù hợp với định dạng của `when`.",
+        "Sau khi có đối tượng datetime, sử dụng phương thức `.date()` để chỉ lấy phần ngày. Ví dụ: `my_datetime_object.date()`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc và hiểu kỹ đề bài để xác định đúng yêu cầu đầu vào và đầu ra.",
+          "readability-flesch_kincaid_reading_ease-sm": 136.865,
+          "familiarity-freq-exclude_stop_words-sm": 0.886,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Học cách phân tích chuỗi (string parsing) thành đối tượng `datetime`.",
+          "readability-flesch_kincaid_reading_ease-sm": 128.563,
+          "familiarity-freq-exclude_stop_words-sm": 0.714,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Học cách trích xuất các phần cụ thể (như ngày, giờ) từ đối tượng `datetime`.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.768,
+          "familiarity-freq-exclude_stop_words-sm": 0.724,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần định nghĩa một hàm nhận `when` làm tham số và sử dụng tham số đó trong logic xử lý.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.741,
+          "familiarity-freq-exclude_stop_words-sm": 0.882,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `datetime.datetime.strptime(when, format_string)` để chuyển đổi chuỗi `when` thành đối tượng datetime. Cần xác định `format_string` phù hợp với định dạng của `when`.",
+          "readability-flesch_kincaid_reading_ease-sm": 111.282,
+          "familiarity-freq-exclude_stop_words-sm": 0.715,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi có đối tượng datetime, sử dụng phương thức `.date()` để chỉ lấy phần ngày. Ví dụ: `my_datetime_object.date()`.",
+          "readability-flesch_kincaid_reading_ease-sm": 132.632,
+          "familiarity-freq-exclude_stop_words-sm": 0.811,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": 10,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "when.decode(`\\ \\`)",
+      "hints": [
+        "Cần hiểu rõ mục đích của các phương thức trong Python, đặc biệt là sự khác biệt giữa xử lý chuỗi (string manipulation) và xử lý byte (byte decoding).",
+        "Nghiên cứu cách làm việc với đối tượng datetime và chuỗi thời gian trong Python, sử dụng module `datetime`.",
+        "Kiểm tra lại cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi.",
+        "Sử dụng dấu nháy đơn hoặc kép để định nghĩa chuỗi, ví dụ: `when.decode(' ')` hoặc `when.decode(\" \")`. Tuy nhiên, phương thức `decode()` không phải là cách đúng để giải quyết bài toán này.",
+        "Để xử lý chuỗi datetime, bạn cần sử dụng module `datetime` của Python. Cụ thể, `datetime.datetime.strptime()` để phân tích chuỗi thành đối tượng datetime, sau đó dùng `.date()` để lấy phần ngày."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ mục đích của các phương thức trong Python, đặc biệt là sự khác biệt giữa xử lý chuỗi (string manipulation) và xử lý byte (byte decoding).",
+          "readability-flesch_kincaid_reading_ease-sm": 122.104,
+          "familiarity-freq-exclude_stop_words-sm": 0.834,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nghiên cứu cách làm việc với đối tượng datetime và chuỗi thời gian trong Python, sử dụng module `datetime`.",
+          "readability-flesch_kincaid_reading_ease-sm": 115.606,
+          "familiarity-freq-exclude_stop_words-sm": 0.851,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Kiểm tra lại cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi.",
+          "readability-flesch_kincaid_reading_ease-sm": 132.433,
+          "familiarity-freq-exclude_stop_words-sm": 0.898,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Sử dụng dấu nháy đơn hoặc kép để định nghĩa chuỗi, ví dụ: `when.decode(' ')` hoặc `when.decode(\" \")`. Tuy nhiên, phương thức `decode()` không phải là cách đúng để giải quyết bài toán này.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.32,
+          "familiarity-freq-exclude_stop_words-sm": 0.758,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để xử lý chuỗi datetime, bạn cần sử dụng module `datetime` của Python. Cụ thể, `datetime.datetime.strptime()` để phân tích chuỗi thành đối tượng datetime, sau đó dùng `.date()` để lấy phần ngày.",
+          "readability-flesch_kincaid_reading_ease-sm": 114.082,
+          "familiarity-freq-exclude_stop_words-sm": 0.806,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 10,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "datetime.datetime.strptime(`January 11,2010`,`% B % d,% Y`).strftime(`% a`)",
+      "hints": [
+        "Cần sử dụng dấu nháy đơn hoặc kép (`'` hoặc `\"`) cho chuỗi literal trong Python thay vì dấu backtick (`` ` ``) để tránh lỗi cú pháp.",
+        "Cần chọn đúng format code trong `strftime` hoặc sử dụng phương thức `.date()` để chỉ lấy phần ngày, thay vì chỉ lấy tên viết tắt của thứ trong tuần (`%a`).",
+        "Cần hiểu rõ hơn yêu cầu 'extract date only' để chọn phương pháp xuất ra phù hợp (ví dụ: `datetime_object.date()` hoặc `strftime('%Y-%m-%d')`).",
+        "Thay thế dấu backtick bằng dấu nháy đơn hoặc kép, ví dụ: `'January 11,2010'` hoặc `\"January 11,2010\"`.",
+        "Để lấy phần ngày, có thể dùng `.date()` sau khi parse (ví dụ: `datetime.datetime.strptime(when, '%B %d,%Y').date()`) hoặc dùng `strftime` với định dạng ngày tháng đầy đủ (ví dụ: `strftime('%Y-%m-%d')`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần sử dụng dấu nháy đơn hoặc kép (`'` hoặc `\"`) cho chuỗi literal trong Python thay vì dấu backtick (`` ` ``) để tránh lỗi cú pháp.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.364,
+          "familiarity-freq-exclude_stop_words-sm": 0.738,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần chọn đúng format code trong `strftime` hoặc sử dụng phương thức `.date()` để chỉ lấy phần ngày, thay vì chỉ lấy tên viết tắt của thứ trong tuần (`%a`).",
+          "readability-flesch_kincaid_reading_ease-sm": 130.345,
+          "familiarity-freq-exclude_stop_words-sm": 0.809,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần hiểu rõ hơn yêu cầu 'extract date only' để chọn phương pháp xuất ra phù hợp (ví dụ: `datetime_object.date()` hoặc `strftime('%Y-%m-%d')`).",
+          "readability-flesch_kincaid_reading_ease-sm": 102.353,
+          "familiarity-freq-exclude_stop_words-sm": 0.793,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế dấu backtick bằng dấu nháy đơn hoặc kép, ví dụ: `'January 11,2010'` hoặc `\"January 11,2010\"`.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.12,
+          "familiarity-freq-exclude_stop_words-sm": 0.763,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để lấy phần ngày, có thể dùng `.date()` sau khi parse (ví dụ: `datetime.datetime.strptime(when, '%B %d,%Y').date()`) hoặc dùng `strftime` với định dạng ngày tháng đầy đủ (ví dụ: `strftime('%Y-%m-%d')`).",
+          "readability-flesch_kincaid_reading_ease-sm": 124.036,
+          "familiarity-freq-exclude_stop_words-sm": 0.77,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 10,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "when.strftime(`% m/% d/% Y`)",
+      "hints": [
+        "Cần chuyển đổi chuỗi đầu vào (`when`) thành đối tượng `datetime` trước khi áp dụng phương thức `strftime`.",
+        "Sửa lỗi cú pháp khi định nghĩa chuỗi (sử dụng dấu nháy đơn hoặc kép thay vì dấu backtick).",
+        "Thay đổi thành `when.strftime('%m/%d/%Y')`",
+        "Trước tiên, phân tích chuỗi thành đối tượng datetime: `import datetime; dt_object = datetime.datetime.strptime(when, '%Y-%m-%d')`. Sau đó, gọi `dt_object.strftime('%m/%d/%Y')`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần chuyển đổi chuỗi đầu vào (`when`) thành đối tượng `datetime` trước khi áp dụng phương thức `strftime`.",
+          "readability-flesch_kincaid_reading_ease-sm": 133.125,
+          "familiarity-freq-exclude_stop_words-sm": 0.729,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa lỗi cú pháp khi định nghĩa chuỗi (sử dụng dấu nháy đơn hoặc kép thay vì dấu backtick).",
+          "readability-flesch_kincaid_reading_ease-sm": 129.666,
+          "familiarity-freq-exclude_stop_words-sm": 0.636,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Thay đổi thành `when.strftime('%m/%d/%Y')`",
+          "readability-flesch_kincaid_reading_ease-sm": 116.145,
+          "familiarity-freq-exclude_stop_words-sm": 0.684,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trước tiên, phân tích chuỗi thành đối tượng datetime: `import datetime; dt_object = datetime.datetime.strptime(when, '%Y-%m-%d')`. Sau đó, gọi `dt_object.strftime('%m/%d/%Y')`.",
+          "readability-flesch_kincaid_reading_ease-sm": 70.102,
+          "familiarity-freq-exclude_stop_words-sm": 0.773,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 10,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "when.strftime('%Y-%m-%d')",
+      "hints": [
+        "Cần xử lý bước chuyển đổi chuỗi đầu vào ('datetime string') thành đối tượng datetime trước khi định dạng.",
+        "Chú ý hơn đến kiểu dữ liệu của biến đầu vào được mô tả trong đề bài để tránh lỗi runtime.",
+        "Để xử lý 'datetime string', bạn cần chuyển đổi nó thành đối tượng `datetime` trước. Ví dụ, nếu `when` là '2023-10-27 10:30:00', bạn có thể dùng: `dt_obj = datetime.datetime.strptime(when, '%Y-%m-%d %H:%M:%S')`. Sau đó, áp dụng định dạng: `dt_obj.strftime('%Y-%m-%d')`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần xử lý bước chuyển đổi chuỗi đầu vào ('datetime string') thành đối tượng datetime trước khi định dạng.",
+          "readability-flesch_kincaid_reading_ease-sm": 116.308,
+          "familiarity-freq-exclude_stop_words-sm": 0.85,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Chú ý hơn đến kiểu dữ liệu của biến đầu vào được mô tả trong đề bài để tránh lỗi runtime.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.12,
+          "familiarity-freq-exclude_stop_words-sm": 0.803,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Để xử lý 'datetime string', bạn cần chuyển đổi nó thành đối tượng `datetime` trước. Ví dụ, nếu `when` là '2023-10-27 10:30:00', bạn có thể dùng: `dt_obj = datetime.datetime.strptime(when, '%Y-%m-%d %H:%M:%S')`. Sau đó, áp dụng định dạng: `dt_obj.strftime('%Y-%m-%d')`.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.017,
+          "familiarity-freq-exclude_stop_words-sm": 0.861,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": 15,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.array([0,0], [0], None)",
+      "hints": [
+        "Cần đọc kỹ đề bài để hiểu rõ yêu cầu là tính tổng, không phải khởi tạo mảng.",
+        "Cần nắm vững cú pháp khởi tạo mảng NumPy, đặc biệt là mảng 2D.",
+        "Cần tìm hiểu cách sử dụng phương thức `sum()` của NumPy và tham số `axis` để tính tổng theo hàng.",
+        "Để tạo một mảng 2D, bạn cần truyền một list chứa các list con, ví dụ: `np.array([[0,0], [0,0]])`. Các đối số sau đó thường là `dtype` hoặc `copy`.",
+        "Sau khi đã có một mảng NumPy 2D hợp lệ (ví dụ: `my_array = np.array([[1,2],[3,4]])`), bạn cần gọi phương thức `sum()` với tham số `axis=1` để tính tổng theo hàng, ví dụ: `my_array.sum(axis=1)`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài để hiểu rõ yêu cầu là tính tổng, không phải khởi tạo mảng.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.565,
+          "familiarity-freq-exclude_stop_words-sm": 0.825,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Cần nắm vững cú pháp khởi tạo mảng NumPy, đặc biệt là mảng 2D.",
+          "readability-flesch_kincaid_reading_ease-sm": 156.368,
+          "familiarity-freq-exclude_stop_words-sm": 0.709,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần tìm hiểu cách sử dụng phương thức `sum()` của NumPy và tham số `axis` để tính tổng theo hàng.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.7,
+          "familiarity-freq-exclude_stop_words-sm": 0.863,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo một mảng 2D, bạn cần truyền một list chứa các list con, ví dụ: `np.array([[0,0], [0,0]])`. Các đối số sau đó thường là `dtype` hoặc `copy`.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.256,
+          "familiarity-freq-exclude_stop_words-sm": 0.766,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi đã có một mảng NumPy 2D hợp lệ (ví dụ: `my_array = np.array([[1,2],[3,4]])`), bạn cần gọi phương thức `sum()` với tham số `axis=1` để tính tổng theo hàng, ví dụ: `my_array.sum(axis=1)`.",
+          "readability-flesch_kincaid_reading_ease-sm": 119.825,
+          "familiarity-freq-exclude_stop_words-sm": 0.735,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 15,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.all(numpy.data).all()",
+      "hints": [
+        "Cần đọc kỹ đề bài và hiểu rõ yêu cầu tính tổng theo hàng.",
+        "Cần nắm vững các hàm cơ bản của thư viện NumPy, đặc biệt là các hàm liên quan đến tính toán thống kê như `sum`.",
+        "Để tính tổng các hàng, bạn cần sử dụng phương thức `.sum()` với tham số `axis` phù hợp, ví dụ: `my_array.sum(axis=1)`.",
+        "Nếu bạn có một mảng tên là `a`, bạn chỉ cần dùng `a` thay vì `numpy.data`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài và hiểu rõ yêu cầu tính tổng theo hàng.",
+          "readability-flesch_kincaid_reading_ease-sm": 144.282,
+          "familiarity-freq-exclude_stop_words-sm": 0.874,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Cần nắm vững các hàm cơ bản của thư viện NumPy, đặc biệt là các hàm liên quan đến tính toán thống kê như `sum`.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.097,
+          "familiarity-freq-exclude_stop_words-sm": 0.757,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tính tổng các hàng, bạn cần sử dụng phương thức `.sum()` với tham số `axis` phù hợp, ví dụ: `my_array.sum(axis=1)`.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.83,
+          "familiarity-freq-exclude_stop_words-sm": 0.799,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nếu bạn có một mảng tên là `a`, bạn chỉ cần dùng `a` thay vì `numpy.data`.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.741,
+          "familiarity-freq-exclude_stop_words-sm": 0.763,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 15,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.array([1,2,3,4]).sum(axis = 0)",
+      "hints": [
+        "Cần hiểu rõ yêu cầu về cấu trúc dữ liệu đầu vào (mảng 2D) và tham số `axis` để tính toán đúng theo đề bài.",
+        "Để tạo mảng 2D, bạn có thể dùng `np.array([[1,2,3],[4,5,6]])` hoặc `np.arange(1, 7).reshape(2, 3)`.",
+        "Khi đã có mảng 2D, hãy thay đổi `axis = 0` thành `axis = 1` để tính tổng trên các hàng. Ví dụ: `my_2d_array.sum(axis=1)`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ yêu cầu về cấu trúc dữ liệu đầu vào (mảng 2D) và tham số `axis` để tính toán đúng theo đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.866,
+          "familiarity-freq-exclude_stop_words-sm": 0.761,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo mảng 2D, bạn có thể dùng `np.array([[1,2,3],[4,5,6]])` hoặc `np.arange(1, 7).reshape(2, 3)`.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.839,
+          "familiarity-freq-exclude_stop_words-sm": 0.635,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khi đã có mảng 2D, hãy thay đổi `axis = 0` thành `axis = 1` để tính tổng trên các hàng. Ví dụ: `my_2d_array.sum(axis=1)`.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.13,
+          "familiarity-freq-exclude_stop_words-sm": 0.741,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": 15,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.array([1,2,3,4]).sum(axis = 0)",
+      "hints": [
+        "Cần tạo một mảng NumPy 2 chiều thay vì 1 chiều như yêu cầu của đề bài.",
+        "Cần hiểu rõ ý nghĩa của tham số `axis` trong NumPy khi làm việc với mảng đa chiều để tính tổng theo hàng (rows).",
+        "Thay đổi thành mảng 2 chiều, ví dụ: `np.array([[1,2,3,4]])` hoặc `np.array([[1,2],[3,4]])`.",
+        "Thay đổi `axis = 0` thành `axis = 1` để tính tổng theo hàng."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần tạo một mảng NumPy 2 chiều thay vì 1 chiều như yêu cầu của đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 119.909,
+          "familiarity-freq-exclude_stop_words-sm": 0.895,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần hiểu rõ ý nghĩa của tham số `axis` trong NumPy khi làm việc với mảng đa chiều để tính tổng theo hàng (rows).",
+          "readability-flesch_kincaid_reading_ease-sm": 118.622,
+          "familiarity-freq-exclude_stop_words-sm": 0.838,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi thành mảng 2 chiều, ví dụ: `np.array([[1,2,3,4]])` hoặc `np.array([[1,2],[3,4]])`.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.85,
+          "familiarity-freq-exclude_stop_words-sm": 0.631,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi `axis = 0` thành `axis = 1` để tính tổng theo hàng.",
+          "readability-flesch_kincaid_reading_ease-sm": 155.665,
+          "familiarity-freq-exclude_stop_words-sm": 0.774,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 15,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.sum(vals, axis=1)",
+      "hints": [
+        "Không có điểm cần cải thiện đáng kể cho đoạn code này, đây là một giải pháp tối ưu."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Không có điểm cần cải thiện đáng kể cho đoạn code này, đây là một giải pháp tối ưu.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.666,
+          "familiarity-freq-exclude_stop_words-sm": 0.839,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 1
+    },
+    {
+      "row_index": 80,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print(a,key = lambda x:x [1])",
+      "hints": [
+        "Cần đọc và hiểu rõ yêu cầu đề bài trước khi bắt đầu viết code.",
+        "Cần tìm hiểu cách duyệt qua các phần tử trong một danh sách 2 chiều (list of lists).",
+        "Cần tìm hiểu cách định dạng chuỗi và sử dụng các hàm như `join()` để tạo ra output mong muốn.",
+        "Cần kiểm tra các đối số hợp lệ của hàm `print()`.",
+        "Loại bỏ đối số `key` khỏi hàm `print()`. Nếu muốn sắp xếp, hãy sắp xếp danh sách trước khi in.",
+        "Sử dụng vòng lặp lồng nhau hoặc generator expression để duyệt qua từng hàng và từng cột của danh sách `tab`, sau đó nối chúng lại bằng các ký tự phân cách (ví dụ: tab `\\t` cho cột và newline `\\n` cho hàng).",
+        "Đảm bảo sử dụng đúng tên biến được nhắc đến trong đề bài, tức là `tab`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc và hiểu rõ yêu cầu đề bài trước khi bắt đầu viết code.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.57,
+          "familiarity-freq-exclude_stop_words-sm": 0.914,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần tìm hiểu cách duyệt qua các phần tử trong một danh sách 2 chiều (list of lists).",
+          "readability-flesch_kincaid_reading_ease-sm": 132.165,
+          "familiarity-freq-exclude_stop_words-sm": 0.905,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần tìm hiểu cách định dạng chuỗi và sử dụng các hàm như `join()` để tạo ra output mong muốn.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.36,
+          "familiarity-freq-exclude_stop_words-sm": 0.836,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần kiểm tra các đối số hợp lệ của hàm `print()`.",
+          "readability-flesch_kincaid_reading_ease-sm": 161.191,
+          "familiarity-freq-exclude_stop_words-sm": 0.792,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Loại bỏ đối số `key` khỏi hàm `print()`. Nếu muốn sắp xếp, hãy sắp xếp danh sách trước khi in.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.355,
+          "familiarity-freq-exclude_stop_words-sm": 0.696,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng vòng lặp lồng nhau hoặc generator expression để duyệt qua từng hàng và từng cột của danh sách `tab`, sau đó nối chúng lại bằng các ký tự phân cách (ví dụ: tab `\\t` cho cột và newline `\\n` cho hàng).",
+          "readability-flesch_kincaid_reading_ease-sm": 150.546,
+          "familiarity-freq-exclude_stop_words-sm": 0.724,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đảm bảo sử dụng đúng tên biến được nhắc đến trong đề bài, tức là `tab`.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.365,
+          "familiarity-freq-exclude_stop_words-sm": 0.764,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": 80,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print(`\\ n`.join(str(x)for i in tab))",
+      "hints": [
+        "Cần xử lý từng phần tử trong mỗi hàng (nested loop) thay vì chỉ lặp qua các hàng.",
+        "Khắc phục lỗi cú pháp khi định nghĩa chuỗi ký tự.",
+        "Đảm bảo tất cả biến được sử dụng đều đã được định nghĩa trong phạm vi phù hợp.",
+        "Hiểu rõ hơn về cách sử dụng generator expression để xử lý dữ liệu đa chiều.",
+        "Sử dụng dấu nháy đơn hoặc kép (`'` hoặc `\"`) cho chuỗi ký tự, ví dụ: `'\n'` hoặc `\"\\n\"`. Đảm bảo không có khoảng trắng giữa `\\` và `n`.",
+        "Bạn cần lặp qua từng phần tử trong mỗi hàng của `tab`. Nếu `i` là một hàng, bạn cần một vòng lặp lồng nhau (hoặc generator expression) để truy cập các phần tử bên trong `i`. Ví dụ: `str(col) for col in i`.",
+        "Bạn cần một cấu trúc lặp lồng nhau. Ví dụ, `'\n'.join(['\t'.join(str(col) for col in row) for row in tab])` sẽ nối các cột bằng `\\t` và các hàng bằng `\\n`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần xử lý từng phần tử trong mỗi hàng (nested loop) thay vì chỉ lặp qua các hàng.",
+          "readability-flesch_kincaid_reading_ease-sm": 163.145,
+          "familiarity-freq-exclude_stop_words-sm": 0.836,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khắc phục lỗi cú pháp khi định nghĩa chuỗi ký tự.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.525,
+          "familiarity-freq-exclude_stop_words-sm": 0.766,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Đảm bảo tất cả biến được sử dụng đều đã được định nghĩa trong phạm vi phù hợp.",
+          "readability-flesch_kincaid_reading_ease-sm": 155.665,
+          "familiarity-freq-exclude_stop_words-sm": 0.87,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Hiểu rõ hơn về cách sử dụng generator expression để xử lý dữ liệu đa chiều.",
+          "readability-flesch_kincaid_reading_ease-sm": 116.57,
+          "familiarity-freq-exclude_stop_words-sm": 0.836,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Sử dụng dấu nháy đơn hoặc kép (`'` hoặc `\"`) cho chuỗi ký tự, ví dụ: `'\n'` hoặc `\"\\n\"`. Đảm bảo không có khoảng trắng giữa `\\` và `n`.",
+          "readability-flesch_kincaid_reading_ease-sm": 165.036,
+          "familiarity-freq-exclude_stop_words-sm": 0.791,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bạn cần lặp qua từng phần tử trong mỗi hàng của `tab`. Nếu `i` là một hàng, bạn cần một vòng lặp lồng nhau (hoặc generator expression) để truy cập các phần tử bên trong `i`. Ví dụ: `str(col) for col in i`.",
+          "readability-flesch_kincaid_reading_ease-sm": 156.737,
+          "familiarity-freq-exclude_stop_words-sm": 0.778,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bạn cần một cấu trúc lặp lồng nhau. Ví dụ, `'\n'.join(['\t'.join(str(col) for col in row) for row in tab])` sẽ nối các cột bằng `\\t` và các hàng bằng `\\n`.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.504,
+          "familiarity-freq-exclude_stop_words-sm": 0.76,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": 80,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print([x.map(``, x)for x in tab])",
+      "hints": [
+        "Cần nắm vững cú pháp và các phương thức cơ bản của Python (ví dụ: `str.join()`, list comprehensions).",
+        "Hiểu rõ cách xử lý dữ liệu dạng bảng (2D list) để định dạng đầu ra theo yêu cầu.",
+        "Trong Python, `list` không có phương thức `.map()`. Nếu muốn áp dụng một hàm cho từng phần tử, bạn có thể dùng `map()` (hàm built-in) hoặc list comprehension. Tuy nhiên, trong trường hợp này, mục tiêu là nối các phần tử thành chuỗi, không phải áp dụng một hàm biến đổi.",
+        "Sử dụng phương thức `str.join()` để nối các chuỗi. Ví dụ: `'\t'.join(str(col) for col in row)` để nối các cột trong một hàng, và sau đó `'\n'.join(processed_rows)` để nối các hàng lại với nhau."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần nắm vững cú pháp và các phương thức cơ bản của Python (ví dụ: `str.join()`, list comprehensions).",
+          "readability-flesch_kincaid_reading_ease-sm": 144.235,
+          "familiarity-freq-exclude_stop_words-sm": 0.714,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Hiểu rõ cách xử lý dữ liệu dạng bảng (2D list) để định dạng đầu ra theo yêu cầu.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.214,
+          "familiarity-freq-exclude_stop_words-sm": 0.818,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong Python, `list` không có phương thức `.map()`. Nếu muốn áp dụng một hàm cho từng phần tử, bạn có thể dùng `map()` (hàm built-in) hoặc list comprehension. Tuy nhiên, trong trường hợp này, mục tiêu là nối các phần tử thành chuỗi, không phải áp dụng một hàm biến đổi.",
+          "readability-flesch_kincaid_reading_ease-sm": 144.912,
+          "familiarity-freq-exclude_stop_words-sm": 0.835,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng phương thức `str.join()` để nối các chuỗi. Ví dụ: `'\t'.join(str(col) for col in row)` để nối các cột trong một hàng, và sau đó `'\n'.join(processed_rows)` để nối các hàng lại với nhau.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.296,
+          "familiarity-freq-exclude_stop_words-sm": 0.81,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 80,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print([x.map(``, x)for x in tab])",
+      "hints": [
+        "Cần nắm vững các phương thức của kiểu dữ liệu list trong Python.",
+        "Cần hiểu cách sử dụng các hàm để nối chuỗi (string joining) và định dạng đầu ra.",
+        "Trong Python, list không có phương thức 'map' trực tiếp. Nếu muốn áp dụng một hàm cho từng phần tử, bạn có thể dùng hàm `map()` toàn cục (nhưng cần truyền hàm và iterable), hoặc dùng list comprehension với logic phù hợp. Để nối các phần tử trong list thành chuỗi, hãy dùng phương thức `str.join()`.",
+        "Để in bảng, bạn cần nối các phần tử trong mỗi hàng bằng một dấu phân cách (ví dụ: tab `\\t`), sau đó nối các hàng lại với nhau bằng dấu phân cách hàng (ví dụ: xuống dòng `\\n`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần nắm vững các phương thức của kiểu dữ liệu list trong Python.",
+          "readability-flesch_kincaid_reading_ease-sm": 128.563,
+          "familiarity-freq-exclude_stop_words-sm": 0.774,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần hiểu cách sử dụng các hàm để nối chuỗi (string joining) và định dạng đầu ra.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.839,
+          "familiarity-freq-exclude_stop_words-sm": 0.86,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Trong Python, list không có phương thức 'map' trực tiếp. Nếu muốn áp dụng một hàm cho từng phần tử, bạn có thể dùng hàm `map()` toàn cục (nhưng cần truyền hàm và iterable), hoặc dùng list comprehension với logic phù hợp. Để nối các phần tử trong list thành chuỗi, hãy dùng phương thức `str.join()`.",
+          "readability-flesch_kincaid_reading_ease-sm": 142.825,
+          "familiarity-freq-exclude_stop_words-sm": 0.813,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để in bảng, bạn cần nối các phần tử trong mỗi hàng bằng một dấu phân cách (ví dụ: tab `\\t`), sau đó nối các hàng lại với nhau bằng dấu phân cách hàng (ví dụ: xuống dòng `\\n`).",
+          "readability-flesch_kincaid_reading_ease-sm": 157.468,
+          "familiarity-freq-exclude_stop_words-sm": 0.768,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 80,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print(tab, sep='\\t', end='",
+      "hints": [
+        "Cần hiểu rõ cách hàm `print()` xử lý các đối số, đặc biệt khi in một cấu trúc dữ liệu phức tạp như list 2 chiều.",
+        "Cần xử lý lỗi cú pháp để chương trình có thể chạy được.",
+        "Thiếu logic lặp qua từng hàng và từng cột của danh sách 2 chiều để định dạng đầu ra.",
+        "Thêm dấu nháy đơn hoặc kép để đóng chuỗi, ví dụ: `end=''` hoặc `end='\\n'`.",
+        "Cần sử dụng vòng lặp lồng nhau hoặc list comprehension để xử lý từng hàng và từng phần tử. Ví dụ: `for row in tab: print('\\t'.join(str(col) for col in row))`.",
+        "Thêm cấu trúc lặp (ví dụ: `for` loop) để truy cập từng phần tử trong `tab` và định dạng chúng thành chuỗi trước khi in."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ cách hàm `print()` xử lý các đối số, đặc biệt khi in một cấu trúc dữ liệu phức tạp như list 2 chiều.",
+          "readability-flesch_kincaid_reading_ease-sm": 136.115,
+          "familiarity-freq-exclude_stop_words-sm": 0.756,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần xử lý lỗi cú pháp để chương trình có thể chạy được.",
+          "readability-flesch_kincaid_reading_ease-sm": 174.117,
+          "familiarity-freq-exclude_stop_words-sm": 0.864,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Thiếu logic lặp qua từng hàng và từng cột của danh sách 2 chiều để định dạng đầu ra.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.571,
+          "familiarity-freq-exclude_stop_words-sm": 0.783,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm dấu nháy đơn hoặc kép để đóng chuỗi, ví dụ: `end=''` hoặc `end='\\n'`.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.265,
+          "familiarity-freq-exclude_stop_words-sm": 0.718,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần sử dụng vòng lặp lồng nhau hoặc list comprehension để xử lý từng hàng và từng phần tử. Ví dụ: `for row in tab: print('\\t'.join(str(col) for col in row))`.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.364,
+          "familiarity-freq-exclude_stop_words-sm": 0.811,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm cấu trúc lặp (ví dụ: `for` loop) để truy cập từng phần tử trong `tab` và định dạng chúng thành chuỗi trước khi in.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.028,
+          "familiarity-freq-exclude_stop_words-sm": 0.719,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": 100,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "data ['a']= df ['a']== 'a')",
+      "hints": [
+        "Cần đọc kỹ và hiểu rõ yêu cầu đề bài trước khi bắt đầu viết code.",
+        "Xác định đúng thư viện và API cần dùng cho bài toán (ví dụ: Matplotlib cho việc vẽ đồ thị và đặt nhãn).",
+        "Cần tập trung vào việc sử dụng thư viện Matplotlib và tìm hiểu cách thêm các ký tự đặc biệt (như subscript) vào nhãn đồ thị. Ví dụ: sử dụng chuỗi Unicode '\\u2082' cho số 2 subscript.",
+        "Loại bỏ dấu đóng ngoặc đơn thừa: `data['a'] = df['a'] == 'a'` hoặc `data['a'] = (df['a'] == 'a')` nếu muốn nhóm biểu thức điều kiện."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ và hiểu rõ yêu cầu đề bài trước khi bắt đầu viết code.",
+          "readability-flesch_kincaid_reading_ease-sm": 132.433,
+          "familiarity-freq-exclude_stop_words-sm": 0.889,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xác định đúng thư viện và API cần dùng cho bài toán (ví dụ: Matplotlib cho việc vẽ đồ thị và đặt nhãn).",
+          "readability-flesch_kincaid_reading_ease-sm": 139.351,
+          "familiarity-freq-exclude_stop_words-sm": 0.739,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần tập trung vào việc sử dụng thư viện Matplotlib và tìm hiểu cách thêm các ký tự đặc biệt (như subscript) vào nhãn đồ thị. Ví dụ: sử dụng chuỗi Unicode '\\u2082' cho số 2 subscript.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.468,
+          "familiarity-freq-exclude_stop_words-sm": 0.809,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Loại bỏ dấu đóng ngoặc đơn thừa: `data['a'] = df['a'] == 'a'` hoặc `data['a'] = (df['a'] == 'a')` nếu muốn nhóm biểu thức điều kiện.",
+          "readability-flesch_kincaid_reading_ease-sm": 128.335,
+          "familiarity-freq-exclude_stop_words-sm": 0.797,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 100,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.execute(`x`, 0,{`2`:`2`})",
+      "hints": [
+        "Cần tìm hiểu cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string).",
+        "Cần làm quen với thư viện Matplotlib và các hàm cơ bản của nó để vẽ đồ thị và đặt nhãn.",
+        "Hiểu rõ yêu cầu của đề bài về việc đặt nhãn có ký tự subscript.",
+        "Sử dụng dấu nháy đơn (') hoặc nháy kép (\") cho chuỗi, ví dụ: 'x', '2'.",
+        "Tham khảo tài liệu Matplotlib để sử dụng đúng hàm và tham số. Ví dụ, để vẽ và đặt nhãn, bạn có thể dùng `plt.plot(x, y, label='...')`.",
+        "Để tạo subscript '2' trong 'H2O', bạn có thể sử dụng ký tự Unicode `\\u2082` (ví dụ: `label='H\\u2082O'`) hoặc sử dụng cú pháp LaTeX nếu đã bật `usetex=True` (ví dụ: `label='H$_2$O'`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần tìm hiểu cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string).",
+          "readability-flesch_kincaid_reading_ease-sm": 129.862,
+          "familiarity-freq-exclude_stop_words-sm": 0.903,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần làm quen với thư viện Matplotlib và các hàm cơ bản của nó để vẽ đồ thị và đặt nhãn.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.291,
+          "familiarity-freq-exclude_stop_words-sm": 0.829,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Hiểu rõ yêu cầu của đề bài về việc đặt nhãn có ký tự subscript.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.21,
+          "familiarity-freq-exclude_stop_words-sm": 0.831,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng dấu nháy đơn (') hoặc nháy kép (\") cho chuỗi, ví dụ: 'x', '2'.",
+          "readability-flesch_kincaid_reading_ease-sm": 144.282,
+          "familiarity-freq-exclude_stop_words-sm": 0.817,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Tham khảo tài liệu Matplotlib để sử dụng đúng hàm và tham số. Ví dụ, để vẽ và đặt nhãn, bạn có thể dùng `plt.plot(x, y, label='...')`.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.193,
+          "familiarity-freq-exclude_stop_words-sm": 0.795,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo subscript '2' trong 'H2O', bạn có thể sử dụng ký tự Unicode `\\u2082` (ví dụ: `label='H\\u2082O'`) hoặc sử dụng cú pháp LaTeX nếu đã bật `usetex=True` (ví dụ: `label='H$_2$O'`).",
+          "readability-flesch_kincaid_reading_ease-sm": 115.698,
+          "familiarity-freq-exclude_stop_words-sm": 0.741,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": 100,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.text(x[2], y[2], 'H2O', ha='center', va='bottom')",
+      "hints": [
+        "Cần hiểu rõ yêu cầu 'subscripted' (chỉ số dưới) và 'labels' (nhãn) trong đề bài.",
+        "Sử dụng đúng API của Matplotlib cho việc thêm nhãn vào biểu đồ (ví dụ: tham số `label` trong `plt.plot()` hoặc `plt.xlabel()`, `plt.ylabel()`).",
+        "Tìm hiểu cách tạo ký tự subscript trong Matplotlib (ví dụ: dùng Unicode `\\u2082` hoặc cú pháp TeX `$_2$`).",
+        "Để tạo nhãn cho đường vẽ, hãy sử dụng tham số `label` trong hàm `plt.plot()`. Ví dụ: `plt.plot(x, y, label='H2O')`. Để tạo nhãn cho trục, sử dụng `plt.xlabel()` hoặc `plt.ylabel()`.",
+        "Để tạo chỉ số dưới, bạn có thể sử dụng ký tự Unicode (`'H\\u2082O'`) hoặc cú pháp TeX của Matplotlib (`'H$_2$O'`). Ví dụ: `plt.plot(x, y, label='H\\u2082O')`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ yêu cầu 'subscripted' (chỉ số dưới) và 'labels' (nhãn) trong đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 112.65,
+          "familiarity-freq-exclude_stop_words-sm": 0.775,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng đúng API của Matplotlib cho việc thêm nhãn vào biểu đồ (ví dụ: tham số `label` trong `plt.plot()` hoặc `plt.xlabel()`, `plt.ylabel()`).",
+          "readability-flesch_kincaid_reading_ease-sm": 112.602,
+          "familiarity-freq-exclude_stop_words-sm": 0.659,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Tìm hiểu cách tạo ký tự subscript trong Matplotlib (ví dụ: dùng Unicode `\\u2082` hoặc cú pháp TeX `$_2$`).",
+          "readability-flesch_kincaid_reading_ease-sm": 140.004,
+          "familiarity-freq-exclude_stop_words-sm": 0.796,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo nhãn cho đường vẽ, hãy sử dụng tham số `label` trong hàm `plt.plot()`. Ví dụ: `plt.plot(x, y, label='H2O')`. Để tạo nhãn cho trục, sử dụng `plt.xlabel()` hoặc `plt.ylabel()`.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.772,
+          "familiarity-freq-exclude_stop_words-sm": 0.658,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo chỉ số dưới, bạn có thể sử dụng ký tự Unicode (`'H\\u2082O'`) hoặc cú pháp TeX của Matplotlib (`'H$_2$O'`). Ví dụ: `plt.plot(x, y, label='H\\u2082O')`.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.076,
+          "familiarity-freq-exclude_stop_words-sm": 0.804,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 100,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "data ['a']= df ['a']== 'a')",
+      "hints": [
+        "Cần đọc kỹ đề bài để hiểu rõ yêu cầu và mục tiêu của bài toán.",
+        "Xác định đúng thư viện và API cần sử dụng (matplotlib cho việc vẽ đồ thị và nhãn).",
+        "Nắm vững cú pháp cơ bản của Python, đặc biệt là việc đóng mở ngoặc.",
+        "Đọc lại đề bài và xác định rằng cần sử dụng thư viện `matplotlib.pyplot` để vẽ đồ thị và đặt nhãn. Ví dụ: `plt.plot(x, y, label='H\\u2082O')`.",
+        "Kiểm tra lại các cặp dấu ngoặc đơn để đảm bảo chúng được đóng mở đúng cách. Ví dụ, nếu muốn gán một Series boolean: `data['a'] = (df['a'] == 'a')` hoặc `data['a'] = df['a'] == 'a'` nếu `data['a']` là một cột mới."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài để hiểu rõ yêu cầu và mục tiêu của bài toán.",
+          "readability-flesch_kincaid_reading_ease-sm": 127.145,
+          "familiarity-freq-exclude_stop_words-sm": 0.828,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Xác định đúng thư viện và API cần sử dụng (matplotlib cho việc vẽ đồ thị và nhãn).",
+          "readability-flesch_kincaid_reading_ease-sm": 146.265,
+          "familiarity-freq-exclude_stop_words-sm": 0.743,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nắm vững cú pháp cơ bản của Python, đặc biệt là việc đóng mở ngoặc.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.13,
+          "familiarity-freq-exclude_stop_words-sm": 0.758,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Đọc lại đề bài và xác định rằng cần sử dụng thư viện `matplotlib.pyplot` để vẽ đồ thị và đặt nhãn. Ví dụ: `plt.plot(x, y, label='H\\u2082O')`.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.31,
+          "familiarity-freq-exclude_stop_words-sm": 0.726,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Kiểm tra lại các cặp dấu ngoặc đơn để đảm bảo chúng được đóng mở đúng cách. Ví dụ, nếu muốn gán một Series boolean: `data['a'] = (df['a'] == 'a')` hoặc `data['a'] = df['a'] == 'a'` nếu `data['a']` là một cột mới.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.084,
+          "familiarity-freq-exclude_stop_words-sm": 0.792,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 100,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.execute(`x`, 0,{`2`:`2`})",
+      "hints": [
+        "Cần tìm hiểu cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string).",
+        "Cần tìm hiểu cách import và sử dụng thư viện Matplotlib, đặc biệt là module `pyplot` và hàm `plot`.",
+        "Nghiên cứu cách thêm nhãn (label) vào biểu đồ và cách tạo ký tự subscript trong Matplotlib.",
+        "Sử dụng `'x'` hoặc `\"x\"`.",
+        "Để vẽ biểu đồ và thêm nhãn, bạn cần dùng `plt.plot(x_data, y_data, label='your_label')`.",
+        "Thêm `import matplotlib.pyplot as plt` vào đầu file.",
+        "Để tạo 'H₂O', bạn có thể dùng `label='H\\u2082O'`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần tìm hiểu cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string).",
+          "readability-flesch_kincaid_reading_ease-sm": 129.862,
+          "familiarity-freq-exclude_stop_words-sm": 0.903,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần tìm hiểu cách import và sử dụng thư viện Matplotlib, đặc biệt là module `pyplot` và hàm `plot`.",
+          "readability-flesch_kincaid_reading_ease-sm": 128.316,
+          "familiarity-freq-exclude_stop_words-sm": 0.796,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nghiên cứu cách thêm nhãn (label) vào biểu đồ và cách tạo ký tự subscript trong Matplotlib.",
+          "readability-flesch_kincaid_reading_ease-sm": 119.909,
+          "familiarity-freq-exclude_stop_words-sm": 0.789,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `'x'` hoặc `\"x\"`.",
+          "readability-flesch_kincaid_reading_ease-sm": 178.9,
+          "familiarity-freq-exclude_stop_words-sm": 1.0,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để vẽ biểu đồ và thêm nhãn, bạn cần dùng `plt.plot(x_data, y_data, label='your_label')`.",
+          "readability-flesch_kincaid_reading_ease-sm": 112.65,
+          "familiarity-freq-exclude_stop_words-sm": 0.674,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `import matplotlib.pyplot as plt` vào đầu file.",
+          "readability-flesch_kincaid_reading_ease-sm": 95.165,
+          "familiarity-freq-exclude_stop_words-sm": 0.766,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo 'H₂O', bạn có thể dùng `label='H\\u2082O'`.",
+          "readability-flesch_kincaid_reading_ease-sm": 137.465,
+          "familiarity-freq-exclude_stop_words-sm": 0.738,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": 100,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.savefig(`H20`, dpi = 300)",
+      "hints": [
+        "Cần đọc kỹ đề bài để xác định yêu cầu chính là tạo 'label' chứ không phải lưu file.",
+        "Cần tìm hiểu cách đặt 'label' cho các đối tượng trong matplotlib (ví dụ: `plt.plot(..., label=...)`).",
+        "Cần tìm hiểu cách sử dụng ký tự Unicode hoặc cú pháp đặc biệt trong matplotlib để tạo chỉ số dưới (subscript).",
+        "Để đặt label cho một đối tượng trong biểu đồ (ví dụ: đường thẳng), bạn cần sử dụng tham số `label` trong các hàm vẽ biểu đồ như `plt.plot()`. Ví dụ: `plt.plot(x, y, label='...')`.",
+        "Có hai cách phổ biến để tạo chỉ số dưới: 1) Sử dụng ký tự Unicode cho chỉ số dưới (ví dụ: `H\\u2082O` cho H₂O). 2) Sử dụng cú pháp TeX/LaTeX của Matplotlib bằng cách bao quanh chuỗi bằng dấu đô la (ví dụ: `'$H_2O$'`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài để xác định yêu cầu chính là tạo 'label' chứ không phải lưu file.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.571,
+          "familiarity-freq-exclude_stop_words-sm": 0.904,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần tìm hiểu cách đặt 'label' cho các đối tượng trong matplotlib (ví dụ: `plt.plot(..., label=...)`).",
+          "readability-flesch_kincaid_reading_ease-sm": 122.765,
+          "familiarity-freq-exclude_stop_words-sm": 0.778,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần tìm hiểu cách sử dụng ký tự Unicode hoặc cú pháp đặc biệt trong matplotlib để tạo chỉ số dưới (subscript).",
+          "readability-flesch_kincaid_reading_ease-sm": 134.143,
+          "familiarity-freq-exclude_stop_words-sm": 0.881,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để đặt label cho một đối tượng trong biểu đồ (ví dụ: đường thẳng), bạn cần sử dụng tham số `label` trong các hàm vẽ biểu đồ như `plt.plot()`. Ví dụ: `plt.plot(x, y, label='...')`.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.35,
+          "familiarity-freq-exclude_stop_words-sm": 0.732,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Có hai cách phổ biến để tạo chỉ số dưới: 1) Sử dụng ký tự Unicode cho chỉ số dưới (ví dụ: `H\\u2082O` cho H₂O). 2) Sử dụng cú pháp TeX/LaTeX của Matplotlib bằng cách bao quanh chuỗi bằng dấu đô la (ví dụ: `'$H_2O$'`).",
+          "readability-flesch_kincaid_reading_ease-sm": 134.505,
+          "familiarity-freq-exclude_stop_words-sm": 0.8,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 100,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.savefig(`H20`, dpi = 300)",
+      "hints": [
+        "Cần đọc kỹ đề bài để hiểu rõ yêu cầu về 'labels' và 'subscripted text'.",
+        "Phân biệt rõ chức năng của các hàm Matplotlib như `plt.savefig` (lưu hình) và `plt.plot` (vẽ và gán nhãn).",
+        "Nắm vững cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string literals).",
+        "Để tạo nhãn cho đường vẽ, bạn cần sử dụng tham số `label` trong hàm `plt.plot()` hoặc dùng `plt.xlabel()`, `plt.ylabel()` cho nhãn trục. Ví dụ: `plt.plot(x, y, label='...')`.",
+        "Luôn sử dụng dấu nháy đơn hoặc nháy kép để định nghĩa chuỗi trong Python. Ví dụ: `'H20'` hoặc `\"H20\"`.",
+        "Để tạo subscript trong Matplotlib labels, bạn có thể dùng ký tự Unicode (ví dụ: `H\\u2082O`) hoặc cú pháp LaTeX (ví dụ: `H$_2$O`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài để hiểu rõ yêu cầu về 'labels' và 'subscripted text'.",
+          "readability-flesch_kincaid_reading_ease-sm": 118.29,
+          "familiarity-freq-exclude_stop_words-sm": 0.893,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Phân biệt rõ chức năng của các hàm Matplotlib như `plt.savefig` (lưu hình) và `plt.plot` (vẽ và gán nhãn).",
+          "readability-flesch_kincaid_reading_ease-sm": 154.702,
+          "familiarity-freq-exclude_stop_words-sm": 0.545,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nắm vững cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string literals).",
+          "readability-flesch_kincaid_reading_ease-sm": 124.886,
+          "familiarity-freq-exclude_stop_words-sm": 0.813,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo nhãn cho đường vẽ, bạn cần sử dụng tham số `label` trong hàm `plt.plot()` hoặc dùng `plt.xlabel()`, `plt.ylabel()` cho nhãn trục. Ví dụ: `plt.plot(x, y, label='...')`.",
+          "readability-flesch_kincaid_reading_ease-sm": 145.25,
+          "familiarity-freq-exclude_stop_words-sm": 0.666,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Luôn sử dụng dấu nháy đơn hoặc nháy kép để định nghĩa chuỗi trong Python. Ví dụ: `'H20'` hoặc `\"H20\"`.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.355,
+          "familiarity-freq-exclude_stop_words-sm": 0.814,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo subscript trong Matplotlib labels, bạn có thể dùng ký tự Unicode (ví dụ: `H\\u2082O`) hoặc cú pháp LaTeX (ví dụ: `H$_2$O`).",
+          "readability-flesch_kincaid_reading_ease-sm": 119.897,
+          "familiarity-freq-exclude_stop_words-sm": 0.768,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": 100,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.text(x[2], y[2], 'H2O', ha='center', va='bottom')",
+      "hints": [
+        "Cần phân biệt rõ ràng giữa việc tạo 'label' cho biểu đồ (thường dùng với `plt.plot` và `plt.legend`) và việc thêm 'text annotation' tại một điểm cụ thể (`plt.text`).",
+        "Chưa thực hiện được yêu cầu chính của đề bài là định dạng '2' thành chỉ số dưới.",
+        "Để tạo nhãn cho một đường vẽ, hãy sử dụng tham số `label` trong hàm vẽ (ví dụ: `plt.plot(x, y, label='...')`). Sau đó, gọi `plt.legend()` để hiển thị các nhãn này.",
+        "Trong Matplotlib, bạn có thể sử dụng cú pháp Unicode cho chỉ số dưới (ví dụ: `label='H\\u2082O'`) hoặc cú pháp TeX/LaTeX (ví dụ: `label='$H_2O$'`) để tạo chỉ số dưới."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần phân biệt rõ ràng giữa việc tạo 'label' cho biểu đồ (thường dùng với `plt.plot` và `plt.legend`) và việc thêm 'text annotation' tại một điểm cụ thể (`plt.text`).",
+          "readability-flesch_kincaid_reading_ease-sm": 113.299,
+          "familiarity-freq-exclude_stop_words-sm": 0.73,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Chưa thực hiện được yêu cầu chính của đề bài là định dạng '2' thành chỉ số dưới.",
+          "readability-flesch_kincaid_reading_ease-sm": 150.965,
+          "familiarity-freq-exclude_stop_words-sm": 0.945,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tạo nhãn cho một đường vẽ, hãy sử dụng tham số `label` trong hàm vẽ (ví dụ: `plt.plot(x, y, label='...')`). Sau đó, gọi `plt.legend()` để hiển thị các nhãn này.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.16,
+          "familiarity-freq-exclude_stop_words-sm": 0.707,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong Matplotlib, bạn có thể sử dụng cú pháp Unicode cho chỉ số dưới (ví dụ: `label='H\\u2082O'`) hoặc cú pháp TeX/LaTeX (ví dụ: `label='$H_2O$'`) để tạo chỉ số dưới.",
+          "readability-flesch_kincaid_reading_ease-sm": 117.584,
+          "familiarity-freq-exclude_stop_words-sm": 0.775,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 4
+    }
+  ]
+}

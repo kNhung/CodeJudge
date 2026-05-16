@@ -1,0 +1,19 @@
+{
+  "mode": "taxonomy",
+  "samples": 95,
+  "output_file": "/home/knhung/KLTN/CodeJudge/evaluation/hcmus/output/hcmus_author_from_id48/hcmus_author_from_id48.jsonl",
+  "invalid_cnt": 0,
+  "total_cnt": 95,
+  "correct_cnt": 66,
+  "processed_unique_ids": 95,
+  "rate_limit_hit": false,
+  "accuracy": 0.6947368421052632,
+  "kendalltau": 0.341,
+  "spearmanr": 0.341,
+  "mae_on_10": 3.121,
+  "rmse_on_10": 3.863,
+  "pearson_grade": 0.308,
+  "metric_scope": "file",
+  "last_batch_samples": 22,
+  "last_batch_rate_limit_hit": false
+}

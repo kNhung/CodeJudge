@@ -1,0 +1,16 @@
+{
+  "mode": "taxonomy",
+  "samples": 1,
+  "output_file": "/home/knhung/KLTN/CodeJudge/evaluation/hcmus/output/260315_1733_gemini-2.5-flash_taxonomy/260315_1733_gemini-2.5-flash_taxonomy.jsonl",
+  "invalid_cnt": 0,
+  "total_cnt": 1,
+  "correct_cnt": 1,
+  "processed_unique_ids": 1,
+  "rate_limit_hit": false,
+  "accuracy": 1.0,
+  "kendalltau": NaN,
+  "spearmanr": NaN,
+  "mae_on_10": 0.1,
+  "rmse_on_10": 0.1,
+  "pearson_grade": NaN
+}

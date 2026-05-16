@@ -1,0 +1,10 @@
+{
+  "valid_metric_records": 65,
+  "correct_cnt": 56,
+  "accuracy": 0.8615384615384616,
+  "kendalltau": 0.601,
+  "spearmanr": 0.601,
+  "mae_on_10": 1.576,
+  "rmse_on_10": 2.226,
+  "pearson_grade": 0.62
+}

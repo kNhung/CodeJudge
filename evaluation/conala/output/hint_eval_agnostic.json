@@ -1,0 +1,1277 @@
+{
+  "input_file": "/home/knhung/KLTN/CodeJudge/evaluation/conala/output/io_text_runs.jsonl",
+  "mode": "agnostic",
+  "include_strengths": false,
+  "metrics": [
+    "readability",
+    "familiarity"
+  ],
+  "summary": {
+    "samples": 30,
+    "total_hints": 143,
+    "metrics": {
+      "readability": {
+        "mean": 0.904833,
+        "max": 1.0,
+        "min": 0.15,
+        "count": 143
+      },
+      "familiarity": {
+        "mean": 0.909825,
+        "max": 1.0,
+        "min": 0.6,
+        "count": 143
+      }
+    }
+  },
+  "samples": [
+    {
+      "row_index": 0,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "send a signal `signal.SIGUSR1` to the current process",
+      "reference_code": "",
+      "student_code": "os.kill(os.getpid(), signal.SIGUSR1)",
+      "hints": [
+        "Không có điểm cần cải thiện rõ ràng cho đoạn code này, vì nó đã hoàn thành xuất sắc yêu cầu đề bài."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Không có điểm cần cải thiện rõ ràng cho đoạn code này, vì nó đã hoàn thành xuất sắc yêu cầu đề bài.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        }
+      ],
+      "hint_count": 1
+    },
+    {
+      "row_index": 5,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "get rid of None values in dictionary `kwargs`",
+      "reference_code": "",
+      "student_code": "kwargs.pop(None)",
+      "hints": [
+        "Cần hiểu rõ yêu cầu đề bài: loại bỏ các cặp khóa-giá trị có giá trị là None, không phải loại bỏ khóa có tên là None.",
+        "Nắm vững cách duyệt qua các cặp khóa-giá trị trong dictionary và cách kiểm tra điều kiện cho giá trị.",
+        "Để loại bỏ các cặp khóa-giá trị có giá trị là `None`, bạn cần duyệt qua tất cả các cặp khóa-giá trị và chỉ giữ lại những cặp có giá trị khác `None`. Ví dụ, có thể dùng dictionary comprehension: `new_kwargs = {k: v for k, v in kwargs.items() if v is not None}`.",
+        "Đảm bảo rằng logic xử lý của bạn không chỉ đúng về mặt cú pháp mà còn phải đúng về mặt ngữ nghĩa và xử lý được các trường hợp không mong muốn (như khóa không tồn tại)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ yêu cầu đề bài: loại bỏ các cặp khóa-giá trị có giá trị là None, không phải loại bỏ khóa có tên là None.",
+          "readability": 1.0,
+          "familiarity": 0.9629629629629629
+        },
+        {
+          "text": "Nắm vững cách duyệt qua các cặp khóa-giá trị trong dictionary và cách kiểm tra điều kiện cho giá trị.",
+          "readability": 1.0,
+          "familiarity": 0.9333333333333333
+        },
+        {
+          "text": "Để loại bỏ các cặp khóa-giá trị có giá trị là `None`, bạn cần duyệt qua tất cả các cặp khóa-giá trị và chỉ giữ lại những cặp có giá trị khác `None`. Ví dụ, có thể dùng dictionary comprehension: `new_kwargs = {k: v for k, v in kwargs.items() if v is not None}`.",
+          "readability": 1.0,
+          "familiarity": 0.8636363636363636
+        },
+        {
+          "text": "Đảm bảo rằng logic xử lý của bạn không chỉ đúng về mặt cú pháp mà còn phải đúng về mặt ngữ nghĩa và xử lý được các trường hợp không mong muốn (như khóa không tồn tại).",
+          "readability": 1.0,
+          "familiarity": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 6,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "soup.find_element_by_css_selector('li.png',re.compile('unicode_escape'))",
+      "hints": [
+        "Cần đọc và hiểu rõ yêu cầu của đề bài trước khi bắt đầu viết code.",
+        "Nắm vững các module cơ bản của Python để thực hiện các tác vụ khác nhau (ví dụ: `subprocess` cho lệnh hệ thống, `re` cho regex).",
+        "Kiểm tra cú pháp và đảm bảo các biến, thư viện được định nghĩa/import trước khi sử dụng.",
+        "Đọc kỹ đề bài để xác định đúng mục tiêu. Để thực thi lệnh hệ thống trong Python, cần sử dụng module `subprocess`.",
+        "Đảm bảo tất cả các biến được định nghĩa hoặc gán giá trị trước khi được gọi. Nếu bạn định dùng thư viện web scraping, cần khởi tạo đối tượng `soup` (ví dụ: `from bs4 import BeautifulSoup; soup = BeautifulSoup(...)` hoặc `from selenium import webdriver; driver = webdriver.Chrome(); soup = driver`).",
+        "Thêm `import re` ở đầu file để sử dụng module này.",
+        "Tham khảo tài liệu của thư viện bạn đang sử dụng để biết cách gọi hàm/phương thức đúng cú pháp và đối số."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc và hiểu rõ yêu cầu của đề bài trước khi bắt đầu viết code.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Nắm vững các module cơ bản của Python để thực hiện các tác vụ khác nhau (ví dụ: `subprocess` cho lệnh hệ thống, `re` cho regex).",
+          "readability": 1.0,
+          "familiarity": 0.9545454545454546
+        },
+        {
+          "text": "Kiểm tra cú pháp và đảm bảo các biến, thư viện được định nghĩa/import trước khi sử dụng.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Đọc kỹ đề bài để xác định đúng mục tiêu. Để thực thi lệnh hệ thống trong Python, cần sử dụng module `subprocess`.",
+          "readability": 0.8891304347826087,
+          "familiarity": 0.9
+        },
+        {
+          "text": "Đảm bảo tất cả các biến được định nghĩa hoặc gán giá trị trước khi được gọi. Nếu bạn định dùng thư viện web scraping, cần khởi tạo đối tượng `soup` (ví dụ: `from bs4 import BeautifulSoup; soup = BeautifulSoup(...)` hoặc `from selenium import webdriver; driver = webdriver.Chrome(); soup = driver`).",
+          "readability": 1.0,
+          "familiarity": 0.9047619047619048
+        },
+        {
+          "text": "Thêm `import re` ở đầu file để sử dụng module này.",
+          "readability": 0.759090909090909,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Tham khảo tài liệu của thư viện bạn đang sử dụng để biết cách gọi hàm/phương thức đúng cú pháp và đối số.",
+          "readability": 1.0,
+          "familiarity": 0.9565217391304348
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": 6,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "sys.stdout.capture(`ps-ef | grep something | wc-l`)",
+      "hints": [
+        "Cần tìm hiểu cách thực thi lệnh hệ thống (shell commands) từ Python.",
+        "Nắm vững cú pháp chuẩn của Python, đặc biệt là cách định nghĩa chuỗi.",
+        "Tìm hiểu về module `subprocess` trong Python để tương tác với hệ điều hành và chạy các lệnh bên ngoài.",
+        "Thay thế bằng dấu nháy đơn hoặc kép thông thường của Python, ví dụ: `'ps-ef | grep something | wc-l'`.",
+        "Để thực thi lệnh shell và bắt output, bạn cần sử dụng module `subprocess`, ví dụ: `subprocess.check_output('your command', shell=True)` hoặc `subprocess.run('your command', shell=True, capture_output=True, text=True).stdout`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần tìm hiểu cách thực thi lệnh hệ thống (shell commands) từ Python.",
+          "readability": 1.0,
+          "familiarity": 0.9166666666666666
+        },
+        {
+          "text": "Nắm vững cú pháp chuẩn của Python, đặc biệt là cách định nghĩa chuỗi.",
+          "readability": 1.0,
+          "familiarity": 0.9285714285714286
+        },
+        {
+          "text": "Tìm hiểu về module `subprocess` trong Python để tương tác với hệ điều hành và chạy các lệnh bên ngoài.",
+          "readability": 1.0,
+          "familiarity": 0.9444444444444444
+        },
+        {
+          "text": "Thay thế bằng dấu nháy đơn hoặc kép thông thường của Python, ví dụ: `'ps-ef | grep something | wc-l'`.",
+          "readability": 1.0,
+          "familiarity": 0.8333333333333334
+        },
+        {
+          "text": "Để thực thi lệnh shell và bắt output, bạn cần sử dụng module `subprocess`, ví dụ: `subprocess.check_output('your command', shell=True)` hoặc `subprocess.run('your command', shell=True, capture_output=True, text=True).stdout`.",
+          "readability": 1.0,
+          "familiarity": 0.6818181818181818
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 6,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "subprocess.call(`ps-ef | grep something | wc-l`, * * subprocess.check_output(`ps-ef | grep something | wc-l`),shell = True)",
+      "hints": [
+        "Cần sử dụng cú pháp chuỗi đúng trong Python (dùng dấu nháy đơn hoặc kép thay vì dấu backtick).",
+        "Hiểu rõ sự khác biệt giữa `subprocess.call` (trả về mã thoát) và `subprocess.check_output` (trả về output của lệnh) để chọn đúng hàm cho mục tiêu 'capture final output'.",
+        "Sử dụng đúng cách các tham số khi gọi hàm `subprocess` (ví dụ: tránh dùng `**` không đúng chỗ).",
+        "Kiểm tra lại cú pháp của lệnh hệ thống (`ps -ef` thay vì `ps-ef`).",
+        "Thay bằng dấu nháy đơn hoặc kép, ví dụ: `'ps -ef | grep something | wc -l'`.",
+        "Nếu muốn capture output, chỉ cần dùng `subprocess.check_output` một lần. Nếu muốn truyền output của lệnh này làm input cho lệnh khác, cần xử lý output đó thành chuỗi hoặc bytes rồi truyền vào tham số `input` của lệnh tiếp theo (nếu cần).",
+        "Để capture output, hãy dùng `subprocess.check_output`.",
+        "Sửa thành `ps -ef`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần sử dụng cú pháp chuỗi đúng trong Python (dùng dấu nháy đơn hoặc kép thay vì dấu backtick).",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Hiểu rõ sự khác biệt giữa `subprocess.call` (trả về mã thoát) và `subprocess.check_output` (trả về output của lệnh) để chọn đúng hàm cho mục tiêu 'capture final output'.",
+          "readability": 0.9511904761904761,
+          "familiarity": 0.92
+        },
+        {
+          "text": "Sử dụng đúng cách các tham số khi gọi hàm `subprocess` (ví dụ: tránh dùng `**` không đúng chỗ).",
+          "readability": 1.0,
+          "familiarity": 0.9411764705882353
+        },
+        {
+          "text": "Kiểm tra lại cú pháp của lệnh hệ thống (`ps -ef` thay vì `ps-ef`).",
+          "readability": 1.0,
+          "familiarity": 0.9166666666666666
+        },
+        {
+          "text": "Thay bằng dấu nháy đơn hoặc kép, ví dụ: `'ps -ef | grep something | wc -l'`.",
+          "readability": 1.0,
+          "familiarity": 0.9285714285714286
+        },
+        {
+          "text": "Nếu muốn capture output, chỉ cần dùng `subprocess.check_output` một lần. Nếu muốn truyền output của lệnh này làm input cho lệnh khác, cần xử lý output đó thành chuỗi hoặc bytes rồi truyền vào tham số `input` của lệnh tiếp theo (nếu cần).",
+          "readability": 1.0,
+          "familiarity": 0.9428571428571428
+        },
+        {
+          "text": "Để capture output, hãy dùng `subprocess.check_output`.",
+          "readability": 1.0,
+          "familiarity": 0.8
+        },
+        {
+          "text": "Sửa thành `ps -ef`.",
+          "readability": 0.15,
+          "familiarity": 0.75
+        }
+      ],
+      "hint_count": 8
+    },
+    {
+      "row_index": 6,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "self.treeview.connect(`ps-ef | grep something | wc-l`, self.ps-ef | grep something | wc-l)",
+      "hints": [
+        "Cần phân biệt rõ ràng giữa việc tương tác với giao diện người dùng (GUI) và việc thực thi các lệnh hệ thống.",
+        "Nghiên cứu về module `subprocess` trong Python để thực thi các lệnh shell và lấy kết quả.",
+        "Thay thế bằng `'ps -ef | grep something | wc -l'` hoặc `\"ps -ef | grep something | wc -l\"`.",
+        "Phần này hoàn toàn sai về mặt ý tưởng và cú pháp. Nếu muốn thực thi lệnh, cần dùng module `subprocess` và không truyền chuỗi lệnh trực tiếp như một thuộc tính hay biểu thức.",
+        "Để chạy lệnh hệ thống và lấy output, bạn cần sử dụng module `subprocess` của Python, cụ thể là hàm `subprocess.check_output()` hoặc `subprocess.run()`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần phân biệt rõ ràng giữa việc tương tác với giao diện người dùng (GUI) và việc thực thi các lệnh hệ thống.",
+          "readability": 1.0,
+          "familiarity": 0.9523809523809523
+        },
+        {
+          "text": "Nghiên cứu về module `subprocess` trong Python để thực thi các lệnh shell và lấy kết quả.",
+          "readability": 1.0,
+          "familiarity": 0.9230769230769231
+        },
+        {
+          "text": "Thay thế bằng `'ps -ef | grep something | wc -l'` hoặc `\"ps -ef | grep something | wc -l\"`.",
+          "readability": 1.0,
+          "familiarity": 0.9285714285714286
+        },
+        {
+          "text": "Phần này hoàn toàn sai về mặt ý tưởng và cú pháp. Nếu muốn thực thi lệnh, cần dùng module `subprocess` và không truyền chuỗi lệnh trực tiếp như một thuộc tính hay biểu thức.",
+          "readability": 1.0,
+          "familiarity": 0.967741935483871
+        },
+        {
+          "text": "Để chạy lệnh hệ thống và lấy output, bạn cần sử dụng module `subprocess` của Python, cụ thể là hàm `subprocess.check_output()` hoặc `subprocess.run()`.",
+          "readability": 0.918840579710145,
+          "familiarity": 0.8181818181818182
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 6,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "capture final output of a chain of system commands `ps -ef | grep something | wc -l`",
+      "reference_code": "",
+      "student_code": "subprocess.check_output(['ps', '-ef', '|', 'grep', 'something', '|', 'wc', '-l'])",
+      "hints": [
+        "Cần hiểu rõ hơn về cách `subprocess` xử lý các lệnh shell phức tạp, đặc biệt là khi có các toán tử như pipe (`|`).",
+        "Luôn kiểm tra kết quả thực thi của lệnh để đảm bảo nó hoạt động đúng như mong đợi.",
+        "Để thực thi một chuỗi lệnh shell có pipe, bạn cần truyền toàn bộ chuỗi lệnh dưới dạng một string và bật `shell=True`. Ví dụ: `subprocess.check_output('ps -ef | grep something | wc -l', shell=True)`"
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ hơn về cách `subprocess` xử lý các lệnh shell phức tạp, đặc biệt là khi có các toán tử như pipe (`|`).",
+          "readability": 1.0,
+          "familiarity": 0.9090909090909091
+        },
+        {
+          "text": "Luôn kiểm tra kết quả thực thi của lệnh để đảm bảo nó hoạt động đúng như mong đợi.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Để thực thi một chuỗi lệnh shell có pipe, bạn cần truyền toàn bộ chuỗi lệnh dưới dạng một string và bật `shell=True`. Ví dụ: `subprocess.check_output('ps -ef | grep something | wc -l', shell=True)`",
+          "readability": 1.0,
+          "familiarity": 0.8928571428571429
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": 10,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "datetime.datetime.now()",
+      "hints": [
+        "Cần đọc và hiểu kỹ đề bài để xác định đúng yêu cầu đầu vào và đầu ra.",
+        "Học cách phân tích chuỗi (string parsing) thành đối tượng `datetime`.",
+        "Học cách trích xuất các phần cụ thể (như ngày, giờ) từ đối tượng `datetime`.",
+        "Cần định nghĩa một hàm nhận `when` làm tham số và sử dụng tham số đó trong logic xử lý.",
+        "Sử dụng `datetime.datetime.strptime(when, format_string)` để chuyển đổi chuỗi `when` thành đối tượng datetime. Cần xác định `format_string` phù hợp với định dạng của `when`.",
+        "Sau khi có đối tượng datetime, sử dụng phương thức `.date()` để chỉ lấy phần ngày. Ví dụ: `my_datetime_object.date()`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc và hiểu kỹ đề bài để xác định đúng yêu cầu đầu vào và đầu ra.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Học cách phân tích chuỗi (string parsing) thành đối tượng `datetime`.",
+          "readability": 1.0,
+          "familiarity": 0.9090909090909091
+        },
+        {
+          "text": "Học cách trích xuất các phần cụ thể (như ngày, giờ) từ đối tượng `datetime`.",
+          "readability": 1.0,
+          "familiarity": 0.9333333333333333
+        },
+        {
+          "text": "Cần định nghĩa một hàm nhận `when` làm tham số và sử dụng tham số đó trong logic xử lý.",
+          "readability": 1.0,
+          "familiarity": 0.9375
+        },
+        {
+          "text": "Sử dụng `datetime.datetime.strptime(when, format_string)` để chuyển đổi chuỗi `when` thành đối tượng datetime. Cần xác định `format_string` phù hợp với định dạng của `when`.",
+          "readability": 0.9125,
+          "familiarity": 0.7916666666666666
+        },
+        {
+          "text": "Sau khi có đối tượng datetime, sử dụng phương thức `.date()` để chỉ lấy phần ngày. Ví dụ: `my_datetime_object.date()`.",
+          "readability": 0.5407894736842106,
+          "familiarity": 0.8888888888888888
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": 10,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "when.decode(`\\ \\`)",
+      "hints": [
+        "Cần hiểu rõ mục đích của các phương thức trong Python, đặc biệt là sự khác biệt giữa xử lý chuỗi (string manipulation) và xử lý byte (byte decoding).",
+        "Nghiên cứu cách làm việc với đối tượng datetime và chuỗi thời gian trong Python, sử dụng module `datetime`.",
+        "Kiểm tra lại cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi.",
+        "Sử dụng dấu nháy đơn hoặc kép để định nghĩa chuỗi, ví dụ: `when.decode(' ')` hoặc `when.decode(\" \")`. Tuy nhiên, phương thức `decode()` không phải là cách đúng để giải quyết bài toán này.",
+        "Để xử lý chuỗi datetime, bạn cần sử dụng module `datetime` của Python. Cụ thể, `datetime.datetime.strptime()` để phân tích chuỗi thành đối tượng datetime, sau đó dùng `.date()` để lấy phần ngày."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ mục đích của các phương thức trong Python, đặc biệt là sự khác biệt giữa xử lý chuỗi (string manipulation) và xử lý byte (byte decoding).",
+          "readability": 1.0,
+          "familiarity": 0.9629629629629629
+        },
+        {
+          "text": "Nghiên cứu cách làm việc với đối tượng datetime và chuỗi thời gian trong Python, sử dụng module `datetime`.",
+          "readability": 1.0,
+          "familiarity": 0.8666666666666667
+        },
+        {
+          "text": "Kiểm tra lại cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi.",
+          "readability": 1.0,
+          "familiarity": 0.9285714285714286
+        },
+        {
+          "text": "Sử dụng dấu nháy đơn hoặc kép để định nghĩa chuỗi, ví dụ: `when.decode(' ')` hoặc `when.decode(\" \")`. Tuy nhiên, phương thức `decode()` không phải là cách đúng để giải quyết bài toán này.",
+          "readability": 0.7323529411764705,
+          "familiarity": 0.9117647058823529
+        },
+        {
+          "text": "Để xử lý chuỗi datetime, bạn cần sử dụng module `datetime` của Python. Cụ thể, `datetime.datetime.strptime()` để phân tích chuỗi thành đối tượng datetime, sau đó dùng `.date()` để lấy phần ngày.",
+          "readability": 0.6634375,
+          "familiarity": 0.8666666666666667
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 10,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "datetime.datetime.strptime(`January 11,2010`,`% B % d,% Y`).strftime(`% a`)",
+      "hints": [
+        "Cần sử dụng dấu nháy đơn hoặc kép (`'` hoặc `\"`) cho chuỗi literal trong Python thay vì dấu backtick (`` ` ``) để tránh lỗi cú pháp.",
+        "Cần chọn đúng format code trong `strftime` hoặc sử dụng phương thức `.date()` để chỉ lấy phần ngày, thay vì chỉ lấy tên viết tắt của thứ trong tuần (`%a`).",
+        "Cần hiểu rõ hơn yêu cầu 'extract date only' để chọn phương pháp xuất ra phù hợp (ví dụ: `datetime_object.date()` hoặc `strftime('%Y-%m-%d')`).",
+        "Thay thế dấu backtick bằng dấu nháy đơn hoặc kép, ví dụ: `'January 11,2010'` hoặc `\"January 11,2010\"`.",
+        "Để lấy phần ngày, có thể dùng `.date()` sau khi parse (ví dụ: `datetime.datetime.strptime(when, '%B %d,%Y').date()`) hoặc dùng `strftime` với định dạng ngày tháng đầy đủ (ví dụ: `strftime('%Y-%m-%d')`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần sử dụng dấu nháy đơn hoặc kép (`'` hoặc `\"`) cho chuỗi literal trong Python thay vì dấu backtick (`` ` ``) để tránh lỗi cú pháp.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Cần chọn đúng format code trong `strftime` hoặc sử dụng phương thức `.date()` để chỉ lấy phần ngày, thay vì chỉ lấy tên viết tắt của thứ trong tuần (`%a`).",
+          "readability": 1.0,
+          "familiarity": 0.88
+        },
+        {
+          "text": "Cần hiểu rõ hơn yêu cầu 'extract date only' để chọn phương pháp xuất ra phù hợp (ví dụ: `datetime_object.date()` hoặc `strftime('%Y-%m-%d')`).",
+          "readability": 1.0,
+          "familiarity": 0.9
+        },
+        {
+          "text": "Thay thế dấu backtick bằng dấu nháy đơn hoặc kép, ví dụ: `'January 11,2010'` hoặc `\"January 11,2010\"`.",
+          "readability": 1.0,
+          "familiarity": 0.875
+        },
+        {
+          "text": "Để lấy phần ngày, có thể dùng `.date()` sau khi parse (ví dụ: `datetime.datetime.strptime(when, '%B %d,%Y').date()`) hoặc dùng `strftime` với định dạng ngày tháng đầy đủ (ví dụ: `strftime('%Y-%m-%d')`).",
+          "readability": 0.83,
+          "familiarity": 0.8076923076923077
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 10,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "when.strftime(`% m/% d/% Y`)",
+      "hints": [
+        "Cần chuyển đổi chuỗi đầu vào (`when`) thành đối tượng `datetime` trước khi áp dụng phương thức `strftime`.",
+        "Sửa lỗi cú pháp khi định nghĩa chuỗi (sử dụng dấu nháy đơn hoặc kép thay vì dấu backtick).",
+        "Thay đổi thành `when.strftime('%m/%d/%Y')`",
+        "Trước tiên, phân tích chuỗi thành đối tượng datetime: `import datetime; dt_object = datetime.datetime.strptime(when, '%Y-%m-%d')`. Sau đó, gọi `dt_object.strftime('%m/%d/%Y')`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần chuyển đổi chuỗi đầu vào (`when`) thành đối tượng `datetime` trước khi áp dụng phương thức `strftime`.",
+          "readability": 1.0,
+          "familiarity": 0.8235294117647058
+        },
+        {
+          "text": "Sửa lỗi cú pháp khi định nghĩa chuỗi (sử dụng dấu nháy đơn hoặc kép thay vì dấu backtick).",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Thay đổi thành `when.strftime('%m/%d/%Y')`",
+          "readability": 1.0,
+          "familiarity": 0.75
+        },
+        {
+          "text": "Trước tiên, phân tích chuỗi thành đối tượng datetime: `import datetime; dt_object = datetime.datetime.strptime(when, '%Y-%m-%d')`. Sau đó, gọi `dt_object.strftime('%m/%d/%Y')`.",
+          "readability": 1.0,
+          "familiarity": 0.8421052631578947
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 10,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "Format a datetime string `when` to extract date only",
+      "reference_code": "",
+      "student_code": "when.strftime('%Y-%m-%d')",
+      "hints": [
+        "Cần xử lý bước chuyển đổi chuỗi đầu vào ('datetime string') thành đối tượng datetime trước khi định dạng.",
+        "Chú ý hơn đến kiểu dữ liệu của biến đầu vào được mô tả trong đề bài để tránh lỗi runtime.",
+        "Để xử lý 'datetime string', bạn cần chuyển đổi nó thành đối tượng `datetime` trước. Ví dụ, nếu `when` là '2023-10-27 10:30:00', bạn có thể dùng: `dt_obj = datetime.datetime.strptime(when, '%Y-%m-%d %H:%M:%S')`. Sau đó, áp dụng định dạng: `dt_obj.strftime('%Y-%m-%d')`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần xử lý bước chuyển đổi chuỗi đầu vào ('datetime string') thành đối tượng datetime trước khi định dạng.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Chú ý hơn đến kiểu dữ liệu của biến đầu vào được mô tả trong đề bài để tránh lỗi runtime.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Để xử lý 'datetime string', bạn cần chuyển đổi nó thành đối tượng `datetime` trước. Ví dụ, nếu `when` là '2023-10-27 10:30:00', bạn có thể dùng: `dt_obj = datetime.datetime.strptime(when, '%Y-%m-%d %H:%M:%S')`. Sau đó, áp dụng định dạng: `dt_obj.strftime('%Y-%m-%d')`.",
+          "readability": 0.9030701754385964,
+          "familiarity": 0.7894736842105263
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": 15,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.array([0,0], [0], None)",
+      "hints": [
+        "Cần đọc kỹ đề bài để hiểu rõ yêu cầu là tính tổng, không phải khởi tạo mảng.",
+        "Cần nắm vững cú pháp khởi tạo mảng NumPy, đặc biệt là mảng 2D.",
+        "Cần tìm hiểu cách sử dụng phương thức `sum()` của NumPy và tham số `axis` để tính tổng theo hàng.",
+        "Để tạo một mảng 2D, bạn cần truyền một list chứa các list con, ví dụ: `np.array([[0,0], [0,0]])`. Các đối số sau đó thường là `dtype` hoặc `copy`.",
+        "Sau khi đã có một mảng NumPy 2D hợp lệ (ví dụ: `my_array = np.array([[1,2],[3,4]])`), bạn cần gọi phương thức `sum()` với tham số `axis=1` để tính tổng theo hàng, ví dụ: `my_array.sum(axis=1)`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài để hiểu rõ yêu cầu là tính tổng, không phải khởi tạo mảng.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Cần nắm vững cú pháp khởi tạo mảng NumPy, đặc biệt là mảng 2D.",
+          "readability": 1.0,
+          "familiarity": 0.9285714285714286
+        },
+        {
+          "text": "Cần tìm hiểu cách sử dụng phương thức `sum()` của NumPy và tham số `axis` để tính tổng theo hàng.",
+          "readability": 1.0,
+          "familiarity": 0.8888888888888888
+        },
+        {
+          "text": "Để tạo một mảng 2D, bạn cần truyền một list chứa các list con, ví dụ: `np.array([[0,0], [0,0]])`. Các đối số sau đó thường là `dtype` hoặc `copy`.",
+          "readability": 0.7458333333333333,
+          "familiarity": 0.84
+        },
+        {
+          "text": "Sau khi đã có một mảng NumPy 2D hợp lệ (ví dụ: `my_array = np.array([[1,2],[3,4]])`), bạn cần gọi phương thức `sum()` với tham số `axis=1` để tính tổng theo hàng, ví dụ: `my_array.sum(axis=1)`.",
+          "readability": 1.0,
+          "familiarity": 0.8666666666666667
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 15,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.all(numpy.data).all()",
+      "hints": [
+        "Cần đọc kỹ đề bài và hiểu rõ yêu cầu tính tổng theo hàng.",
+        "Cần nắm vững các hàm cơ bản của thư viện NumPy, đặc biệt là các hàm liên quan đến tính toán thống kê như `sum`.",
+        "Để tính tổng các hàng, bạn cần sử dụng phương thức `.sum()` với tham số `axis` phù hợp, ví dụ: `my_array.sum(axis=1)`.",
+        "Nếu bạn có một mảng tên là `a`, bạn chỉ cần dùng `a` thay vì `numpy.data`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài và hiểu rõ yêu cầu tính tổng theo hàng.",
+          "readability": 0.9357142857142857,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Cần nắm vững các hàm cơ bản của thư viện NumPy, đặc biệt là các hàm liên quan đến tính toán thống kê như `sum`.",
+          "readability": 1.0,
+          "familiarity": 0.9166666666666666
+        },
+        {
+          "text": "Để tính tổng các hàng, bạn cần sử dụng phương thức `.sum()` với tham số `axis` phù hợp, ví dụ: `my_array.sum(axis=1)`.",
+          "readability": 0.6166666666666667,
+          "familiarity": 0.85
+        },
+        {
+          "text": "Nếu bạn có một mảng tên là `a`, bạn chỉ cần dùng `a` thay vì `numpy.data`.",
+          "readability": 0.471875,
+          "familiarity": 0.9333333333333333
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 15,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.array([1,2,3,4]).sum(axis = 0)",
+      "hints": [
+        "Cần hiểu rõ yêu cầu về cấu trúc dữ liệu đầu vào (mảng 2D) và tham số `axis` để tính toán đúng theo đề bài.",
+        "Để tạo mảng 2D, bạn có thể dùng `np.array([[1,2,3],[4,5,6]])` hoặc `np.arange(1, 7).reshape(2, 3)`.",
+        "Khi đã có mảng 2D, hãy thay đổi `axis = 0` thành `axis = 1` để tính tổng trên các hàng. Ví dụ: `my_2d_array.sum(axis=1)`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ yêu cầu về cấu trúc dữ liệu đầu vào (mảng 2D) và tham số `axis` để tính toán đúng theo đề bài.",
+          "readability": 1.0,
+          "familiarity": 0.9565217391304348
+        },
+        {
+          "text": "Để tạo mảng 2D, bạn có thể dùng `np.array([[1,2,3],[4,5,6]])` hoặc `np.arange(1, 7).reshape(2, 3)`.",
+          "readability": 0.7480769230769231,
+          "familiarity": 0.7692307692307693
+        },
+        {
+          "text": "Khi đã có mảng 2D, hãy thay đổi `axis = 0` thành `axis = 1` để tính tổng trên các hàng. Ví dụ: `my_2d_array.sum(axis=1)`.",
+          "readability": 0.5708333333333333,
+          "familiarity": 0.9565217391304348
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": 15,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.array([1,2,3,4]).sum(axis = 0)",
+      "hints": [
+        "Cần tạo một mảng NumPy 2 chiều thay vì 1 chiều như yêu cầu của đề bài.",
+        "Cần hiểu rõ ý nghĩa của tham số `axis` trong NumPy khi làm việc với mảng đa chiều để tính tổng theo hàng (rows).",
+        "Thay đổi thành mảng 2 chiều, ví dụ: `np.array([[1,2,3,4]])` hoặc `np.array([[1,2],[3,4]])`.",
+        "Thay đổi `axis = 0` thành `axis = 1` để tính tổng theo hàng."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần tạo một mảng NumPy 2 chiều thay vì 1 chiều như yêu cầu của đề bài.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Cần hiểu rõ ý nghĩa của tham số `axis` trong NumPy khi làm việc với mảng đa chiều để tính tổng theo hàng (rows).",
+          "readability": 1.0,
+          "familiarity": 0.9
+        },
+        {
+          "text": "Thay đổi thành mảng 2 chiều, ví dụ: `np.array([[1,2,3,4]])` hoặc `np.array([[1,2],[3,4]])`.",
+          "readability": 0.9575757575757575,
+          "familiarity": 0.8
+        },
+        {
+          "text": "Thay đổi `axis = 0` thành `axis = 1` để tính tổng theo hàng.",
+          "readability": 0.9892857142857143,
+          "familiarity": 1.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 15,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "Calculate sum over all rows of 2D numpy array",
+      "reference_code": "",
+      "student_code": "np.sum(vals, axis=1)",
+      "hints": [
+        "Không có điểm cần cải thiện đáng kể cho đoạn code này, đây là một giải pháp tối ưu."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Không có điểm cần cải thiện đáng kể cho đoạn code này, đây là một giải pháp tối ưu.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        }
+      ],
+      "hint_count": 1
+    },
+    {
+      "row_index": 80,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print(a,key = lambda x:x [1])",
+      "hints": [
+        "Cần đọc và hiểu rõ yêu cầu đề bài trước khi bắt đầu viết code.",
+        "Cần tìm hiểu cách duyệt qua các phần tử trong một danh sách 2 chiều (list of lists).",
+        "Cần tìm hiểu cách định dạng chuỗi và sử dụng các hàm như `join()` để tạo ra output mong muốn.",
+        "Cần kiểm tra các đối số hợp lệ của hàm `print()`.",
+        "Loại bỏ đối số `key` khỏi hàm `print()`. Nếu muốn sắp xếp, hãy sắp xếp danh sách trước khi in.",
+        "Sử dụng vòng lặp lồng nhau hoặc generator expression để duyệt qua từng hàng và từng cột của danh sách `tab`, sau đó nối chúng lại bằng các ký tự phân cách (ví dụ: tab `\\t` cho cột và newline `\\n` cho hàng).",
+        "Đảm bảo sử dụng đúng tên biến được nhắc đến trong đề bài, tức là `tab`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc và hiểu rõ yêu cầu đề bài trước khi bắt đầu viết code.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Cần tìm hiểu cách duyệt qua các phần tử trong một danh sách 2 chiều (list of lists).",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Cần tìm hiểu cách định dạng chuỗi và sử dụng các hàm như `join()` để tạo ra output mong muốn.",
+          "readability": 1.0,
+          "familiarity": 0.9411764705882353
+        },
+        {
+          "text": "Cần kiểm tra các đối số hợp lệ của hàm `print()`.",
+          "readability": 0.7363636363636363,
+          "familiarity": 0.9
+        },
+        {
+          "text": "Loại bỏ đối số `key` khỏi hàm `print()`. Nếu muốn sắp xếp, hãy sắp xếp danh sách trước khi in.",
+          "readability": 0.6875,
+          "familiarity": 0.8888888888888888
+        },
+        {
+          "text": "Sử dụng vòng lặp lồng nhau hoặc generator expression để duyệt qua từng hàng và từng cột của danh sách `tab`, sau đó nối chúng lại bằng các ký tự phân cách (ví dụ: tab `\\t` cho cột và newline `\\n` cho hàng).",
+          "readability": 1.0,
+          "familiarity": 0.9393939393939394
+        },
+        {
+          "text": "Đảm bảo sử dụng đúng tên biến được nhắc đến trong đề bài, tức là `tab`.",
+          "readability": 1.0,
+          "familiarity": 0.9333333333333333
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": 80,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print(`\\ n`.join(str(x)for i in tab))",
+      "hints": [
+        "Cần xử lý từng phần tử trong mỗi hàng (nested loop) thay vì chỉ lặp qua các hàng.",
+        "Khắc phục lỗi cú pháp khi định nghĩa chuỗi ký tự.",
+        "Đảm bảo tất cả biến được sử dụng đều đã được định nghĩa trong phạm vi phù hợp.",
+        "Hiểu rõ hơn về cách sử dụng generator expression để xử lý dữ liệu đa chiều.",
+        "Sử dụng dấu nháy đơn hoặc kép (`'` hoặc `\"`) cho chuỗi ký tự, ví dụ: `'\n'` hoặc `\"\\n\"`. Đảm bảo không có khoảng trắng giữa `\\` và `n`.",
+        "Bạn cần lặp qua từng phần tử trong mỗi hàng của `tab`. Nếu `i` là một hàng, bạn cần một vòng lặp lồng nhau (hoặc generator expression) để truy cập các phần tử bên trong `i`. Ví dụ: `str(col) for col in i`.",
+        "Bạn cần một cấu trúc lặp lồng nhau. Ví dụ, `'\n'.join(['\t'.join(str(col) for col in row) for row in tab])` sẽ nối các cột bằng `\\t` và các hàng bằng `\\n`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần xử lý từng phần tử trong mỗi hàng (nested loop) thay vì chỉ lặp qua các hàng.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Khắc phục lỗi cú pháp khi định nghĩa chuỗi ký tự.",
+          "readability": 0.7363636363636363,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Đảm bảo tất cả biến được sử dụng đều đã được định nghĩa trong phạm vi phù hợp.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Hiểu rõ hơn về cách sử dụng generator expression để xử lý dữ liệu đa chiều.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Sử dụng dấu nháy đơn hoặc kép (`'` hoặc `\"`) cho chuỗi ký tự, ví dụ: `'\n'` hoặc `\"\\n\"`. Đảm bảo không có khoảng trắng giữa `\\` và `n`.",
+          "readability": 1.0,
+          "familiarity": 0.9655172413793104
+        },
+        {
+          "text": "Bạn cần lặp qua từng phần tử trong mỗi hàng của `tab`. Nếu `i` là một hàng, bạn cần một vòng lặp lồng nhau (hoặc generator expression) để truy cập các phần tử bên trong `i`. Ví dụ: `str(col) for col in i`.",
+          "readability": 1.0,
+          "familiarity": 0.9411764705882353
+        },
+        {
+          "text": "Bạn cần một cấu trúc lặp lồng nhau. Ví dụ, `'\n'.join(['\t'.join(str(col) for col in row) for row in tab])` sẽ nối các cột bằng `\\t` và các hàng bằng `\\n`.",
+          "readability": 0.503125,
+          "familiarity": 0.8846153846153846
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": 80,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print([x.map(``, x)for x in tab])",
+      "hints": [
+        "Cần nắm vững cú pháp và các phương thức cơ bản của Python (ví dụ: `str.join()`, list comprehensions).",
+        "Hiểu rõ cách xử lý dữ liệu dạng bảng (2D list) để định dạng đầu ra theo yêu cầu.",
+        "Trong Python, `list` không có phương thức `.map()`. Nếu muốn áp dụng một hàm cho từng phần tử, bạn có thể dùng `map()` (hàm built-in) hoặc list comprehension. Tuy nhiên, trong trường hợp này, mục tiêu là nối các phần tử thành chuỗi, không phải áp dụng một hàm biến đổi.",
+        "Sử dụng phương thức `str.join()` để nối các chuỗi. Ví dụ: `'\t'.join(str(col) for col in row)` để nối các cột trong một hàng, và sau đó `'\n'.join(processed_rows)` để nối các hàng lại với nhau."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần nắm vững cú pháp và các phương thức cơ bản của Python (ví dụ: `str.join()`, list comprehensions).",
+          "readability": 0.8166666666666668,
+          "familiarity": 0.9411764705882353
+        },
+        {
+          "text": "Hiểu rõ cách xử lý dữ liệu dạng bảng (2D list) để định dạng đầu ra theo yêu cầu.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Trong Python, `list` không có phương thức `.map()`. Nếu muốn áp dụng một hàm cho từng phần tử, bạn có thể dùng `map()` (hàm built-in) hoặc list comprehension. Tuy nhiên, trong trường hợp này, mục tiêu là nối các phần tử thành chuỗi, không phải áp dụng một hàm biến đổi.",
+          "readability": 1.0,
+          "familiarity": 0.9166666666666666
+        },
+        {
+          "text": "Sử dụng phương thức `str.join()` để nối các chuỗi. Ví dụ: `'\t'.join(str(col) for col in row)` để nối các cột trong một hàng, và sau đó `'\n'.join(processed_rows)` để nối các hàng lại với nhau.",
+          "readability": 0.5533333333333332,
+          "familiarity": 0.9032258064516129
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 80,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print([x.map(``, x)for x in tab])",
+      "hints": [
+        "Cần nắm vững các phương thức của kiểu dữ liệu list trong Python.",
+        "Cần hiểu cách sử dụng các hàm để nối chuỗi (string joining) và định dạng đầu ra.",
+        "Trong Python, list không có phương thức 'map' trực tiếp. Nếu muốn áp dụng một hàm cho từng phần tử, bạn có thể dùng hàm `map()` toàn cục (nhưng cần truyền hàm và iterable), hoặc dùng list comprehension với logic phù hợp. Để nối các phần tử trong list thành chuỗi, hãy dùng phương thức `str.join()`.",
+        "Để in bảng, bạn cần nối các phần tử trong mỗi hàng bằng một dấu phân cách (ví dụ: tab `\\t`), sau đó nối các hàng lại với nhau bằng dấu phân cách hàng (ví dụ: xuống dòng `\\n`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần nắm vững các phương thức của kiểu dữ liệu list trong Python.",
+          "readability": 1.0,
+          "familiarity": 0.9090909090909091
+        },
+        {
+          "text": "Cần hiểu cách sử dụng các hàm để nối chuỗi (string joining) và định dạng đầu ra.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Trong Python, list không có phương thức 'map' trực tiếp. Nếu muốn áp dụng một hàm cho từng phần tử, bạn có thể dùng hàm `map()` toàn cục (nhưng cần truyền hàm và iterable), hoặc dùng list comprehension với logic phù hợp. Để nối các phần tử trong list thành chuỗi, hãy dùng phương thức `str.join()`.",
+          "readability": 1.0,
+          "familiarity": 0.9183673469387755
+        },
+        {
+          "text": "Để in bảng, bạn cần nối các phần tử trong mỗi hàng bằng một dấu phân cách (ví dụ: tab `\\t`), sau đó nối các hàng lại với nhau bằng dấu phân cách hàng (ví dụ: xuống dòng `\\n`).",
+          "readability": 1.0,
+          "familiarity": 0.9411764705882353
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 80,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "print a 2 dimensional list `tab` as a table with delimiters",
+      "reference_code": "",
+      "student_code": "print(tab, sep='\\t', end='",
+      "hints": [
+        "Cần hiểu rõ cách hàm `print()` xử lý các đối số, đặc biệt khi in một cấu trúc dữ liệu phức tạp như list 2 chiều.",
+        "Cần xử lý lỗi cú pháp để chương trình có thể chạy được.",
+        "Thiếu logic lặp qua từng hàng và từng cột của danh sách 2 chiều để định dạng đầu ra.",
+        "Thêm dấu nháy đơn hoặc kép để đóng chuỗi, ví dụ: `end=''` hoặc `end='\\n'`.",
+        "Cần sử dụng vòng lặp lồng nhau hoặc list comprehension để xử lý từng hàng và từng phần tử. Ví dụ: `for row in tab: print('\\t'.join(str(col) for col in row))`.",
+        "Thêm cấu trúc lặp (ví dụ: `for` loop) để truy cập từng phần tử trong `tab` và định dạng chúng thành chuỗi trước khi in."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ cách hàm `print()` xử lý các đối số, đặc biệt khi in một cấu trúc dữ liệu phức tạp như list 2 chiều.",
+          "readability": 1.0,
+          "familiarity": 0.9545454545454546
+        },
+        {
+          "text": "Cần xử lý lỗi cú pháp để chương trình có thể chạy được.",
+          "readability": 0.8769230769230769,
+          "familiarity": 0.9230769230769231
+        },
+        {
+          "text": "Thiếu logic lặp qua từng hàng và từng cột của danh sách 2 chiều để định dạng đầu ra.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Thêm dấu nháy đơn hoặc kép để đóng chuỗi, ví dụ: `end=''` hoặc `end='\\n'`.",
+          "readability": 1.0,
+          "familiarity": 0.8571428571428571
+        },
+        {
+          "text": "Cần sử dụng vòng lặp lồng nhau hoặc list comprehension để xử lý từng hàng và từng phần tử. Ví dụ: `for row in tab: print('\\t'.join(str(col) for col in row))`.",
+          "readability": 0.825,
+          "familiarity": 0.9545454545454546
+        },
+        {
+          "text": "Thêm cấu trúc lặp (ví dụ: `for` loop) để truy cập từng phần tử trong `tab` và định dạng chúng thành chuỗi trước khi in.",
+          "readability": 1.0,
+          "familiarity": 0.9090909090909091
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": 100,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "data ['a']= df ['a']== 'a')",
+      "hints": [
+        "Cần đọc kỹ và hiểu rõ yêu cầu đề bài trước khi bắt đầu viết code.",
+        "Xác định đúng thư viện và API cần dùng cho bài toán (ví dụ: Matplotlib cho việc vẽ đồ thị và đặt nhãn).",
+        "Cần tập trung vào việc sử dụng thư viện Matplotlib và tìm hiểu cách thêm các ký tự đặc biệt (như subscript) vào nhãn đồ thị. Ví dụ: sử dụng chuỗi Unicode '\\u2082' cho số 2 subscript.",
+        "Loại bỏ dấu đóng ngoặc đơn thừa: `data['a'] = df['a'] == 'a'` hoặc `data['a'] = (df['a'] == 'a')` nếu muốn nhóm biểu thức điều kiện."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ và hiểu rõ yêu cầu đề bài trước khi bắt đầu viết code.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Xác định đúng thư viện và API cần dùng cho bài toán (ví dụ: Matplotlib cho việc vẽ đồ thị và đặt nhãn).",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Cần tập trung vào việc sử dụng thư viện Matplotlib và tìm hiểu cách thêm các ký tự đặc biệt (như subscript) vào nhãn đồ thị. Ví dụ: sử dụng chuỗi Unicode '\\u2082' cho số 2 subscript.",
+          "readability": 1.0,
+          "familiarity": 0.9705882352941176
+        },
+        {
+          "text": "Loại bỏ dấu đóng ngoặc đơn thừa: `data['a'] = df['a'] == 'a'` hoặc `data['a'] = (df['a'] == 'a')` nếu muốn nhóm biểu thức điều kiện.",
+          "readability": 1.0,
+          "familiarity": 0.8
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": 100,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.execute(`x`, 0,{`2`:`2`})",
+      "hints": [
+        "Cần tìm hiểu cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string).",
+        "Cần làm quen với thư viện Matplotlib và các hàm cơ bản của nó để vẽ đồ thị và đặt nhãn.",
+        "Hiểu rõ yêu cầu của đề bài về việc đặt nhãn có ký tự subscript.",
+        "Sử dụng dấu nháy đơn (') hoặc nháy kép (\") cho chuỗi, ví dụ: 'x', '2'.",
+        "Tham khảo tài liệu Matplotlib để sử dụng đúng hàm và tham số. Ví dụ, để vẽ và đặt nhãn, bạn có thể dùng `plt.plot(x, y, label='...')`.",
+        "Để tạo subscript '2' trong 'H2O', bạn có thể sử dụng ký tự Unicode `\\u2082` (ví dụ: `label='H\\u2082O'`) hoặc sử dụng cú pháp LaTeX nếu đã bật `usetex=True` (ví dụ: `label='H$_2$O'`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần tìm hiểu cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string).",
+          "readability": 1.0,
+          "familiarity": 0.875
+        },
+        {
+          "text": "Cần làm quen với thư viện Matplotlib và các hàm cơ bản của nó để vẽ đồ thị và đặt nhãn.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Hiểu rõ yêu cầu của đề bài về việc đặt nhãn có ký tự subscript.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Sử dụng dấu nháy đơn (') hoặc nháy kép (\") cho chuỗi, ví dụ: 'x', '2'.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Tham khảo tài liệu Matplotlib để sử dụng đúng hàm và tham số. Ví dụ, để vẽ và đặt nhãn, bạn có thể dùng `plt.plot(x, y, label='...')`.",
+          "readability": 0.425,
+          "familiarity": 0.9230769230769231
+        },
+        {
+          "text": "Để tạo subscript '2' trong 'H2O', bạn có thể sử dụng ký tự Unicode `\\u2082` (ví dụ: `label='H\\u2082O'`) hoặc sử dụng cú pháp LaTeX nếu đã bật `usetex=True` (ví dụ: `label='H$_2$O'`).",
+          "readability": 1.0,
+          "familiarity": 0.7931034482758621
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": 100,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.text(x[2], y[2], 'H2O', ha='center', va='bottom')",
+      "hints": [
+        "Cần hiểu rõ yêu cầu 'subscripted' (chỉ số dưới) và 'labels' (nhãn) trong đề bài.",
+        "Sử dụng đúng API của Matplotlib cho việc thêm nhãn vào biểu đồ (ví dụ: tham số `label` trong `plt.plot()` hoặc `plt.xlabel()`, `plt.ylabel()`).",
+        "Tìm hiểu cách tạo ký tự subscript trong Matplotlib (ví dụ: dùng Unicode `\\u2082` hoặc cú pháp TeX `$_2$`).",
+        "Để tạo nhãn cho đường vẽ, hãy sử dụng tham số `label` trong hàm `plt.plot()`. Ví dụ: `plt.plot(x, y, label='H2O')`. Để tạo nhãn cho trục, sử dụng `plt.xlabel()` hoặc `plt.ylabel()`.",
+        "Để tạo chỉ số dưới, bạn có thể sử dụng ký tự Unicode (`'H\\u2082O'`) hoặc cú pháp TeX của Matplotlib (`'H$_2$O'`). Ví dụ: `plt.plot(x, y, label='H\\u2082O')`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hiểu rõ yêu cầu 'subscripted' (chỉ số dưới) và 'labels' (nhãn) trong đề bài.",
+          "readability": 1.0,
+          "familiarity": 0.7857142857142857
+        },
+        {
+          "text": "Sử dụng đúng API của Matplotlib cho việc thêm nhãn vào biểu đồ (ví dụ: tham số `label` trong `plt.plot()` hoặc `plt.xlabel()`, `plt.ylabel()`).",
+          "readability": 0.6402173913043478,
+          "familiarity": 0.8
+        },
+        {
+          "text": "Tìm hiểu cách tạo ký tự subscript trong Matplotlib (ví dụ: dùng Unicode `\\u2082` hoặc cú pháp TeX `$_2$`).",
+          "readability": 1.0,
+          "familiarity": 0.8823529411764706
+        },
+        {
+          "text": "Để tạo nhãn cho đường vẽ, hãy sử dụng tham số `label` trong hàm `plt.plot()`. Ví dụ: `plt.plot(x, y, label='H2O')`. Để tạo nhãn cho trục, sử dụng `plt.xlabel()` hoặc `plt.ylabel()`.",
+          "readability": 0.44523809523809516,
+          "familiarity": 0.7692307692307693
+        },
+        {
+          "text": "Để tạo chỉ số dưới, bạn có thể sử dụng ký tự Unicode (`'H\\u2082O'`) hoặc cú pháp TeX của Matplotlib (`'H$_2$O'`). Ví dụ: `plt.plot(x, y, label='H\\u2082O')`.",
+          "readability": 0.8762820512820512,
+          "familiarity": 0.8461538461538461
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 100,
+      "case": "baseline",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "data ['a']= df ['a']== 'a')",
+      "hints": [
+        "Cần đọc kỹ đề bài để hiểu rõ yêu cầu và mục tiêu của bài toán.",
+        "Xác định đúng thư viện và API cần sử dụng (matplotlib cho việc vẽ đồ thị và nhãn).",
+        "Nắm vững cú pháp cơ bản của Python, đặc biệt là việc đóng mở ngoặc.",
+        "Đọc lại đề bài và xác định rằng cần sử dụng thư viện `matplotlib.pyplot` để vẽ đồ thị và đặt nhãn. Ví dụ: `plt.plot(x, y, label='H\\u2082O')`.",
+        "Kiểm tra lại các cặp dấu ngoặc đơn để đảm bảo chúng được đóng mở đúng cách. Ví dụ, nếu muốn gán một Series boolean: `data['a'] = (df['a'] == 'a')` hoặc `data['a'] = df['a'] == 'a'` nếu `data['a']` là một cột mới."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài để hiểu rõ yêu cầu và mục tiêu của bài toán.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Xác định đúng thư viện và API cần sử dụng (matplotlib cho việc vẽ đồ thị và nhãn).",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Nắm vững cú pháp cơ bản của Python, đặc biệt là việc đóng mở ngoặc.",
+          "readability": 1.0,
+          "familiarity": 0.9333333333333333
+        },
+        {
+          "text": "Đọc lại đề bài và xác định rằng cần sử dụng thư viện `matplotlib.pyplot` để vẽ đồ thị và đặt nhãn. Ví dụ: `plt.plot(x, y, label='H\\u2082O')`.",
+          "readability": 0.5153846153846154,
+          "familiarity": 0.8846153846153846
+        },
+        {
+          "text": "Kiểm tra lại các cặp dấu ngoặc đơn để đảm bảo chúng được đóng mở đúng cách. Ví dụ, nếu muốn gán một Series boolean: `data['a'] = (df['a'] == 'a')` hoặc `data['a'] = df['a'] == 'a'` nếu `data['a']` là một cột mới.",
+          "readability": 1.0,
+          "familiarity": 0.85
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 100,
+      "case": "tranx-annot",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.execute(`x`, 0,{`2`:`2`})",
+      "hints": [
+        "Cần tìm hiểu cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string).",
+        "Cần tìm hiểu cách import và sử dụng thư viện Matplotlib, đặc biệt là module `pyplot` và hàm `plot`.",
+        "Nghiên cứu cách thêm nhãn (label) vào biểu đồ và cách tạo ký tự subscript trong Matplotlib.",
+        "Sử dụng `'x'` hoặc `\"x\"`.",
+        "Để vẽ biểu đồ và thêm nhãn, bạn cần dùng `plt.plot(x_data, y_data, label='your_label')`.",
+        "Thêm `import matplotlib.pyplot as plt` vào đầu file.",
+        "Để tạo 'H₂O', bạn có thể dùng `label='H\\u2082O'`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần tìm hiểu cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string).",
+          "readability": 1.0,
+          "familiarity": 0.875
+        },
+        {
+          "text": "Cần tìm hiểu cách import và sử dụng thư viện Matplotlib, đặc biệt là module `pyplot` và hàm `plot`.",
+          "readability": 1.0,
+          "familiarity": 0.8235294117647058
+        },
+        {
+          "text": "Nghiên cứu cách thêm nhãn (label) vào biểu đồ và cách tạo ký tự subscript trong Matplotlib.",
+          "readability": 1.0,
+          "familiarity": 0.8666666666666667
+        },
+        {
+          "text": "Sử dụng `'x'` hoặc `\"x\"`.",
+          "readability": 0.30000000000000004,
+          "familiarity": 0.6
+        },
+        {
+          "text": "Để vẽ biểu đồ và thêm nhãn, bạn cần dùng `plt.plot(x_data, y_data, label='your_label')`.",
+          "readability": 0.8615384615384615,
+          "familiarity": 0.7692307692307693
+        },
+        {
+          "text": "Thêm `import matplotlib.pyplot as plt` vào đầu file.",
+          "readability": 0.55625,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Để tạo 'H₂O', bạn có thể dùng `label='H\\u2082O'`.",
+          "readability": 0.8625,
+          "familiarity": 0.75
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": 100,
+      "case": "best-tranx",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.savefig(`H20`, dpi = 300)",
+      "hints": [
+        "Cần đọc kỹ đề bài để xác định yêu cầu chính là tạo 'label' chứ không phải lưu file.",
+        "Cần tìm hiểu cách đặt 'label' cho các đối tượng trong matplotlib (ví dụ: `plt.plot(..., label=...)`).",
+        "Cần tìm hiểu cách sử dụng ký tự Unicode hoặc cú pháp đặc biệt trong matplotlib để tạo chỉ số dưới (subscript).",
+        "Để đặt label cho một đối tượng trong biểu đồ (ví dụ: đường thẳng), bạn cần sử dụng tham số `label` trong các hàm vẽ biểu đồ như `plt.plot()`. Ví dụ: `plt.plot(x, y, label='...')`.",
+        "Có hai cách phổ biến để tạo chỉ số dưới: 1) Sử dụng ký tự Unicode cho chỉ số dưới (ví dụ: `H\\u2082O` cho H₂O). 2) Sử dụng cú pháp TeX/LaTeX của Matplotlib bằng cách bao quanh chuỗi bằng dấu đô la (ví dụ: `'$H_2O$'`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài để xác định yêu cầu chính là tạo 'label' chứ không phải lưu file.",
+          "readability": 1.0,
+          "familiarity": 0.9473684210526315
+        },
+        {
+          "text": "Cần tìm hiểu cách đặt 'label' cho các đối tượng trong matplotlib (ví dụ: `plt.plot(..., label=...)`).",
+          "readability": 0.49375,
+          "familiarity": 0.7692307692307693
+        },
+        {
+          "text": "Cần tìm hiểu cách sử dụng ký tự Unicode hoặc cú pháp đặc biệt trong matplotlib để tạo chỉ số dưới (subscript).",
+          "readability": 1.0,
+          "familiarity": 0.95
+        },
+        {
+          "text": "Để đặt label cho một đối tượng trong biểu đồ (ví dụ: đường thẳng), bạn cần sử dụng tham số `label` trong các hàm vẽ biểu đồ như `plt.plot()`. Ví dụ: `plt.plot(x, y, label='...')`.",
+          "readability": 0.5035294117647058,
+          "familiarity": 0.8275862068965517
+        },
+        {
+          "text": "Có hai cách phổ biến để tạo chỉ số dưới: 1) Sử dụng ký tự Unicode cho chỉ số dưới (ví dụ: `H\\u2082O` cho H₂O). 2) Sử dụng cú pháp TeX/LaTeX của Matplotlib bằng cách bao quanh chuỗi bằng dấu đô la (ví dụ: `'$H_2O$'`).",
+          "readability": 1.0,
+          "familiarity": 0.8974358974358975
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": 100,
+      "case": "best-tranx-rerank",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.savefig(`H20`, dpi = 300)",
+      "hints": [
+        "Cần đọc kỹ đề bài để hiểu rõ yêu cầu về 'labels' và 'subscripted text'.",
+        "Phân biệt rõ chức năng của các hàm Matplotlib như `plt.savefig` (lưu hình) và `plt.plot` (vẽ và gán nhãn).",
+        "Nắm vững cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string literals).",
+        "Để tạo nhãn cho đường vẽ, bạn cần sử dụng tham số `label` trong hàm `plt.plot()` hoặc dùng `plt.xlabel()`, `plt.ylabel()` cho nhãn trục. Ví dụ: `plt.plot(x, y, label='...')`.",
+        "Luôn sử dụng dấu nháy đơn hoặc nháy kép để định nghĩa chuỗi trong Python. Ví dụ: `'H20'` hoặc `\"H20\"`.",
+        "Để tạo subscript trong Matplotlib labels, bạn có thể dùng ký tự Unicode (ví dụ: `H\\u2082O`) hoặc cú pháp LaTeX (ví dụ: `H$_2$O`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài để hiểu rõ yêu cầu về 'labels' và 'subscripted text'.",
+          "readability": 1.0,
+          "familiarity": 0.9333333333333333
+        },
+        {
+          "text": "Phân biệt rõ chức năng của các hàm Matplotlib như `plt.savefig` (lưu hình) và `plt.plot` (vẽ và gán nhãn).",
+          "readability": 0.5412280701754386,
+          "familiarity": 0.8947368421052632
+        },
+        {
+          "text": "Nắm vững cú pháp cơ bản của Python, đặc biệt là cách khai báo chuỗi (string literals).",
+          "readability": 1.0,
+          "familiarity": 0.9375
+        },
+        {
+          "text": "Để tạo nhãn cho đường vẽ, bạn cần sử dụng tham số `label` trong hàm `plt.plot()` hoặc dùng `plt.xlabel()`, `plt.ylabel()` cho nhãn trục. Ví dụ: `plt.plot(x, y, label='...')`.",
+          "readability": 0.4625,
+          "familiarity": 0.75
+        },
+        {
+          "text": "Luôn sử dụng dấu nháy đơn hoặc nháy kép để định nghĩa chuỗi trong Python. Ví dụ: `'H20'` hoặc `\"H20\"`.",
+          "readability": 0.7875000000000001,
+          "familiarity": 0.8421052631578947
+        },
+        {
+          "text": "Để tạo subscript trong Matplotlib labels, bạn có thể dùng ký tự Unicode (ví dụ: `H\\u2082O`) hoặc cú pháp LaTeX (ví dụ: `H$_2$O`).",
+          "readability": 1.0,
+          "familiarity": 0.8571428571428571
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": 100,
+      "case": "codex",
+      "language": "Python",
+      "problem_statement": "subscript text 'H20' with '2' as subscripted in matplotlib labels for arrays 'x' and 'y'.",
+      "reference_code": "",
+      "student_code": "plt.text(x[2], y[2], 'H2O', ha='center', va='bottom')",
+      "hints": [
+        "Cần phân biệt rõ ràng giữa việc tạo 'label' cho biểu đồ (thường dùng với `plt.plot` và `plt.legend`) và việc thêm 'text annotation' tại một điểm cụ thể (`plt.text`).",
+        "Chưa thực hiện được yêu cầu chính của đề bài là định dạng '2' thành chỉ số dưới.",
+        "Để tạo nhãn cho một đường vẽ, hãy sử dụng tham số `label` trong hàm vẽ (ví dụ: `plt.plot(x, y, label='...')`). Sau đó, gọi `plt.legend()` để hiển thị các nhãn này.",
+        "Trong Matplotlib, bạn có thể sử dụng cú pháp Unicode cho chỉ số dưới (ví dụ: `label='H\\u2082O'`) hoặc cú pháp TeX/LaTeX (ví dụ: `label='$H_2O$'`) để tạo chỉ số dưới."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần phân biệt rõ ràng giữa việc tạo 'label' cho biểu đồ (thường dùng với `plt.plot` và `plt.legend`) và việc thêm 'text annotation' tại một điểm cụ thể (`plt.text`).",
+          "readability": 0.6560344827586208,
+          "familiarity": 0.8214285714285714
+        },
+        {
+          "text": "Chưa thực hiện được yêu cầu chính của đề bài là định dạng '2' thành chỉ số dưới.",
+          "readability": 1.0,
+          "familiarity": 1.0
+        },
+        {
+          "text": "Để tạo nhãn cho một đường vẽ, hãy sử dụng tham số `label` trong hàm vẽ (ví dụ: `plt.plot(x, y, label='...')`). Sau đó, gọi `plt.legend()` để hiển thị các nhãn này.",
+          "readability": 0.44258064516129025,
+          "familiarity": 0.8571428571428571
+        },
+        {
+          "text": "Trong Matplotlib, bạn có thể sử dụng cú pháp Unicode cho chỉ số dưới (ví dụ: `label='H\\u2082O'`) hoặc cú pháp TeX/LaTeX (ví dụ: `label='$H_2O$'`) để tạo chỉ số dưới.",
+          "readability": 1.0,
+          "familiarity": 0.8571428571428571
+        }
+      ],
+      "hint_count": 4
+    }
+  ]
+}

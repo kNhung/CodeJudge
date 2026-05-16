@@ -1,0 +1,3086 @@
+{
+  "input_file": "/home/knhung/KLTN/CodeJudge/evaluation/hcmus/output/hcmus_from_48_taxonomy/hcmus_from_48_taxonomy.jsonl",
+  "mode": "agnostic",
+  "include_strengths": false,
+  "metrics": [
+    "readability-flesch_kincaid_reading_ease-sm",
+    "familiarity-freq-exclude_stop_words-sm",
+    "convergence-specificity-bert-base"
+  ],
+  "summary": {
+    "samples": 51,
+    "total_hints": 341,
+    "metrics": {
+      "readability-flesch_kincaid_reading_ease-sm": {
+        "mean": 143.186267,
+        "max": 180.555,
+        "min": 42.616,
+        "count": 341
+      },
+      "familiarity-freq-exclude_stop_words-sm": {
+        "mean": 0.766097,
+        "max": 0.952,
+        "min": 0.485,
+        "count": 341
+      },
+      "convergence-specificity-bert-base": {
+        "mean": 0.935484,
+        "max": 1.0,
+        "min": 0.0,
+        "count": 341
+      }
+    }
+  },
+  "samples": [
+    {
+      "row_index": "48",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cải thiện việc hiểu và xử lý đầy đủ phạm vi của đề bài trong Bài 3 (số đối xứng lớn nhất).",
+        "Nên bổ sung các thông báo nhập liệu rõ ràng cho người dùng trong Bài 4.",
+        "Xem xét các trường hợp biên như số hoàn hảo khi kiểm tra số bạn bè trong Bài 4.",
+        "Cần một thuật toán duyệt qua tất cả các số con (subsequences) có thể tạo ra từ số ban đầu, sau đó kiểm tra tính đối xứng và tìm số lớn nhất. Có thể dùng đệ quy hoặc lập trình động.",
+        "Khởi tạo `maxPalindrome` bằng `n` nếu `isPalindrome(n)` là đúng, hoặc đảm bảo `n` được kiểm tra trong quá trình duyệt.",
+        "Thêm `cout << \"Nhập a: \";` và `cout << \"Nhập b: \";` trước các lệnh `cin` tương ứng.",
+        "Cân nhắc thêm điều kiện `if (a == b) return 0;` hoặc làm rõ định nghĩa số bạn bè có bao gồm số hoàn hảo với chính nó hay không."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cải thiện việc hiểu và xử lý đầy đủ phạm vi của đề bài trong Bài 3 (số đối xứng lớn nhất).",
+          "readability-flesch_kincaid_reading_ease-sm": 147.345,
+          "familiarity-freq-exclude_stop_words-sm": 0.751,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Nên bổ sung các thông báo nhập liệu rõ ràng cho người dùng trong Bài 4.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.007,
+          "familiarity-freq-exclude_stop_words-sm": 0.831,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xem xét các trường hợp biên như số hoàn hảo khi kiểm tra số bạn bè trong Bài 4.",
+          "readability-flesch_kincaid_reading_ease-sm": 157.119,
+          "familiarity-freq-exclude_stop_words-sm": 0.841,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một thuật toán duyệt qua tất cả các số con (subsequences) có thể tạo ra từ số ban đầu, sau đó kiểm tra tính đối xứng và tìm số lớn nhất. Có thể dùng đệ quy hoặc lập trình động.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.695,
+          "familiarity-freq-exclude_stop_words-sm": 0.858,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Khởi tạo `maxPalindrome` bằng `n` nếu `isPalindrome(n)` là đúng, hoặc đảm bảo `n` được kiểm tra trong quá trình duyệt.",
+          "readability-flesch_kincaid_reading_ease-sm": 121.008,
+          "familiarity-freq-exclude_stop_words-sm": 0.708,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `cout << \"Nhập a: \";` và `cout << \"Nhập b: \";` trước các lệnh `cin` tương ứng.",
+          "readability-flesch_kincaid_reading_ease-sm": 177.03,
+          "familiarity-freq-exclude_stop_words-sm": 0.833,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cân nhắc thêm điều kiện `if (a == b) return 0;` hoặc làm rõ định nghĩa số bạn bè có bao gồm số hoàn hảo với chính nó hay không.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.885,
+          "familiarity-freq-exclude_stop_words-sm": 0.85,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": "51",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Sử dụng long long cho n * n để đảm bảo không bị tràn số: `return (long long)n * n % (long long)pow(10, countLength(n))) == n;` hoặc tốt hơn là tính powerOf10 bằng vòng lặp.",
+        "Thay thế bằng một hàm tính lũy thừa của 10 cho số nguyên: `long long powerOf10 = 1; for (int i = 0; i < countLength(n); ++i) powerOf10 *= 10;`",
+        "Cần một thuật toán khác để giải quyết bài toán này, ví dụ: duyệt qua tất cả các số có thể tạo ra bằng cách xóa chữ số và kiểm tra xem chúng có phải là số đối xứng không, sau đó chọn số lớn nhất. Hoặc sử dụng phương pháp đệ quy/quy hoạch động để tìm chuỗi con đối xứng dài nhất.",
+        "Nếu muốn tạo số 3 chữ số d1 dX d4, công thức phải là `d1 * 100 + dX * 10 + d4`. Tuy nhiên, đây chỉ là một phần nhỏ của giải pháp sai lầm tổng thể.",
+        "Cần đảm bảo rằng chương trình luôn tìm được một số đối xứng hợp lệ nếu có thể tạo ra từ 2 chữ số trở lên. Nếu không tìm được số đối xứng 3 hoặc 4 chữ số, có thể tìm số đối xứng 2 chữ số."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Sử dụng long long cho n * n để đảm bảo không bị tràn số: `return (long long)n * n % (long long)pow(10, countLength(n))) == n;` hoặc tốt hơn là tính powerOf10 bằng vòng lặp.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.485,
+          "familiarity-freq-exclude_stop_words-sm": 0.78,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế bằng một hàm tính lũy thừa của 10 cho số nguyên: `long long powerOf10 = 1; for (int i = 0; i < countLength(n); ++i) powerOf10 *= 10;`",
+          "readability-flesch_kincaid_reading_ease-sm": 145.955,
+          "familiarity-freq-exclude_stop_words-sm": 0.791,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một thuật toán khác để giải quyết bài toán này, ví dụ: duyệt qua tất cả các số có thể tạo ra bằng cách xóa chữ số và kiểm tra xem chúng có phải là số đối xứng không, sau đó chọn số lớn nhất. Hoặc sử dụng phương pháp đệ quy/quy hoạch động để tìm chuỗi con đối xứng dài nhất.",
+          "readability-flesch_kincaid_reading_ease-sm": 155.509,
+          "familiarity-freq-exclude_stop_words-sm": 0.827,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Nếu muốn tạo số 3 chữ số d1 dX d4, công thức phải là `d1 * 100 + dX * 10 + d4`. Tuy nhiên, đây chỉ là một phần nhỏ của giải pháp sai lầm tổng thể.",
+          "readability-flesch_kincaid_reading_ease-sm": 163.061,
+          "familiarity-freq-exclude_stop_words-sm": 0.877,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần đảm bảo rằng chương trình luôn tìm được một số đối xứng hợp lệ nếu có thể tạo ra từ 2 chữ số trở lên. Nếu không tìm được số đối xứng 3 hoặc 4 chữ số, có thể tìm số đối xứng 2 chữ số.",
+          "readability-flesch_kincaid_reading_ease-sm": 179.084,
+          "familiarity-freq-exclude_stop_words-sm": 0.848,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": "52",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cẩn trọng hơn với việc sử dụng các hàm thư viện có thể gây ra lỗi chính xác khi làm việc với số nguyên (ví dụ: `pow` trong Bài 2).",
+        "Bài 3 (Số đối xứng lớn nhất) có lỗi logic nghiêm trọng trong việc xử lý các trường hợp xóa nhiều chữ số và điều kiện về số đối xứng (phải từ 2 chữ số trở lên).",
+        "Cần kiểm tra kỹ các trường hợp biên và yêu cầu cụ thể của đề bài để đảm bảo tính đúng đắn của kết quả.",
+        "Thay thế bằng vòng lặp để tính lũy thừa của 10 hoặc sử dụng `std::round(std::pow(10, k))` để đảm bảo kết quả nguyên chính xác.",
+        "Để xóa hai chữ số, cần tạo một số tạm sau khi xóa chữ số đầu tiên, sau đó xóa chữ số thứ hai từ số tạm đó. Cách tiếp cận này phức tạp hơn vì vị trí chữ số sẽ thay đổi sau lần xóa đầu tiên. Một cách khác là chuyển số thành chuỗi, xóa ký tự, rồi chuyển lại thành số.",
+        "Loại bỏ phần code này hoặc đảm bảo rằng `temp` luôn có ít nhất 2 chữ số trước khi kiểm tra `DoiXung`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cẩn trọng hơn với việc sử dụng các hàm thư viện có thể gây ra lỗi chính xác khi làm việc với số nguyên (ví dụ: `pow` trong Bài 2).",
+          "readability-flesch_kincaid_reading_ease-sm": 137.449,
+          "familiarity-freq-exclude_stop_words-sm": 0.79,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3 (Số đối xứng lớn nhất) có lỗi logic nghiêm trọng trong việc xử lý các trường hợp xóa nhiều chữ số và điều kiện về số đối xứng (phải từ 2 chữ số trở lên).",
+          "readability-flesch_kincaid_reading_ease-sm": 151.474,
+          "familiarity-freq-exclude_stop_words-sm": 0.721,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần kiểm tra kỹ các trường hợp biên và yêu cầu cụ thể của đề bài để đảm bảo tính đúng đắn của kết quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.852,
+          "familiarity-freq-exclude_stop_words-sm": 0.826,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Thay thế bằng vòng lặp để tính lũy thừa của 10 hoặc sử dụng `std::round(std::pow(10, k))` để đảm bảo kết quả nguyên chính xác.",
+          "readability-flesch_kincaid_reading_ease-sm": 161.102,
+          "familiarity-freq-exclude_stop_words-sm": 0.732,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để xóa hai chữ số, cần tạo một số tạm sau khi xóa chữ số đầu tiên, sau đó xóa chữ số thứ hai từ số tạm đó. Cách tiếp cận này phức tạp hơn vì vị trí chữ số sẽ thay đổi sau lần xóa đầu tiên. Một cách khác là chuyển số thành chuỗi, xóa ký tự, rồi chuyển lại thành số.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.491,
+          "familiarity-freq-exclude_stop_words-sm": 0.81,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Loại bỏ phần code này hoặc đảm bảo rằng `temp` luôn có ít nhất 2 chữ số trước khi kiểm tra `DoiXung`.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.34,
+          "familiarity-freq-exclude_stop_words-sm": 0.775,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "55",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Thay đổi logic tính số chữ số, ví dụ:\n```cpp\nint Dem_sochuso(int a)\n{\n    if (a == 0) return 1;\n    int count = 0;\n    while (a != 0)\n    {\n        a /= 10;\n        count++;\n    }\n    return count;\n}\n```",
+        "Cần thiết kế lại hoàn toàn hàm này dựa trên thuật toán tìm chuỗi con đối xứng dài nhất (Longest Palindromic Subsequence), ví dụ dùng quy hoạch động hoặc đệ quy có nhớ.",
+        "Cần nghiên cứu lại thuật toán để tạo số đối xứng lớn nhất từ một số bằng cách xóa chữ số. Một cách tiếp cận là chuyển số thành chuỗi, sau đó tìm chuỗi con đối xứng dài nhất (Longest Palindromic Subsequence) và chuyển ngược lại thành số."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Thay đổi logic tính số chữ số, ví dụ:\n```cpp\nint Dem_sochuso(int a)\n{\n    if (a == 0) return 1;\n    int count = 0;\n    while (a != 0)\n    {\n        a /= 10;\n        count++;\n    }\n    return count;\n}\n```",
+          "readability-flesch_kincaid_reading_ease-sm": 114.731,
+          "familiarity-freq-exclude_stop_words-sm": 0.839,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần thiết kế lại hoàn toàn hàm này dựa trên thuật toán tìm chuỗi con đối xứng dài nhất (Longest Palindromic Subsequence), ví dụ dùng quy hoạch động hoặc đệ quy có nhớ.",
+          "readability-flesch_kincaid_reading_ease-sm": 104.122,
+          "familiarity-freq-exclude_stop_words-sm": 0.736,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần nghiên cứu lại thuật toán để tạo số đối xứng lớn nhất từ một số bằng cách xóa chữ số. Một cách tiếp cận là chuyển số thành chuỗi, sau đó tìm chuỗi con đối xứng dài nhất (Longest Palindromic Subsequence) và chuyển ngược lại thành số.",
+          "readability-flesch_kincaid_reading_ease-sm": 137.72,
+          "familiarity-freq-exclude_stop_words-sm": 0.799,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": "56",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cải thiện kỹ năng debug và kiểm tra lại logic, đặc biệt khi làm việc với các phép toán số học liên quan đến chữ số (ví dụ: đếm số chữ số, trích xuất chữ số).",
+        "Đối với Bài 3, cần xem xét lại toàn bộ ý tưởng giải quyết để tìm số đối xứng lớn nhất, vì cách tiếp cận hiện tại không đảm bảo tính đúng đắn và hiệu quả.",
+        "Xử lý lỗi đầu vào cần rõ ràng hơn, ví dụ như trong Bài 2 khi n < 0, nên kết thúc chương trình hoặc hàm thay vì chỉ in 'error' và tiếp tục.",
+        "Để đếm số chữ số, chỉ cần chia `n` cho 10 và tăng `count` cho đến khi `n` bằng 0. Ví dụ:\n```cpp\nint count(int n){\n    if (n == 0) return 1; // Xử lý trường hợp n=0\n    int count = 0;\n    int temp_n = n;\n    while(temp_n != 0){\n        temp_n = temp_n / 10;\n        count++;\n    }\n    return count;\n}\n```",
+        "Áp dụng cách sửa tương tự như hàm `count` trong Bai02.cpp.",
+        "Để giải quyết bài toán này một cách đúng đắn, cần chuyển đổi số thành chuỗi ký tự hoặc mảng các chữ số để dễ dàng thao tác xóa. Sau đó, thử tất cả các tổ hợp xóa chữ số để tạo ra các số đối xứng và chọn số lớn nhất. Đây là một bài toán phức tạp hơn và đòi hỏi một thuật toán khác."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cải thiện kỹ năng debug và kiểm tra lại logic, đặc biệt khi làm việc với các phép toán số học liên quan đến chữ số (ví dụ: đếm số chữ số, trích xuất chữ số).",
+          "readability-flesch_kincaid_reading_ease-sm": 128.123,
+          "familiarity-freq-exclude_stop_words-sm": 0.781,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đối với Bài 3, cần xem xét lại toàn bộ ý tưởng giải quyết để tìm số đối xứng lớn nhất, vì cách tiếp cận hiện tại không đảm bảo tính đúng đắn và hiệu quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.705,
+          "familiarity-freq-exclude_stop_words-sm": 0.835,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Xử lý lỗi đầu vào cần rõ ràng hơn, ví dụ như trong Bài 2 khi n < 0, nên kết thúc chương trình hoặc hàm thay vì chỉ in 'error' và tiếp tục.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.978,
+          "familiarity-freq-exclude_stop_words-sm": 0.87,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để đếm số chữ số, chỉ cần chia `n` cho 10 và tăng `count` cho đến khi `n` bằng 0. Ví dụ:\n```cpp\nint count(int n){\n    if (n == 0) return 1; // Xử lý trường hợp n=0\n    int count = 0;\n    int temp_n = n;\n    while(temp_n != 0){\n        temp_n = temp_n / 10;\n        count++;\n    }\n    return count;\n}\n```",
+          "readability-flesch_kincaid_reading_ease-sm": 160.098,
+          "familiarity-freq-exclude_stop_words-sm": 0.787,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Áp dụng cách sửa tương tự như hàm `count` trong Bai02.cpp.",
+          "readability-flesch_kincaid_reading_ease-sm": 161.102,
+          "familiarity-freq-exclude_stop_words-sm": 0.659,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để giải quyết bài toán này một cách đúng đắn, cần chuyển đổi số thành chuỗi ký tự hoặc mảng các chữ số để dễ dàng thao tác xóa. Sau đó, thử tất cả các tổ hợp xóa chữ số để tạo ra các số đối xứng và chọn số lớn nhất. Đây là một bài toán phức tạp hơn và đòi hỏi một thuật toán khác.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.404,
+          "familiarity-freq-exclude_stop_words-sm": 0.789,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "58",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cẩn trọng hơn với các trường hợp biên và giới hạn kiểu dữ liệu (`int` vs `long long` trong vòng lặp, sai số của `pow`).",
+        "Đặc biệt cần rèn luyện kỹ năng phân tích yêu cầu đề bài và kiểm tra logic giải thuật, đặc biệt là các điều kiện (`||` thay vì `&&`) và cách tạo dữ liệu mới (xóa chữ số).",
+        "Kiểm tra kỹ lại các ví dụ và định nghĩa trong đề để đảm bảo thuật toán bao quát hết các trường hợp.",
+        "Thay đổi kiểu dữ liệu của `i` thành `long long`: `for (long long i = a; i <= b; i++)`.",
+        "Nên tự xây dựng hàm tính lũy thừa nguyên hoặc dùng vòng lặp để tính `10^count` nhằm tránh sai số: `long long power_of_10 = 1; for (int k = 0; k < count; k++) power_of_10 *= 10;`.",
+        "Để xóa chữ số ở vị trí `k` (0-indexed từ phải sang), cần tách số thành phần trước vị trí `k` và phần sau vị trí `k`, sau đó ghép lại. Ví dụ: `(n / (int)pow(10, k+1)) * (int)pow(10, k) + (n % (int)pow(10, k))` (cần cẩn thận với `pow` và `int` cast). Hoặc chuyển số thành chuỗi để thao tác dễ hơn. Cần xem xét tất cả các khả năng xóa chữ số (0, 1, 2, ...).",
+        "Thay toán tử `||` bằng `&&`: `if (temp1 == b && temp2 == a) return true;`.",
+        "Thêm kiểm tra cho `n=1` ở đầu hàm `cal_sumofdiv`: `if (n == 1) return 0;`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cẩn trọng hơn với các trường hợp biên và giới hạn kiểu dữ liệu (`int` vs `long long` trong vòng lặp, sai số của `pow`).",
+          "readability-flesch_kincaid_reading_ease-sm": 132.055,
+          "familiarity-freq-exclude_stop_words-sm": 0.689,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đặc biệt cần rèn luyện kỹ năng phân tích yêu cầu đề bài và kiểm tra logic giải thuật, đặc biệt là các điều kiện (`||` thay vì `&&`) và cách tạo dữ liệu mới (xóa chữ số).",
+          "readability-flesch_kincaid_reading_ease-sm": 115.698,
+          "familiarity-freq-exclude_stop_words-sm": 0.739,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Kiểm tra kỹ lại các ví dụ và định nghĩa trong đề để đảm bảo thuật toán bao quát hết các trường hợp.",
+          "readability-flesch_kincaid_reading_ease-sm": 158.38,
+          "familiarity-freq-exclude_stop_words-sm": 0.79,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Thay đổi kiểu dữ liệu của `i` thành `long long`: `for (long long i = a; i <= b; i++)`.",
+          "readability-flesch_kincaid_reading_ease-sm": 126.163,
+          "familiarity-freq-exclude_stop_words-sm": 0.782,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nên tự xây dựng hàm tính lũy thừa nguyên hoặc dùng vòng lặp để tính `10^count` nhằm tránh sai số: `long long power_of_10 = 1; for (int k = 0; k < count; k++) power_of_10 *= 10;`.",
+          "readability-flesch_kincaid_reading_ease-sm": 126.015,
+          "familiarity-freq-exclude_stop_words-sm": 0.731,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để xóa chữ số ở vị trí `k` (0-indexed từ phải sang), cần tách số thành phần trước vị trí `k` và phần sau vị trí `k`, sau đó ghép lại. Ví dụ: `(n / (int)pow(10, k+1)) * (int)pow(10, k) + (n % (int)pow(10, k))` (cần cẩn thận với `pow` và `int` cast). Hoặc chuyển số thành chuỗi để thao tác dễ hơn. Cần xem xét tất cả các khả năng xóa chữ số (0, 1, 2, ...).",
+          "readability-flesch_kincaid_reading_ease-sm": 165.862,
+          "familiarity-freq-exclude_stop_words-sm": 0.742,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay toán tử `||` bằng `&&`: `if (temp1 == b && temp2 == a) return true;`.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.741,
+          "familiarity-freq-exclude_stop_words-sm": 0.772,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm kiểm tra cho `n=1` ở đầu hàm `cal_sumofdiv`: `if (n == 1) return 0;`.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.36,
+          "familiarity-freq-exclude_stop_words-sm": 0.818,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 8
+    },
+    {
+      "row_index": "61",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần duyệt qua tất cả các số con (subsequence) có thể tạo ra bằng cách xóa chữ số, kiểm tra xem số con đó có phải là số đối xứng không, và chọn số đối xứng lớn nhất trong số đó. Hoặc sử dụng kỹ thuật tìm palindrome subsequence."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần duyệt qua tất cả các số con (subsequence) có thể tạo ra bằng cách xóa chữ số, kiểm tra xem số con đó có phải là số đối xứng không, và chọn số đối xứng lớn nhất trong số đó. Hoặc sử dụng kỹ thuật tìm palindrome subsequence.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.511,
+          "familiarity-freq-exclude_stop_words-sm": 0.87,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 1
+    },
+    {
+      "row_index": "62",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Thay `int nBinh = pow(n,2);` bằng `long long nBinh = (long long)n * n;` để đảm bảo độ chính xác và tránh tràn số.",
+        "Một cách tiếp cận tốt hơn là chuyển số thành chuỗi, sau đó tạo tất cả các chuỗi con có thể bằng cách xóa 0 hoặc nhiều ký tự, rồi kiểm tra tính đối xứng và tìm số lớn nhất. Hoặc sử dụng đệ quy/quay lui để thử các tổ hợp xóa.",
+        "Trước khi bắt đầu vòng lặp xóa, hãy kiểm tra xem `n` có phải là số đối xứng không. Nếu có, gán `max = n` ban đầu.",
+        "Để kiểm tra số nguyên dương một cách chính xác, nên sử dụng `int` cho `a, b` và kiểm tra `if (a <= 0 || b <= 0)`. Hoặc nếu muốn dùng `unsigned int`, chỉ cần thông báo yêu cầu nhập số dương mà không cần kiểm tra `a < 0`.",
+        "Thêm kiểm tra `if (a == 0 || b == 0)` hoặc `if (a <= 0 || b <= 0)` nếu dùng `int` để đảm bảo chỉ xử lý số nguyên dương."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Thay `int nBinh = pow(n,2);` bằng `long long nBinh = (long long)n * n;` để đảm bảo độ chính xác và tránh tràn số.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.097,
+          "familiarity-freq-exclude_stop_words-sm": 0.73,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Một cách tiếp cận tốt hơn là chuyển số thành chuỗi, sau đó tạo tất cả các chuỗi con có thể bằng cách xóa 0 hoặc nhiều ký tự, rồi kiểm tra tính đối xứng và tìm số lớn nhất. Hoặc sử dụng đệ quy/quay lui để thử các tổ hợp xóa.",
+          "readability-flesch_kincaid_reading_ease-sm": 156.673,
+          "familiarity-freq-exclude_stop_words-sm": 0.823,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trước khi bắt đầu vòng lặp xóa, hãy kiểm tra xem `n` có phải là số đối xứng không. Nếu có, gán `max = n` ban đầu.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.896,
+          "familiarity-freq-exclude_stop_words-sm": 0.753,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để kiểm tra số nguyên dương một cách chính xác, nên sử dụng `int` cho `a, b` và kiểm tra `if (a <= 0 || b <= 0)`. Hoặc nếu muốn dùng `unsigned int`, chỉ cần thông báo yêu cầu nhập số dương mà không cần kiểm tra `a < 0`.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.291,
+          "familiarity-freq-exclude_stop_words-sm": 0.833,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm kiểm tra `if (a == 0 || b == 0)` hoặc `if (a <= 0 || b <= 0)` nếu dùng `int` để đảm bảo chỉ xử lý số nguyên dương.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.034,
+          "familiarity-freq-exclude_stop_words-sm": 0.823,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": "64",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cải thiện kỹ năng xử lý các trường hợp phức tạp và trường hợp biên (edge cases) để đảm bảo tính đúng đắn của kết quả.",
+        "Kiểm tra kỹ lưỡng hơn logic của các hàm phụ trợ để tránh lỗi nghiêm trọng (ví dụ: hàm `demSoChuSo` trong Bài 3).",
+        "Chú ý đến điều kiện dừng của vòng lặp và luồng xử lý tổng thể để tránh các lỗi logic dẫn đến kết quả sai (ví dụ: hàm `ktraAutomorphic` trong Bài 2).",
+        "Cân nhắc các giới hạn của kiểu dữ liệu khi thực hiện các phép toán có thể gây tràn số (ví dụ: `a * a` trong Bài 2 với `int`).",
+        "Cần một cách tiếp cận khác để so sánh các chữ số cuối cùng của `a*a` với `a`. Một cách là tính số chữ số của `a`, sau đó lấy `a*a` modulo `10^số_chữ_số` và so sánh với `a`. Hoặc sửa vòng lặp để so sánh từng chữ số từ phải sang trái cho đến khi `a` hết chữ số, và đảm bảo `square_a` cũng có đủ chữ số để so sánh.",
+        "Hàm này chỉ cần đếm số chữ số của một số. Có thể sửa đơn giản thành:\n```cpp\nint demSoChuSo(int a) {\n    if (a == 0) return 1;\n    int count = 0;\n    while (a > 0) {\n        a /= 10;\n        count++;\n    }\n    return count;\n}\n```\nHoặc sử dụng `std::to_string(a).length()`.",
+        "Để giải quyết đầy đủ, cần một phương pháp tạo ra tất cả các số con bằng cách xóa bất kỳ số lượng chữ số nào và kiểm tra tính đối xứng. Tuy nhiên, với giới hạn số có 4 chữ số, cách tiếp cận hiện tại là hợp lý cho việc tìm số đối xứng lớn nhất."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cải thiện kỹ năng xử lý các trường hợp phức tạp và trường hợp biên (edge cases) để đảm bảo tính đúng đắn của kết quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.097,
+          "familiarity-freq-exclude_stop_words-sm": 0.773,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Kiểm tra kỹ lưỡng hơn logic của các hàm phụ trợ để tránh lỗi nghiêm trọng (ví dụ: hàm `demSoChuSo` trong Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 137.468,
+          "familiarity-freq-exclude_stop_words-sm": 0.686,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Chú ý đến điều kiện dừng của vòng lặp và luồng xử lý tổng thể để tránh các lỗi logic dẫn đến kết quả sai (ví dụ: hàm `ktraAutomorphic` trong Bài 2).",
+          "readability-flesch_kincaid_reading_ease-sm": 130.025,
+          "familiarity-freq-exclude_stop_words-sm": 0.737,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cân nhắc các giới hạn của kiểu dữ liệu khi thực hiện các phép toán có thể gây tràn số (ví dụ: `a * a` trong Bài 2 với `int`).",
+          "readability-flesch_kincaid_reading_ease-sm": 127.195,
+          "familiarity-freq-exclude_stop_words-sm": 0.713,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một cách tiếp cận khác để so sánh các chữ số cuối cùng của `a*a` với `a`. Một cách là tính số chữ số của `a`, sau đó lấy `a*a` modulo `10^số_chữ_số` và so sánh với `a`. Hoặc sửa vòng lặp để so sánh từng chữ số từ phải sang trái cho đến khi `a` hết chữ số, và đảm bảo `square_a` cũng có đủ chữ số để so sánh.",
+          "readability-flesch_kincaid_reading_ease-sm": 142.393,
+          "familiarity-freq-exclude_stop_words-sm": 0.749,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Hàm này chỉ cần đếm số chữ số của một số. Có thể sửa đơn giản thành:\n```cpp\nint demSoChuSo(int a) {\n    if (a == 0) return 1;\n    int count = 0;\n    while (a > 0) {\n        a /= 10;\n        count++;\n    }\n    return count;\n}\n```\nHoặc sử dụng `std::to_string(a).length()`.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.885,
+          "familiarity-freq-exclude_stop_words-sm": 0.821,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để giải quyết đầy đủ, cần một phương pháp tạo ra tất cả các số con bằng cách xóa bất kỳ số lượng chữ số nào và kiểm tra tính đối xứng. Tuy nhiên, với giới hạn số có 4 chữ số, cách tiếp cận hiện tại là hợp lý cho việc tìm số đối xứng lớn nhất.",
+          "readability-flesch_kincaid_reading_ease-sm": 142.393,
+          "familiarity-freq-exclude_stop_words-sm": 0.856,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": "67",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 3 chưa giải quyết đúng trọng tâm yêu cầu, chỉ xử lý được trường hợp số ban đầu đã là số đối xứng.",
+        "Cần cẩn trọng hơn khi sử dụng `std::pow` với các phép toán số nguyên, có thể dẫn đến lỗi tràn số hoặc mất chính xác.",
+        "Việc truyền tham số bằng tham chiếu không `const` (`int&`) cho các biến không cần thay đổi giá trị trong hàm có thể gây nhầm lẫn hoặc tiềm ẩn lỗi.",
+        "Để giải quyết bài toán này, bạn cần duyệt qua tất cả các chuỗi con có thể tạo ra từ số `m` bằng cách xóa các chữ số, sau đó kiểm tra xem chuỗi con nào là số đối xứng và chọn số lớn nhất. Ví dụ, với 1231, bạn cần xem xét 121, 131, 231, 123, v.v. và tìm số đối xứng lớn nhất trong số đó. Một cách tiếp cận là sử dụng đệ quy hoặc vòng lặp để tạo ra các chuỗi con và hàm kiểm tra đối xứng.",
+        "Thay vì `pow(n,2)`, nên dùng `(long long)n * n` để đảm bảo kết quả bình phương không bị tràn `int` và giữ kiểu số nguyên. Đối với `pow(10,dem)`, bạn có thể tự viết một vòng lặp để tính `10^dem` bằng số nguyên hoặc sử dụng `long long` và kiểm tra giới hạn.",
+        "Nếu bạn muốn thay đổi giá trị của `a` và `b` trong `tinh_tongTuadenb` và muốn sự thay đổi đó ảnh hưởng đến biến gốc, thì `int&` là đúng. Tuy nhiên, nếu chỉ muốn sử dụng bản sao cục bộ để swap, hãy truyền bằng giá trị. Đối với `ktra_automorphic` và `tong_uoc`, vì `n` và `a` không bị thay đổi, nên truyền `const int& n` hoặc `int n` sẽ là lựa chọn tốt hơn."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 3 chưa giải quyết đúng trọng tâm yêu cầu, chỉ xử lý được trường hợp số ban đầu đã là số đối xứng.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.94,
+          "familiarity-freq-exclude_stop_words-sm": 0.872,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Cần cẩn trọng hơn khi sử dụng `std::pow` với các phép toán số nguyên, có thể dẫn đến lỗi tràn số hoặc mất chính xác.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.363,
+          "familiarity-freq-exclude_stop_words-sm": 0.782,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Việc truyền tham số bằng tham chiếu không `const` (`int&`) cho các biến không cần thay đổi giá trị trong hàm có thể gây nhầm lẫn hoặc tiềm ẩn lỗi.",
+          "readability-flesch_kincaid_reading_ease-sm": 127.537,
+          "familiarity-freq-exclude_stop_words-sm": 0.715,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để giải quyết bài toán này, bạn cần duyệt qua tất cả các chuỗi con có thể tạo ra từ số `m` bằng cách xóa các chữ số, sau đó kiểm tra xem chuỗi con nào là số đối xứng và chọn số lớn nhất. Ví dụ, với 1231, bạn cần xem xét 121, 131, 231, 123, v.v. và tìm số đối xứng lớn nhất trong số đó. Một cách tiếp cận là sử dụng đệ quy hoặc vòng lặp để tạo ra các chuỗi con và hàm kiểm tra đối xứng.",
+          "readability-flesch_kincaid_reading_ease-sm": 155.833,
+          "familiarity-freq-exclude_stop_words-sm": 0.838,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay vì `pow(n,2)`, nên dùng `(long long)n * n` để đảm bảo kết quả bình phương không bị tràn `int` và giữ kiểu số nguyên. Đối với `pow(10,dem)`, bạn có thể tự viết một vòng lặp để tính `10^dem` bằng số nguyên hoặc sử dụng `long long` và kiểm tra giới hạn.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.291,
+          "familiarity-freq-exclude_stop_words-sm": 0.726,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nếu bạn muốn thay đổi giá trị của `a` và `b` trong `tinh_tongTuadenb` và muốn sự thay đổi đó ảnh hưởng đến biến gốc, thì `int&` là đúng. Tuy nhiên, nếu chỉ muốn sử dụng bản sao cục bộ để swap, hãy truyền bằng giá trị. Đối với `ktra_automorphic` và `tong_uoc`, vì `n` và `a` không bị thay đổi, nên truyền `const int& n` hoặc `int n` sẽ là lựa chọn tốt hơn.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.344,
+          "familiarity-freq-exclude_stop_words-sm": 0.797,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "70",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Khởi tạo `sum` bằng 0: `int sum = 0;`",
+        "Để tính số mũ của 10, cần thay `numDigit *= 1;` bằng `powerOf10 *= 10;` và khởi tạo `powerOf10 = 1;` trước vòng lặp, sau đó dùng `powerOf10` để so sánh. Ví dụ: `long long powerOf10 = 1; while (tmp1 > 0) { powerOf10 *= 10; tmp1 /= 10; }`",
+        "Cần so sánh `square % powerOf10` (với `powerOf10` được tính đúng) với `n`.",
+        "Để xóa chữ số, có thể chuyển số sang chuỗi, xóa ký tự tại vị trí mong muốn, sau đó chuyển lại thành số. Hoặc dùng toán học: `(n / (i * 10)) * i + (n % i)` để xóa chữ số ở vị trí `i` (ví dụ `i=10` xóa hàng chục, `i=100` xóa hàng trăm).",
+        "Cần một cách tiếp cận có hệ thống hơn để tạo ra tất cả các số con bằng cách xóa chữ số, thay vì các điều kiện ngẫu nhiên. Ví dụ, dùng đệ quy hoặc vòng lặp để tạo các chuỗi con."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Khởi tạo `sum` bằng 0: `int sum = 0;`",
+          "readability-flesch_kincaid_reading_ease-sm": 161.102,
+          "familiarity-freq-exclude_stop_words-sm": 0.782,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tính số mũ của 10, cần thay `numDigit *= 1;` bằng `powerOf10 *= 10;` và khởi tạo `powerOf10 = 1;` trước vòng lặp, sau đó dùng `powerOf10` để so sánh. Ví dụ: `long long powerOf10 = 1; while (tmp1 > 0) { powerOf10 *= 10; tmp1 /= 10; }`",
+          "readability-flesch_kincaid_reading_ease-sm": 146.37,
+          "familiarity-freq-exclude_stop_words-sm": 0.722,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần so sánh `square % powerOf10` (với `powerOf10` được tính đúng) với `n`.",
+          "readability-flesch_kincaid_reading_ease-sm": 136.865,
+          "familiarity-freq-exclude_stop_words-sm": 0.521,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để xóa chữ số, có thể chuyển số sang chuỗi, xóa ký tự tại vị trí mong muốn, sau đó chuyển lại thành số. Hoặc dùng toán học: `(n / (i * 10)) * i + (n % i)` để xóa chữ số ở vị trí `i` (ví dụ `i=10` xóa hàng chục, `i=100` xóa hàng trăm).",
+          "readability-flesch_kincaid_reading_ease-sm": 158.071,
+          "familiarity-freq-exclude_stop_words-sm": 0.727,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một cách tiếp cận có hệ thống hơn để tạo ra tất cả các số con bằng cách xóa chữ số, thay vì các điều kiện ngẫu nhiên. Ví dụ, dùng đệ quy hoặc vòng lặp để tạo các chuỗi con.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.263,
+          "familiarity-freq-exclude_stop_words-sm": 0.813,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": "72",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Đổi tên hàm thành isEven hoặc checkEvenNum để phản ánh đúng chức năng.",
+        "Thêm #include <cmath> ở đầu file.",
+        "Hàm checkCount nên đếm số chữ số của số nguyên dương đầu vào. Ví dụ: int countDigits(int num) { if (num == 0) return 1; int digits = 0; while (num > 0) { num /= 10; digits++; } return digits; }. Sau đó, gọi countDigits(n) (số ban đầu) để lấy số chữ số.",
+        "Sử dụng long long cho soBinhPhuong để chứa giá trị lớn hơn: long long soBinhPhuong = (long long)n * n;",
+        "Để lấy chữ số hàng nghìn, sử dụng d = n / 1000;.",
+        "Thêm break; vào cuối mỗi case để ngăn chặn fall-through.",
+        "Cần một thuật toán tổng quát hơn để tìm số đối xứng lớn nhất bằng cách xóa chữ số, ví dụ chuyển số thành chuỗi và kiểm tra các chuỗi con đối xứng."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Đổi tên hàm thành isEven hoặc checkEvenNum để phản ánh đúng chức năng.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.071,
+          "familiarity-freq-exclude_stop_words-sm": 0.655,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm #include <cmath> ở đầu file.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.265,
+          "familiarity-freq-exclude_stop_words-sm": 0.849,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Hàm checkCount nên đếm số chữ số của số nguyên dương đầu vào. Ví dụ: int countDigits(int num) { if (num == 0) return 1; int digits = 0; while (num > 0) { num /= 10; digits++; } return digits; }. Sau đó, gọi countDigits(n) (số ban đầu) để lấy số chữ số.",
+          "readability-flesch_kincaid_reading_ease-sm": 128.204,
+          "familiarity-freq-exclude_stop_words-sm": 0.786,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng long long cho soBinhPhuong để chứa giá trị lớn hơn: long long soBinhPhuong = (long long)n * n;",
+          "readability-flesch_kincaid_reading_ease-sm": 116.308,
+          "familiarity-freq-exclude_stop_words-sm": 0.834,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để lấy chữ số hàng nghìn, sử dụng d = n / 1000;.",
+          "readability-flesch_kincaid_reading_ease-sm": 180.555,
+          "familiarity-freq-exclude_stop_words-sm": 0.875,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm break; vào cuối mỗi case để ngăn chặn fall-through.",
+          "readability-flesch_kincaid_reading_ease-sm": 126.452,
+          "familiarity-freq-exclude_stop_words-sm": 0.842,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một thuật toán tổng quát hơn để tìm số đối xứng lớn nhất bằng cách xóa chữ số, ví dụ chuyển số thành chuỗi và kiểm tra các chuỗi con đối xứng.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.885,
+          "familiarity-freq-exclude_stop_words-sm": 0.762,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": "73",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Trong hàm `solve()`, hãy giữ nguyên `n` là số cần kiểm tra. Trong hàm `CheckAutomorphic(ll num_to_check)`, hãy tính `ll square = num_to_check * num_to_check;` và sau đó gọi `FindNumber(num_to_check, square);`.",
+        "Để tìm số đối xứng lớn nhất, bạn cần tạo ra tất cả các số con có thể bằng cách xóa chữ số từ số `n` ban đầu. Ví dụ, có thể dùng đệ quy hoặc vòng lặp để tạo ra các số con, sau đó kiểm tra từng số con xem có phải đối xứng không và tìm số lớn nhất. Ví dụ, để xóa 2 chữ số từ `n`, bạn cần chọn 2 vị trí bất kỳ trong `n` để xóa, chứ không phải xóa 1 rồi lại xóa thêm 1 từ kết quả.",
+        "Cần sửa lại logic trong hàm `FindNumber` để nó tạo ra và kiểm tra tất cả các số đối xứng có thể được tạo ra bằng cách xóa bất kỳ số lượng chữ số nào từ số `n` ban đầu, sau đó chọn số lớn nhất."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Trong hàm `solve()`, hãy giữ nguyên `n` là số cần kiểm tra. Trong hàm `CheckAutomorphic(ll num_to_check)`, hãy tính `ll square = num_to_check * num_to_check;` và sau đó gọi `FindNumber(num_to_check, square);`.",
+          "readability-flesch_kincaid_reading_ease-sm": 115.458,
+          "familiarity-freq-exclude_stop_words-sm": 0.717,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tìm số đối xứng lớn nhất, bạn cần tạo ra tất cả các số con có thể bằng cách xóa chữ số từ số `n` ban đầu. Ví dụ, có thể dùng đệ quy hoặc vòng lặp để tạo ra các số con, sau đó kiểm tra từng số con xem có phải đối xứng không và tìm số lớn nhất. Ví dụ, để xóa 2 chữ số từ `n`, bạn cần chọn 2 vị trí bất kỳ trong `n` để xóa, chứ không phải xóa 1 rồi lại xóa thêm 1 từ kết quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 162.076,
+          "familiarity-freq-exclude_stop_words-sm": 0.827,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Cần sửa lại logic trong hàm `FindNumber` để nó tạo ra và kiểm tra tất cả các số đối xứng có thể được tạo ra bằng cách xóa bất kỳ số lượng chữ số nào từ số `n` ban đầu, sau đó chọn số lớn nhất.",
+          "readability-flesch_kincaid_reading_ease-sm": 158.615,
+          "familiarity-freq-exclude_stop_words-sm": 0.862,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": "75",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Thay \"float a,b;\" bằng \"int a,b;\" và bỏ kiểm tra \"int(a) == a && int(b) == b\" vì \"cin\" vào \"int\" sẽ tự động xử lý phần thập phân.",
+        "Đổi tên hàm thành \"my_pow\" hoặc \"power\" để tránh trùng lặp với hàm chuẩn.",
+        "Thay \"float n;\" bằng \"int n;\" và bỏ kiểm tra \"int(n) == n\".",
+        "Sử dụng \"long long\" cho biến \"m\" và \"h\" để chứa kết quả bình phương của \"n\": \"long long m = (long long)n * n;\".",
+        "Thay \"float a, b;\" bằng \"int a, b;\" và bỏ kiểm tra \"int(a) == a && int(b) == b\".",
+        "Để tối ưu, có thể sửa vòng lặp như sau:\n```cpp\nint TinhTongCacUocSo (int n)\n{\n    if (n == 1) return 0; \n    int sum = 1; \n    for (int i = 2; i * i <= n; i++)\n    {\n        if (n % i == 0)\n        {\n            sum += i;\n            if (i * i != n) \n            {\n                sum += n / i;\n            }\n        }\n    }\n    return sum;\n}\n```"
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Thay \"float a,b;\" bằng \"int a,b;\" và bỏ kiểm tra \"int(a) == a && int(b) == b\" vì \"cin\" vào \"int\" sẽ tự động xử lý phần thập phân.",
+          "readability-flesch_kincaid_reading_ease-sm": 137.343,
+          "familiarity-freq-exclude_stop_words-sm": 0.898,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đổi tên hàm thành \"my_pow\" hoặc \"power\" để tránh trùng lặp với hàm chuẩn.",
+          "readability-flesch_kincaid_reading_ease-sm": 144.282,
+          "familiarity-freq-exclude_stop_words-sm": 0.699,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay \"float n;\" bằng \"int n;\" và bỏ kiểm tra \"int(n) == n\".",
+          "readability-flesch_kincaid_reading_ease-sm": 156.368,
+          "familiarity-freq-exclude_stop_words-sm": 0.906,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng \"long long\" cho biến \"m\" và \"h\" để chứa kết quả bình phương của \"n\": \"long long m = (long long)n * n;\".",
+          "readability-flesch_kincaid_reading_ease-sm": 140.175,
+          "familiarity-freq-exclude_stop_words-sm": 0.941,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay \"float a, b;\" bằng \"int a, b;\" và bỏ kiểm tra \"int(a) == a && int(b) == b\".",
+          "readability-flesch_kincaid_reading_ease-sm": 140.005,
+          "familiarity-freq-exclude_stop_words-sm": 0.898,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để tối ưu, có thể sửa vòng lặp như sau:\n```cpp\nint TinhTongCacUocSo (int n)\n{\n    if (n == 1) return 0; \n    int sum = 1; \n    for (int i = 2; i * i <= n; i++)\n    {\n        if (n % i == 0)\n        {\n            sum += i;\n            if (i * i != n) \n            {\n                sum += n / i;\n            }\n        }\n    }\n    return sum;\n}\n```",
+          "readability-flesch_kincaid_reading_ease-sm": 143.165,
+          "familiarity-freq-exclude_stop_words-sm": 0.875,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "76",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Có thể dùng vòng lặp `while (temp > 0) { temp /= 10; count_digits++; }` để đếm số chữ số, hoặc dùng hàm `log10` để tính số chữ số và sau đó tính `pow(10, count_digits)` để lấy modulo.",
+        "Sử dụng kiểu dữ liệu `long long` cho `n` và `n2` để chứa được các giá trị lớn hơn, hoặc kiểm tra giới hạn của `n` trước khi tính bình phương.",
+        "Xóa bỏ biến `dem` nếu không cần thiết để làm sạch code.",
+        "Thay đổi điều kiện vòng lặp thành `i < a` (hoặc `i <= a/2` để tối ưu hơn) để không tính chính số đó vào tổng. Tương tự cho `b`.",
+        "Cần một hàm phụ trợ để tính tổng ước số thực sự (không bao gồm chính nó). Sau đó, gọi hàm này hai lần và so sánh kết quả theo đúng định nghĩa: `if (sumDivisors(a) == b && sumDivisors(b) == a) { ... }`.",
+        "Đổi tên hàm thành `kiemTraSoBanBe` hoặc `areAmicableNumbers` để rõ ràng hơn về mục đích của hàm."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Có thể dùng vòng lặp `while (temp > 0) { temp /= 10; count_digits++; }` để đếm số chữ số, hoặc dùng hàm `log10` để tính số chữ số và sau đó tính `pow(10, count_digits)` để lấy modulo.",
+          "readability-flesch_kincaid_reading_ease-sm": 127.948,
+          "familiarity-freq-exclude_stop_words-sm": 0.697,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng kiểu dữ liệu `long long` cho `n` và `n2` để chứa được các giá trị lớn hơn, hoặc kiểm tra giới hạn của `n` trước khi tính bình phương.",
+          "readability-flesch_kincaid_reading_ease-sm": 130.373,
+          "familiarity-freq-exclude_stop_words-sm": 0.784,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xóa bỏ biến `dem` nếu không cần thiết để làm sạch code.",
+          "readability-flesch_kincaid_reading_ease-sm": 156.368,
+          "familiarity-freq-exclude_stop_words-sm": 0.714,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi điều kiện vòng lặp thành `i < a` (hoặc `i <= a/2` để tối ưu hơn) để không tính chính số đó vào tổng. Tương tự cho `b`.",
+          "readability-flesch_kincaid_reading_ease-sm": 156.047,
+          "familiarity-freq-exclude_stop_words-sm": 0.766,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một hàm phụ trợ để tính tổng ước số thực sự (không bao gồm chính nó). Sau đó, gọi hàm này hai lần và so sánh kết quả theo đúng định nghĩa: `if (sumDivisors(a) == b && sumDivisors(b) == a) { ... }`.",
+          "readability-flesch_kincaid_reading_ease-sm": 144.128,
+          "familiarity-freq-exclude_stop_words-sm": 0.768,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đổi tên hàm thành `kiemTraSoBanBe` hoặc `areAmicableNumbers` để rõ ràng hơn về mục đích của hàm.",
+          "readability-flesch_kincaid_reading_ease-sm": 127.315,
+          "familiarity-freq-exclude_stop_words-sm": 0.653,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "77",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Thêm điều kiện dừng cho vòng lặp, ví dụ `while (k <= Binh_Phuong)` hoặc xác định số chữ số của `n` để đặt giới hạn cho `k`.",
+        "Để in ra một số nguyên, cần ghép các chữ số lại bằng phép toán số học. Ví dụ: `cout << a * 100 + b * 10 + d;`",
+        "Cần một cách tiếp cận tổng quát hơn, ví dụ: tạo tất cả các số con có thể từ `n` bằng cách xóa các chữ số, sau đó kiểm tra từng số con xem có phải là số đối xứng không và giữ lại số đối xứng lớn nhất."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Thêm điều kiện dừng cho vòng lặp, ví dụ `while (k <= Binh_Phuong)` hoặc xác định số chữ số của `n` để đặt giới hạn cho `k`.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.978,
+          "familiarity-freq-exclude_stop_words-sm": 0.704,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để in ra một số nguyên, cần ghép các chữ số lại bằng phép toán số học. Ví dụ: `cout << a * 100 + b * 10 + d;`",
+          "readability-flesch_kincaid_reading_ease-sm": 174.514,
+          "familiarity-freq-exclude_stop_words-sm": 0.864,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một cách tiếp cận tổng quát hơn, ví dụ: tạo tất cả các số con có thể từ `n` bằng cách xóa các chữ số, sau đó kiểm tra từng số con xem có phải là số đối xứng không và giữ lại số đối xứng lớn nhất.",
+          "readability-flesch_kincaid_reading_ease-sm": 167.353,
+          "familiarity-freq-exclude_stop_words-sm": 0.837,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": "80",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Sửa thành '#include <cmath>';",
+        "Khai báo và khởi tạo biến 'a', 'b' hoặc sử dụng biến đã được nhập là 'So'.",
+        "Tập trung vào logic giải quyết bài toán tìm số đối xứng.",
+        "Phân tích bài toán thành các bước nhỏ: chuyển số thành chuỗi, tìm các chuỗi con đối xứng, so sánh và chọn chuỗi lớn nhất.",
+        "Sửa thành `if (SumA == b && SumB == a)`.",
+        "Di chuyển phần kiểm tra này lên đầu hàm `ktraBanBe` trước khi thực hiện các phép tính.",
+        "Khởi tạo 'count = 0;'.",
+        "Để lấy chữ số cuối cùng của một số nguyên, hãy sử dụng `n % 10`. Nếu muốn làm việc với số thực, cần chuyển đổi hoặc sử dụng `fmod`.",
+        "Sửa thành `x = x / 10;` hoặc `x /= 10;`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Sửa thành '#include <cmath>';",
+          "readability-flesch_kincaid_reading_ease-sm": 144.345,
+          "familiarity-freq-exclude_stop_words-sm": 0.785,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khai báo và khởi tạo biến 'a', 'b' hoặc sử dụng biến đã được nhập là 'So'.",
+          "readability-flesch_kincaid_reading_ease-sm": 144.792,
+          "familiarity-freq-exclude_stop_words-sm": 0.93,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Tập trung vào logic giải quyết bài toán tìm số đối xứng.",
+          "readability-flesch_kincaid_reading_ease-sm": 117.105,
+          "familiarity-freq-exclude_stop_words-sm": 0.827,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Phân tích bài toán thành các bước nhỏ: chuyển số thành chuỗi, tìm các chuỗi con đối xứng, so sánh và chọn chuỗi lớn nhất.",
+          "readability-flesch_kincaid_reading_ease-sm": 150.156,
+          "familiarity-freq-exclude_stop_words-sm": 0.776,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa thành `if (SumA == b && SumB == a)`.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.594,
+          "familiarity-freq-exclude_stop_words-sm": 0.694,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Di chuyển phần kiểm tra này lên đầu hàm `ktraBanBe` trước khi thực hiện các phép tính.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.024,
+          "familiarity-freq-exclude_stop_words-sm": 0.805,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khởi tạo 'count = 0;'.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.0,
+          "familiarity-freq-exclude_stop_words-sm": 0.932,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để lấy chữ số cuối cùng của một số nguyên, hãy sử dụng `n % 10`. Nếu muốn làm việc với số thực, cần chuyển đổi hoặc sử dụng `fmod`.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.633,
+          "familiarity-freq-exclude_stop_words-sm": 0.873,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa thành `x = x / 10;` hoặc `x /= 10;`.",
+          "readability-flesch_kincaid_reading_ease-sm": 180.539,
+          "familiarity-freq-exclude_stop_words-sm": 0.884,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 9
+    },
+    {
+      "row_index": "81",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 1: Cần cải thiện luồng xử lý lỗi khi 'a > b' để tránh in ra kết quả tổng không chính xác hoặc gây hiểu lầm.",
+        "Bài 2: Cần cải thiện luồng xử lý lỗi khi 'n <= 0' để chương trình không tiếp tục tính toán và in ra kết quả sai. Nên xem xét sử dụng kiểu dữ liệu `long long` cho bình phương của n để tránh tràn số với các giá trị n lớn, và ưu tiên các phép toán số nguyên thay vì `pow` để đảm bảo độ chính xác.",
+        "Bài 3: Chưa nộp bài hoặc không có code cho câu này.",
+        "Trong hàm `tinhTongSoChan`, nếu `a > b`, nên có một cơ chế để báo hiệu lỗi cho hàm `main` (ví dụ: trả về một giá trị boolean hoặc int để chỉ trạng thái lỗi) và hàm `main` sẽ kiểm tra trạng thái này để quyết định có in tổng hay không.",
+        "Sử dụng `return` hoặc `exit(1)` sau khi in thông báo lỗi cho `n <= 0` trong hàm `main` để ngăn chặn việc thực thi tiếp các phần code không mong muốn.",
+        "Thay thế `pow(n, 2)` bằng `(long long)n * n` để tránh tràn số và `pow(10, i)` bằng một vòng lặp nhân 10 hoặc hàm tính lũy thừa số nguyên để đảm bảo độ chính xác khi làm việc với các số nguyên."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 1: Cần cải thiện luồng xử lý lỗi khi 'a > b' để tránh in ra kết quả tổng không chính xác hoặc gây hiểu lầm.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.563,
+          "familiarity-freq-exclude_stop_words-sm": 0.805,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 2: Cần cải thiện luồng xử lý lỗi khi 'n <= 0' để chương trình không tiếp tục tính toán và in ra kết quả sai. Nên xem xét sử dụng kiểu dữ liệu `long long` cho bình phương của n để tránh tràn số với các giá trị n lớn, và ưu tiên các phép toán số nguyên thay vì `pow` để đảm bảo độ chính xác.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.983,
+          "familiarity-freq-exclude_stop_words-sm": 0.816,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Chưa nộp bài hoặc không có code cho câu này.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.255,
+          "familiarity-freq-exclude_stop_words-sm": 0.902,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong hàm `tinhTongSoChan`, nếu `a > b`, nên có một cơ chế để báo hiệu lỗi cho hàm `main` (ví dụ: trả về một giá trị boolean hoặc int để chỉ trạng thái lỗi) và hàm `main` sẽ kiểm tra trạng thái này để quyết định có in tổng hay không.",
+          "readability-flesch_kincaid_reading_ease-sm": 106.801,
+          "familiarity-freq-exclude_stop_words-sm": 0.771,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `return` hoặc `exit(1)` sau khi in thông báo lỗi cho `n <= 0` trong hàm `main` để ngăn chặn việc thực thi tiếp các phần code không mong muốn.",
+          "readability-flesch_kincaid_reading_ease-sm": 123.935,
+          "familiarity-freq-exclude_stop_words-sm": 0.788,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế `pow(n, 2)` bằng `(long long)n * n` để tránh tràn số và `pow(10, i)` bằng một vòng lặp nhân 10 hoặc hàm tính lũy thừa số nguyên để đảm bảo độ chính xác khi làm việc với các số nguyên.",
+          "readability-flesch_kincaid_reading_ease-sm": 132.13,
+          "familiarity-freq-exclude_stop_words-sm": 0.692,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "83",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Sử dụng biến lặp 'i' để kiểm tra và cộng dồn. Ví dụ: for(int i = a; i <= b; ++i){ if(i%2==0){ S = S + i; } }. Loại bỏ hai khối if riêng biệt cho 'b' và chỉ cần một vòng lặp chung.",
+        "Gộp logic vào một vòng lặp duy nhất từ 'a' đến 'b'. Ví dụ: for(int i = a; i <= b; ++i){ if(i%2==0){ S = S + i; } }.",
+        "Để kiểm tra số automorphic, cần xác định số chữ số của 'n' (gọi là 'k'), sau đó kiểm tra '(n*n) % (10^k) == n'. Ví dụ, có thể dùng vòng lặp để đếm số chữ số và tính '10^k'.",
+        "Xóa bỏ biến 'd' nếu không sử dụng."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Sử dụng biến lặp 'i' để kiểm tra và cộng dồn. Ví dụ: for(int i = a; i <= b; ++i){ if(i%2==0){ S = S + i; } }. Loại bỏ hai khối if riêng biệt cho 'b' và chỉ cần một vòng lặp chung.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.863,
+          "familiarity-freq-exclude_stop_words-sm": 0.812,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Gộp logic vào một vòng lặp duy nhất từ 'a' đến 'b'. Ví dụ: for(int i = a; i <= b; ++i){ if(i%2==0){ S = S + i; } }.",
+          "readability-flesch_kincaid_reading_ease-sm": 155.411,
+          "familiarity-freq-exclude_stop_words-sm": 0.835,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để kiểm tra số automorphic, cần xác định số chữ số của 'n' (gọi là 'k'), sau đó kiểm tra '(n*n) % (10^k) == n'. Ví dụ, có thể dùng vòng lặp để đếm số chữ số và tính '10^k'.",
+          "readability-flesch_kincaid_reading_ease-sm": 161.155,
+          "familiarity-freq-exclude_stop_words-sm": 0.809,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xóa bỏ biến 'd' nếu không sử dụng.",
+          "readability-flesch_kincaid_reading_ease-sm": 166.99,
+          "familiarity-freq-exclude_stop_words-sm": 0.808,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 4
+    },
+    {
+      "row_index": "87",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Thay đổi thành `int k = demSo(n);` để `k` là lũy thừa của 10 tương ứng với số chữ số của `n`. Ví dụ, nếu `n=25`, `demSo(n)` trả về `100`, thì `k` nên là `100` chứ không phải `1000`.",
+        "Cần một thuật toán tổng quát hơn để tìm chuỗi con đối xứng dài nhất/lớn nhất. Ví dụ, có thể duyệt qua tất cả các cặp chữ số `(i, j)` trong số `n` để xem chúng có thể tạo thành một số đối xứng hay không, hoặc sử dụng các kỹ thuật như lập trình động để tìm chuỗi con đối xứng dài nhất.",
+        "Để tạo `121` từ `1231`, cần giữ chữ số thứ hai (`2`) chứ không phải chữ số thứ ba (`3`). Logic này cần được xem xét lại để đảm bảo chọn đúng chữ số giữa hoặc các chữ số khác để tạo số đối xứng lớn nhất."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Thay đổi thành `int k = demSo(n);` để `k` là lũy thừa của 10 tương ứng với số chữ số của `n`. Ví dụ, nếu `n=25`, `demSo(n)` trả về `100`, thì `k` nên là `100` chứ không phải `1000`.",
+          "readability-flesch_kincaid_reading_ease-sm": 157.129,
+          "familiarity-freq-exclude_stop_words-sm": 0.695,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một thuật toán tổng quát hơn để tìm chuỗi con đối xứng dài nhất/lớn nhất. Ví dụ, có thể duyệt qua tất cả các cặp chữ số `(i, j)` trong số `n` để xem chúng có thể tạo thành một số đối xứng hay không, hoặc sử dụng các kỹ thuật như lập trình động để tìm chuỗi con đối xứng dài nhất.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.9,
+          "familiarity-freq-exclude_stop_words-sm": 0.783,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Để tạo `121` từ `1231`, cần giữ chữ số thứ hai (`2`) chứ không phải chữ số thứ ba (`3`). Logic này cần được xem xét lại để đảm bảo chọn đúng chữ số giữa hoặc các chữ số khác để tạo số đối xứng lớn nhất.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.773,
+          "familiarity-freq-exclude_stop_words-sm": 0.784,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 3
+    },
+    {
+      "row_index": "91",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Khởi tạo 'right' với một giá trị hợp lệ trước khi sử dụng, ví dụ: `int right = n;` hoặc gán giá trị từ phép toán khác.",
+        "Xem xét lại thuật toán tạo số con bằng cách xóa chữ số. Một cách tiếp cận là chuyển số thành chuỗi, sau đó dùng đệ quy hoặc vòng lặp để tạo tất cả các chuỗi con, chuyển lại thành số và kiểm tra tính đối xứng."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Khởi tạo 'right' với một giá trị hợp lệ trước khi sử dụng, ví dụ: `int right = n;` hoặc gán giá trị từ phép toán khác.",
+          "readability-flesch_kincaid_reading_ease-sm": 145.31,
+          "familiarity-freq-exclude_stop_words-sm": 0.848,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xem xét lại thuật toán tạo số con bằng cách xóa chữ số. Một cách tiếp cận là chuyển số thành chuỗi, sau đó dùng đệ quy hoặc vòng lặp để tạo tất cả các chuỗi con, chuyển lại thành số và kiểm tra tính đối xứng.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.583,
+          "familiarity-freq-exclude_stop_words-sm": 0.802,
+          "convergence-specificity-bert-base": 0.0
+        }
+      ],
+      "hint_count": 2
+    },
+    {
+      "row_index": "92",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 3 (Số đối xứng): Cần cải thiện logic tìm số đối xứng lớn nhất bằng cách xóa chữ số. Hiện tại, code chưa bao quát hết các trường hợp và có lỗi logic.",
+        "Cần kiểm tra kỹ hơn các trường hợp biên và yêu cầu của đề bài, đặc biệt khi đề bài có các điều kiện linh hoạt (ví dụ: 'số lượng con số bị xóa chưa được xác định').",
+        "Trước tiên, hãy kiểm tra xem `n` có phải là số đối xứng không. Nếu có, đó là kết quả lớn nhất. Sau đó mới xét các trường hợp xóa chữ số. Ví dụ:\n```cpp\nint findMaxReverse(int n)\n{\n    if (checkReverse(n)) return n; // Case 0 deletions\n    int result = -1;\n    // Sau đó mới xét các trường hợp xóa 1, 2, ... chữ số\n    // Cần một thuật toán đệ quy hoặc duyệt sâu để tìm tất cả các subsequence đối xứng\n    // Hoặc sửa lại delDigit để nó thực sự tìm số đối xứng bằng cách xóa 'check' chữ số\n    // Hiện tại, delDigit(n, 0) đang tìm số đối xứng bằng cách xóa 1 chữ số.\n    // Cần một cách tiếp cận tổng quát hơn cho 'xóa con số bất kì'.\n    result = delDigit(n, 0); // Đây thực chất là tìm số đối xứng bằng cách xóa 1 chữ số\n    if (result != -1) return result;\n    // Nếu cần xóa nhiều hơn, sẽ tiếp tục gọi delDigit(n, 1) cho 2 chữ số, v.v.\n    return result;\n}\n```",
+        "Xem gợi ý sửa lỗi logic cho hàm `findMaxReverse` ở trên để đảm bảo trường hợp 0 chữ số bị xóa được xử lý đúng.",
+        "Cần thiết kế lại hàm `delDigit` để nó thực sự tìm số đối xứng bằng cách xóa `k` chữ số, hoặc một thuật toán tổng quát hơn để tìm subsequence đối xứng lớn nhất. Tham số `check` nên được đặt tên rõ ràng hơn (ví dụ: `numDeletionsAllowed` hoặc `deletionsRemaining`)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 3 (Số đối xứng): Cần cải thiện logic tìm số đối xứng lớn nhất bằng cách xóa chữ số. Hiện tại, code chưa bao quát hết các trường hợp và có lỗi logic.",
+          "readability-flesch_kincaid_reading_ease-sm": 155.908,
+          "familiarity-freq-exclude_stop_words-sm": 0.789,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần kiểm tra kỹ hơn các trường hợp biên và yêu cầu của đề bài, đặc biệt khi đề bài có các điều kiện linh hoạt (ví dụ: 'số lượng con số bị xóa chưa được xác định').",
+          "readability-flesch_kincaid_reading_ease-sm": 123.739,
+          "familiarity-freq-exclude_stop_words-sm": 0.863,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trước tiên, hãy kiểm tra xem `n` có phải là số đối xứng không. Nếu có, đó là kết quả lớn nhất. Sau đó mới xét các trường hợp xóa chữ số. Ví dụ:\n```cpp\nint findMaxReverse(int n)\n{\n    if (checkReverse(n)) return n; // Case 0 deletions\n    int result = -1;\n    // Sau đó mới xét các trường hợp xóa 1, 2, ... chữ số\n    // Cần một thuật toán đệ quy hoặc duyệt sâu để tìm tất cả các subsequence đối xứng\n    // Hoặc sửa lại delDigit để nó thực sự tìm số đối xứng bằng cách xóa 'check' chữ số\n    // Hiện tại, delDigit(n, 0) đang tìm số đối xứng bằng cách xóa 1 chữ số.\n    // Cần một cách tiếp cận tổng quát hơn cho 'xóa con số bất kì'.\n    result = delDigit(n, 0); // Đây thực chất là tìm số đối xứng bằng cách xóa 1 chữ số\n    if (result != -1) return result;\n    // Nếu cần xóa nhiều hơn, sẽ tiếp tục gọi delDigit(n, 1) cho 2 chữ số, v.v.\n    return result;\n}\n```",
+          "readability-flesch_kincaid_reading_ease-sm": 148.515,
+          "familiarity-freq-exclude_stop_words-sm": 0.828,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xem gợi ý sửa lỗi logic cho hàm `findMaxReverse` ở trên để đảm bảo trường hợp 0 chữ số bị xóa được xử lý đúng.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.621,
+          "familiarity-freq-exclude_stop_words-sm": 0.737,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần thiết kế lại hàm `delDigit` để nó thực sự tìm số đối xứng bằng cách xóa `k` chữ số, hoặc một thuật toán tổng quát hơn để tìm subsequence đối xứng lớn nhất. Tham số `check` nên được đặt tên rõ ràng hơn (ví dụ: `numDeletionsAllowed` hoặc `deletionsRemaining`).",
+          "readability-flesch_kincaid_reading_ease-sm": 140.989,
+          "familiarity-freq-exclude_stop_words-sm": 0.715,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": "95",
+      "case": null,
+      "language": null,
+      "problem_statement": "48_midterm-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Xóa hàm 'checkEven' nếu không cần thiết để giữ cho mã sạch sẽ và dễ bảo trì hơn.",
+        "Sử dụng kiểu dữ liệu 'long long' cho biến 'square' để hỗ trợ các số lớn hơn: 'long long square{static_cast<long long>(n) * n};'.",
+        "Sửa điều kiện thành 'if (n < 1000 || n > 9999)' để bao gồm các giá trị biên hợp lệ.",
+        "Để giải quyết bài toán này một cách tổng quát, cần một thuật toán đệ quy hoặc sử dụng kỹ thuật tạo dãy con (subsequence generation) để tạo ra tất cả các số có thể bằng cách xóa chữ số, sau đó kiểm tra tính đối xứng và tìm số lớn nhất. Ví dụ, sử dụng bitmask để duyệt qua tất cả các tập hợp con của các chữ số.",
+        "Sử dụng các biến có tên khác nhau hoặc phạm vi rõ ràng hơn cho mỗi mục đích của 'base10' để cải thiện khả năng đọc.",
+        "Xóa dòng in debug này."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Xóa hàm 'checkEven' nếu không cần thiết để giữ cho mã sạch sẽ và dễ bảo trì hơn.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.265,
+          "familiarity-freq-exclude_stop_words-sm": 0.745,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng kiểu dữ liệu 'long long' cho biến 'square' để hỗ trợ các số lớn hơn: 'long long square{static_cast<long long>(n) * n};'.",
+          "readability-flesch_kincaid_reading_ease-sm": 115.5,
+          "familiarity-freq-exclude_stop_words-sm": 0.836,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa điều kiện thành 'if (n < 1000 || n > 9999)' để bao gồm các giá trị biên hợp lệ.",
+          "readability-flesch_kincaid_reading_ease-sm": 163.949,
+          "familiarity-freq-exclude_stop_words-sm": 0.901,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để giải quyết bài toán này một cách tổng quát, cần một thuật toán đệ quy hoặc sử dụng kỹ thuật tạo dãy con (subsequence generation) để tạo ra tất cả các số có thể bằng cách xóa chữ số, sau đó kiểm tra tính đối xứng và tìm số lớn nhất. Ví dụ, sử dụng bitmask để duyệt qua tất cả các tập hợp con của các chữ số.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.643,
+          "familiarity-freq-exclude_stop_words-sm": 0.833,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng các biến có tên khác nhau hoặc phạm vi rõ ràng hơn cho mỗi mục đích của 'base10' để cải thiện khả năng đọc.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.399,
+          "familiarity-freq-exclude_stop_words-sm": 0.789,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xóa dòng in debug này.",
+          "readability-flesch_kincaid_reading_ease-sm": 117.16,
+          "familiarity-freq-exclude_stop_words-sm": 0.747,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "99",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Để kiểm tra đối xứng qua đường chéo chính, cần một biến cờ (flag). Duyệt qua tất cả các cặp `(i, j)` với `i < j`. Nếu `matrix[i][j] != matrix[j][i]` thì đặt cờ là `false` và thoát khỏi cả hai vòng lặp. Sau khi duyệt xong, nếu cờ vẫn là `true` thì ma trận đối xứng. Hoặc, nếu tìm thấy bất kỳ cặp nào không khớp, hàm có thể trả về `false` ngay lập tức. Chỉ khi tất cả các cặp đều khớp thì mới trả về `true`.",
+        "Để kiểm tra đối xứng qua đường chéo phụ, cần so sánh `matrix[i][j]` với `matrix[n - 1 - j][n - 1 - i]` cho tất cả các cặp `(i, j)` trong ma trận. Nếu tìm thấy bất kỳ cặp nào không khớp, ma trận không đối xứng qua đường chéo phụ.",
+        "Sử dụng tên biến nhất quán, ví dụ `dimension` hoặc `size` cho kích thước ma trận để tránh nhầm lẫn.",
+        "Để khắc phục, có thể thêm một điều kiện kiểm tra `if (j < 0)` trước khi truy cập `s[j]` hoặc sử dụng một cấu trúc dữ liệu stack để quản lý các ký tự đã xử lý, hoặc đảm bảo `j` không bao giờ nhỏ hơn 0 bằng cách khởi tạo `j = -1` và chỉ thêm ký tự nếu `j >= 0`.",
+        "Thay thế `strCompare` bằng `strcmp` và `copyCharArr` bằng `strcpy` để sử dụng các hàm chuẩn của C++ và duy trì tính nhất quán.",
+        "Loại bỏ các dòng `cout` này để tuân thủ chính xác định dạng đầu ra."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo chính, cần một biến cờ (flag). Duyệt qua tất cả các cặp `(i, j)` với `i < j`. Nếu `matrix[i][j] != matrix[j][i]` thì đặt cờ là `false` và thoát khỏi cả hai vòng lặp. Sau khi duyệt xong, nếu cờ vẫn là `true` thì ma trận đối xứng. Hoặc, nếu tìm thấy bất kỳ cặp nào không khớp, hàm có thể trả về `false` ngay lập tức. Chỉ khi tất cả các cặp đều khớp thì mới trả về `true`.",
+          "readability-flesch_kincaid_reading_ease-sm": 158.869,
+          "familiarity-freq-exclude_stop_words-sm": 0.723,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo phụ, cần so sánh `matrix[i][j]` với `matrix[n - 1 - j][n - 1 - i]` cho tất cả các cặp `(i, j)` trong ma trận. Nếu tìm thấy bất kỳ cặp nào không khớp, ma trận không đối xứng qua đường chéo phụ.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.998,
+          "familiarity-freq-exclude_stop_words-sm": 0.698,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng tên biến nhất quán, ví dụ `dimension` hoặc `size` cho kích thước ma trận để tránh nhầm lẫn.",
+          "readability-flesch_kincaid_reading_ease-sm": 147.225,
+          "familiarity-freq-exclude_stop_words-sm": 0.606,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để khắc phục, có thể thêm một điều kiện kiểm tra `if (j < 0)` trước khi truy cập `s[j]` hoặc sử dụng một cấu trúc dữ liệu stack để quản lý các ký tự đã xử lý, hoặc đảm bảo `j` không bao giờ nhỏ hơn 0 bằng cách khởi tạo `j = -1` và chỉ thêm ký tự nếu `j >= 0`.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.957,
+          "familiarity-freq-exclude_stop_words-sm": 0.792,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế `strCompare` bằng `strcmp` và `copyCharArr` bằng `strcpy` để sử dụng các hàm chuẩn của C++ và duy trì tính nhất quán.",
+          "readability-flesch_kincaid_reading_ease-sm": 142.622,
+          "familiarity-freq-exclude_stop_words-sm": 0.751,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Loại bỏ các dòng `cout` này để tuân thủ chính xác định dạng đầu ra.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.745,
+          "familiarity-freq-exclude_stop_words-sm": 0.754,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "100",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 1: Cần cải thiện logic kiểm tra đối xứng qua đường chéo phụ và xử lý trường hợp tổng số phần tử không phải số chính phương.",
+        "Bài 2: Cần điều chỉnh logic xóa để xử lý đúng các trường hợp chuỗi nhỏ và các trường hợp xóa liên tiếp tạo ra cặp mới.",
+        "Bài 3: Cần xử lý các trường hợp có ít hơn 3 đội tuyển và tránh in thêm dòng trống.",
+        "Bỏ điều kiện `(i + j != n - 1)`. Hàm nên kiểm tra tất cả các cặp `a[i][j]` và `a[n-1-j][n-1-i]`.",
+        "Cần làm rõ yêu cầu đề bài về input `n`. Nếu `n` là tổng số phần tử, cần kiểm tra `n` có phải số chính phương không và xử lý trường hợp không phải. Nếu `n` là kích thước cạnh, thì không cần `trunc(sqrt(n))`.",
+        "Cần đảm bảo vòng lặp dịch chuyển luôn hoạt động đúng. Ví dụ, dịch chuyển đến `n-1` và thêm null terminator `C[n] = '\\0'`. Hoặc sử dụng `std::string` và phương thức `erase` để đơn giản hóa việc xóa.",
+        "Sau khi xóa, cần điều chỉnh `i` để kiểm tra lại các ký tự vừa dịch chuyển. Một cách là đặt `i = 0` để quét lại từ đầu, hoặc `i = std::max(0, i - 1)` để kiểm tra ký tự trước đó và vị trí hiện tại.",
+        "Khởi tạo `Max1, Max2, Max3` với giá trị sentinel (ví dụ: -1) và chỉ in ra các đội nếu chỉ số tương ứng là hợp lệ (`>= 0`). Hoặc sử dụng `std::vector` và `std::sort` để sắp xếp tất cả các đội, sau đó in ra 3 đội đầu tiên (hoặc ít hơn nếu tổng số đội ít hơn 3).",
+        "Xóa dòng `cout << endl;` này."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 1: Cần cải thiện logic kiểm tra đối xứng qua đường chéo phụ và xử lý trường hợp tổng số phần tử không phải số chính phương.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.389,
+          "familiarity-freq-exclude_stop_words-sm": 0.85,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 2: Cần điều chỉnh logic xóa để xử lý đúng các trường hợp chuỗi nhỏ và các trường hợp xóa liên tiếp tạo ra cặp mới.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.563,
+          "familiarity-freq-exclude_stop_words-sm": 0.793,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cần xử lý các trường hợp có ít hơn 3 đội tuyển và tránh in thêm dòng trống.",
+          "readability-flesch_kincaid_reading_ease-sm": 169.615,
+          "familiarity-freq-exclude_stop_words-sm": 0.813,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bỏ điều kiện `(i + j != n - 1)`. Hàm nên kiểm tra tất cả các cặp `a[i][j]` và `a[n-1-j][n-1-i]`.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.389,
+          "familiarity-freq-exclude_stop_words-sm": 0.705,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần làm rõ yêu cầu đề bài về input `n`. Nếu `n` là tổng số phần tử, cần kiểm tra `n` có phải số chính phương không và xử lý trường hợp không phải. Nếu `n` là kích thước cạnh, thì không cần `trunc(sqrt(n))`.",
+          "readability-flesch_kincaid_reading_ease-sm": 166.632,
+          "familiarity-freq-exclude_stop_words-sm": 0.858,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần đảm bảo vòng lặp dịch chuyển luôn hoạt động đúng. Ví dụ, dịch chuyển đến `n-1` và thêm null terminator `C[n] = '\\0'`. Hoặc sử dụng `std::string` và phương thức `erase` để đơn giản hóa việc xóa.",
+          "readability-flesch_kincaid_reading_ease-sm": 156.328,
+          "familiarity-freq-exclude_stop_words-sm": 0.771,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi xóa, cần điều chỉnh `i` để kiểm tra lại các ký tự vừa dịch chuyển. Một cách là đặt `i = 0` để quét lại từ đầu, hoặc `i = std::max(0, i - 1)` để kiểm tra ký tự trước đó và vị trí hiện tại.",
+          "readability-flesch_kincaid_reading_ease-sm": 156.673,
+          "familiarity-freq-exclude_stop_words-sm": 0.842,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khởi tạo `Max1, Max2, Max3` với giá trị sentinel (ví dụ: -1) và chỉ in ra các đội nếu chỉ số tương ứng là hợp lệ (`>= 0`). Hoặc sử dụng `std::vector` và `std::sort` để sắp xếp tất cả các đội, sau đó in ra 3 đội đầu tiên (hoặc ít hơn nếu tổng số đội ít hơn 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 148.993,
+          "familiarity-freq-exclude_stop_words-sm": 0.755,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xóa dòng `cout << endl;` này.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.1,
+          "familiarity-freq-exclude_stop_words-sm": 0.71,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 9
+    },
+    {
+      "row_index": "101",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Tách thành hai hàm riêng biệt: `isMainDiagonalSymmetric()` và `isAntiDiagonalSymmetric()`. Mỗi hàm sẽ duyệt toàn bộ ma trận và trả về `false` ngay khi tìm thấy một cặp không đối xứng. Hàm `checkDoiXung` chính sẽ gọi `return isMainDiagonalSymmetric(...) || isAntiDiagonalSymmetric(...);`",
+        "Thêm `#include <cmath>`.",
+        "Thay vòng `while` bằng một lệnh `j--;` duy nhất. Để xử lý việc xóa lặp lại, cần một vòng lặp bên ngoài hoặc một cách tiếp cận stack tinh vi hơn để kiểm tra lại ký tự mới ở đỉnh stack sau khi xóa.",
+        "Thêm `#include <cstring>`.",
+        "Sử dụng vòng lặp `while(true)` hoặc `do-while`. Trong hàm `nhap`, sau khi đọc tên đội, kiểm tra nếu `strcmp(a.name, \"000\") == 0` thì thoát vòng lặp và không xử lý đội đó nữa. Cần một biến đếm số lượng đội thực tế.",
+        "Sửa thành `if (tinhDiem(a[max_pos]) < tinhDiem(a[j])) max_pos = j;`",
+        "Trong điều kiện `if` của sắp xếp, sau khi so sánh điểm, nếu điểm bằng nhau, cần thêm các điều kiện `else if` để so sánh `share`, `comment`, `like` theo thứ tự ưu tiên."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Tách thành hai hàm riêng biệt: `isMainDiagonalSymmetric()` và `isAntiDiagonalSymmetric()`. Mỗi hàm sẽ duyệt toàn bộ ma trận và trả về `false` ngay khi tìm thấy một cặp không đối xứng. Hàm `checkDoiXung` chính sẽ gọi `return isMainDiagonalSymmetric(...) || isAntiDiagonalSymmetric(...);`",
+          "readability-flesch_kincaid_reading_ease-sm": 102.895,
+          "familiarity-freq-exclude_stop_words-sm": 0.691,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `#include <cmath>`.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.387,
+          "familiarity-freq-exclude_stop_words-sm": 0.485,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay vòng `while` bằng một lệnh `j--;` duy nhất. Để xử lý việc xóa lặp lại, cần một vòng lặp bên ngoài hoặc một cách tiếp cận stack tinh vi hơn để kiểm tra lại ký tự mới ở đỉnh stack sau khi xóa.",
+          "readability-flesch_kincaid_reading_ease-sm": 145.463,
+          "familiarity-freq-exclude_stop_words-sm": 0.763,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `#include <cstring>`.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.387,
+          "familiarity-freq-exclude_stop_words-sm": 0.485,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng vòng lặp `while(true)` hoặc `do-while`. Trong hàm `nhap`, sau khi đọc tên đội, kiểm tra nếu `strcmp(a.name, \"000\") == 0` thì thoát vòng lặp và không xử lý đội đó nữa. Cần một biến đếm số lượng đội thực tế.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.475,
+          "familiarity-freq-exclude_stop_words-sm": 0.736,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa thành `if (tinhDiem(a[max_pos]) < tinhDiem(a[j])) max_pos = j;`",
+          "readability-flesch_kincaid_reading_ease-sm": 108.962,
+          "familiarity-freq-exclude_stop_words-sm": 0.662,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong điều kiện `if` của sắp xếp, sau khi so sánh điểm, nếu điểm bằng nhau, cần thêm các điều kiện `else if` để so sánh `share`, `comment`, `like` theo thứ tự ưu tiên.",
+          "readability-flesch_kincaid_reading_ease-sm": 112.184,
+          "familiarity-freq-exclude_stop_words-sm": 0.717,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": "102",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 2: Cải thiện hiệu suất bằng cách tối ưu vòng lặp ngoài (thay bằng `while (changed)`) và tránh gọi `strlen` nhiều lần không cần thiết trong vòng lặp `deleteAtPos`.",
+        "Bài 3: Cần đọc tên đội có khoảng trắng bằng `getline` thay vì `cin >>` để tránh bị cắt ngắn tên đội.",
+        "Bài 3: Sửa logic sắp xếp để đúng thứ tự giảm dần theo điểm và bổ sung các tiêu chí phụ khi điểm bằng nhau (share, comment, like) theo yêu cầu đề bài.",
+        "Sử dụng `cin.ignore()` sau khi đọc số và trước khi đọc chuỗi, sau đó dùng `cin.getline(teams[count].name, sizeof(teams[count].name));` hoặc `getline(cin, string_variable);` nếu dùng `std::string`.",
+        "Thay đổi điều kiện sắp xếp thành `if (teams[i].point < teams[j].point)` để sắp xếp giảm dần. Sau đó, thêm các điều kiện `else if` để xử lý tie-breaking theo `share`, `comment`, `like` giảm dần.",
+        "Sử dụng một vòng lặp `while (true)` với một cờ `bool changed` để lặp lại quá trình xóa cho đến khi không còn thay đổi nào. Trong `deleteAtPos`, lưu `strlen(ch)` vào một biến cục bộ trước khi vào vòng lặp để tránh gọi lại nhiều lần."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 2: Cải thiện hiệu suất bằng cách tối ưu vòng lặp ngoài (thay bằng `while (changed)`) và tránh gọi `strlen` nhiều lần không cần thiết trong vòng lặp `deleteAtPos`.",
+          "readability-flesch_kincaid_reading_ease-sm": 113.895,
+          "familiarity-freq-exclude_stop_words-sm": 0.617,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cần đọc tên đội có khoảng trắng bằng `getline` thay vì `cin >>` để tránh bị cắt ngắn tên đội.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.363,
+          "familiarity-freq-exclude_stop_words-sm": 0.65,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Sửa logic sắp xếp để đúng thứ tự giảm dần theo điểm và bổ sung các tiêu chí phụ khi điểm bằng nhau (share, comment, like) theo yêu cầu đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 116.94,
+          "familiarity-freq-exclude_stop_words-sm": 0.868,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `cin.ignore()` sau khi đọc số và trước khi đọc chuỗi, sau đó dùng `cin.getline(teams[count].name, sizeof(teams[count].name));` hoặc `getline(cin, string_variable);` nếu dùng `std::string`.",
+          "readability-flesch_kincaid_reading_ease-sm": 88.041,
+          "familiarity-freq-exclude_stop_words-sm": 0.748,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi điều kiện sắp xếp thành `if (teams[i].point < teams[j].point)` để sắp xếp giảm dần. Sau đó, thêm các điều kiện `else if` để xử lý tie-breaking theo `share`, `comment`, `like` giảm dần.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.118,
+          "familiarity-freq-exclude_stop_words-sm": 0.677,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng một vòng lặp `while (true)` với một cờ `bool changed` để lặp lại quá trình xóa cho đến khi không còn thay đổi nào. Trong `deleteAtPos`, lưu `strlen(ch)` vào một biến cục bộ trước khi vào vòng lặp để tránh gọi lại nhiều lần.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.132,
+          "familiarity-freq-exclude_stop_words-sm": 0.7,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "106",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 1: Cần hoàn thiện hàm `check_doixungopdiagonal` bằng cách thêm `return true` khi không tìm thấy sự không đối xứng.",
+        "Bài 2: Cần sửa lỗi so sánh (`=`) thành phép so sánh (`==`) và logic xóa ký tự liên tiếp.",
+        "Bài 3: Cần sửa lỗi so sánh chuỗi (`!=` thay vì `strcmp`) và logic đọc dữ liệu đầu vào để đảm bảo đọc đúng tất cả các đội.",
+        "Bài 3: Cần cải thiện thuật toán sắp xếp và xử lý các trường hợp hòa điểm để tìm ra 3 đội đứng đầu một cách chính xác và hiệu quả hơn.",
+        "Nên sử dụng các cấu trúc dữ liệu và API hiện đại của C++ như `std::string` và `std::vector` để xử lý chuỗi và mảng động an toàn và hiệu quả hơn.",
+        "Thêm `return true;` vào cuối hàm `check_doixungopdiagonal` sau khi vòng lặp kết thúc.",
+        "Sửa `if (a[count] = a[count + 1])` thành `if (a[count] == a[count + 1])`.",
+        "Sửa `a[n] = '\\0';` thành `a[n-1] = '\\0';`.",
+        "Cần thay đổi logic đọc dữ liệu: đọc tên đội trước, kiểm tra nếu là \"000\" thì dừng, nếu không thì đọc tiếp các thông tin còn lại của đội. Sử dụng `strcmp(a[count].name, \"000\") != 0` để so sánh chuỗi.",
+        "Sửa `max.like` thành `max.share` trong điều kiện so sánh lượt share. Tương tự cho các tiêu chí phá hòa khác."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 1: Cần hoàn thiện hàm `check_doixungopdiagonal` bằng cách thêm `return true` khi không tìm thấy sự không đối xứng.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.6,
+          "familiarity-freq-exclude_stop_words-sm": 0.756,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 2: Cần sửa lỗi so sánh (`=`) thành phép so sánh (`==`) và logic xóa ký tự liên tiếp.",
+          "readability-flesch_kincaid_reading_ease-sm": 147.62,
+          "familiarity-freq-exclude_stop_words-sm": 0.679,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cần sửa lỗi so sánh chuỗi (`!=` thay vì `strcmp`) và logic đọc dữ liệu đầu vào để đảm bảo đọc đúng tất cả các đội.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.699,
+          "familiarity-freq-exclude_stop_words-sm": 0.745,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cần cải thiện thuật toán sắp xếp và xử lý các trường hợp hòa điểm để tìm ra 3 đội đứng đầu một cách chính xác và hiệu quả hơn.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.986,
+          "familiarity-freq-exclude_stop_words-sm": 0.83,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nên sử dụng các cấu trúc dữ liệu và API hiện đại của C++ như `std::string` và `std::vector` để xử lý chuỗi và mảng động an toàn và hiệu quả hơn.",
+          "readability-flesch_kincaid_reading_ease-sm": 125.384,
+          "familiarity-freq-exclude_stop_words-sm": 0.792,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `return true;` vào cuối hàm `check_doixungopdiagonal` sau khi vòng lặp kết thúc.",
+          "readability-flesch_kincaid_reading_ease-sm": 114.933,
+          "familiarity-freq-exclude_stop_words-sm": 0.674,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa `if (a[count] = a[count + 1])` thành `if (a[count] == a[count + 1])`.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.571,
+          "familiarity-freq-exclude_stop_words-sm": 0.538,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa `a[n] = '\\0';` thành `a[n-1] = '\\0';`.",
+          "readability-flesch_kincaid_reading_ease-sm": 173.505,
+          "familiarity-freq-exclude_stop_words-sm": 0.852,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần thay đổi logic đọc dữ liệu: đọc tên đội trước, kiểm tra nếu là \"000\" thì dừng, nếu không thì đọc tiếp các thông tin còn lại của đội. Sử dụng `strcmp(a[count].name, \"000\") != 0` để so sánh chuỗi.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.296,
+          "familiarity-freq-exclude_stop_words-sm": 0.862,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa `max.like` thành `max.share` trong điều kiện so sánh lượt share. Tương tự cho các tiêu chí phá hòa khác.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.78,
+          "familiarity-freq-exclude_stop_words-sm": 0.681,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 10
+    },
+    {
+      "row_index": "108",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Truyền kích thước cạnh của ma trận (ví dụ: `sqrt(n)`) vào hàm `solve` thay vì tổng số phần tử. Hoặc tính toán kích thước cạnh ngay trong hàm `solve`.",
+        "Nghiên cứu lại công thức kiểm tra đối xứng ma trận qua đường chéo chính và phụ. Ví dụ, đối xứng qua đường chéo chính: `a[i][j] == a[j][i]`. Đối xứng qua đường chéo phụ: `a[i][j] == a[N-1-j][N-1-i]` (với N là kích thước cạnh ma trận).",
+        "Trước khi truy cập `a[i-1]`, cần kiểm tra `i > 0`. Tuy nhiên, cách xóa ký tự này cũng không đúng. Để xóa `a[i]` và `a[i+1]`, cần dịch chuyển tất cả các ký tự từ `a[i+2]` trở đi sang trái 2 vị trí.",
+        "Sử dụng một vòng lặp để dịch chuyển các ký tự: `for (int k = i; k < len - 2; k++) { a[k] = a[k+2]; }`. Sau đó cập nhật `len` và đặt `a[len] = 0;`.",
+        "Thay `cout << 1;` bằng `cout << a;` để in ra chuỗi đã được thay đổi.",
+        "Sử dụng vòng lặp `while` để đọc tên đội cho đến khi gặp '000'. Đọc tên đội trước, sau đó kiểm tra điều kiện dừng. Sử dụng `std::string` để dễ dàng so sánh chuỗi.",
+        "Sử dụng một mảng các `Team` và sắp xếp nó bằng `std::sort` với một hàm so sánh tùy chỉnh (`lambda` hoặc `struct`) dựa trên điểm số và các tiêu chí phụ. Sau đó chỉ cần in 3 phần tử đầu tiên của mảng đã sắp xếp."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Truyền kích thước cạnh của ma trận (ví dụ: `sqrt(n)`) vào hàm `solve` thay vì tổng số phần tử. Hoặc tính toán kích thước cạnh ngay trong hàm `solve`.",
+          "readability-flesch_kincaid_reading_ease-sm": 162.484,
+          "familiarity-freq-exclude_stop_words-sm": 0.645,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nghiên cứu lại công thức kiểm tra đối xứng ma trận qua đường chéo chính và phụ. Ví dụ, đối xứng qua đường chéo chính: `a[i][j] == a[j][i]`. Đối xứng qua đường chéo phụ: `a[i][j] == a[N-1-j][N-1-i]` (với N là kích thước cạnh ma trận).",
+          "readability-flesch_kincaid_reading_ease-sm": 148.998,
+          "familiarity-freq-exclude_stop_words-sm": 0.675,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trước khi truy cập `a[i-1]`, cần kiểm tra `i > 0`. Tuy nhiên, cách xóa ký tự này cũng không đúng. Để xóa `a[i]` và `a[i+1]`, cần dịch chuyển tất cả các ký tự từ `a[i+2]` trở đi sang trái 2 vị trí.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.363,
+          "familiarity-freq-exclude_stop_words-sm": 0.772,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng một vòng lặp để dịch chuyển các ký tự: `for (int k = i; k < len - 2; k++) { a[k] = a[k+2]; }`. Sau đó cập nhật `len` và đặt `a[len] = 0;`.",
+          "readability-flesch_kincaid_reading_ease-sm": 161.155,
+          "familiarity-freq-exclude_stop_words-sm": 0.78,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay `cout << 1;` bằng `cout << a;` để in ra chuỗi đã được thay đổi.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.05,
+          "familiarity-freq-exclude_stop_words-sm": 0.872,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng vòng lặp `while` để đọc tên đội cho đến khi gặp '000'. Đọc tên đội trước, sau đó kiểm tra điều kiện dừng. Sử dụng `std::string` để dễ dàng so sánh chuỗi.",
+          "readability-flesch_kincaid_reading_ease-sm": 158.357,
+          "familiarity-freq-exclude_stop_words-sm": 0.741,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng một mảng các `Team` và sắp xếp nó bằng `std::sort` với một hàm so sánh tùy chỉnh (`lambda` hoặc `struct`) dựa trên điểm số và các tiêu chí phụ. Sau đó chỉ cần in 3 phần tử đầu tiên của mảng đã sắp xếp.",
+          "readability-flesch_kincaid_reading_ease-sm": 158.798,
+          "familiarity-freq-exclude_stop_words-sm": 0.738,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": "109",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Thay thế bằng `std::vector<std::vector<int>> b(m, std::vector<int>(m));` để đảm bảo tính tương thích và an toàn.",
+        "Đọc `n` và các phần tử của mảng `a` từ `std::cin` để chương trình có thể xử lý các input khác nhau.",
+        "Khi tìm thấy `s[i] == s[i+1]`, bạn cần xác định số lượng ký tự trùng lặp liên tiếp (ví dụ `k` ký tự). Sau đó dịch các ký tự từ `s[i+k]` về sau sang vị trí `s[i]`, và cập nhật độ dài chuỗi. Ví dụ, nếu `s = \"abbaca\"` và tìm thấy `bb` ở `i=1`, bạn cần dịch `aca` sang vị trí `s[1]`, để chuỗi thành `aaca`.",
+        "Sử dụng `std::string` và các phương thức như `erase()` để thao tác chuỗi an toàn và dễ dàng hơn, hoặc thực hiện dịch chuyển ký tự thủ công một cách cẩn thận bằng cách sử dụng `memmove` hoặc vòng lặp dịch chuyển.",
+        "Thay đổi thành `void inputTeam(Team& a)` để truyền tham chiếu, hoặc hàm có thể trả về một đối tượng `Team` đã được điền dữ liệu.",
+        "Sau khi đọc dữ liệu (cần sửa lỗi truyền tham số để dữ liệu được lưu trữ), cần thêm logic để tính điểm cho từng đội, sử dụng `std::sort` với custom comparator để sắp xếp, và in kết quả theo yêu cầu.",
+        "Thiết kế `inputTeam` chỉ đọc dữ liệu cho một đội và trả về đội đó, hoặc hàm `main` sẽ chứa vòng lặp để gọi `inputTeam` nhiều lần (sau khi sửa lỗi truyền tham số)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Thay thế bằng `std::vector<std::vector<int>> b(m, std::vector<int>(m));` để đảm bảo tính tương thích và an toàn.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.54,
+          "familiarity-freq-exclude_stop_words-sm": 0.784,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đọc `n` và các phần tử của mảng `a` từ `std::cin` để chương trình có thể xử lý các input khác nhau.",
+          "readability-flesch_kincaid_reading_ease-sm": 178.58,
+          "familiarity-freq-exclude_stop_words-sm": 0.813,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khi tìm thấy `s[i] == s[i+1]`, bạn cần xác định số lượng ký tự trùng lặp liên tiếp (ví dụ `k` ký tự). Sau đó dịch các ký tự từ `s[i+k]` về sau sang vị trí `s[i]`, và cập nhật độ dài chuỗi. Ví dụ, nếu `s = \"abbaca\"` và tìm thấy `bb` ở `i=1`, bạn cần dịch `aca` sang vị trí `s[1]`, để chuỗi thành `aaca`.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.105,
+          "familiarity-freq-exclude_stop_words-sm": 0.738,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `std::string` và các phương thức như `erase()` để thao tác chuỗi an toàn và dễ dàng hơn, hoặc thực hiện dịch chuyển ký tự thủ công một cách cẩn thận bằng cách sử dụng `memmove` hoặc vòng lặp dịch chuyển.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.915,
+          "familiarity-freq-exclude_stop_words-sm": 0.78,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi thành `void inputTeam(Team& a)` để truyền tham chiếu, hoặc hàm có thể trả về một đối tượng `Team` đã được điền dữ liệu.",
+          "readability-flesch_kincaid_reading_ease-sm": 124.89,
+          "familiarity-freq-exclude_stop_words-sm": 0.699,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi đọc dữ liệu (cần sửa lỗi truyền tham số để dữ liệu được lưu trữ), cần thêm logic để tính điểm cho từng đội, sử dụng `std::sort` với custom comparator để sắp xếp, và in kết quả theo yêu cầu.",
+          "readability-flesch_kincaid_reading_ease-sm": 104.493,
+          "familiarity-freq-exclude_stop_words-sm": 0.8,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thiết kế `inputTeam` chỉ đọc dữ liệu cho một đội và trả về đội đó, hoặc hàm `main` sẽ chứa vòng lặp để gọi `inputTeam` nhiều lần (sau khi sửa lỗi truyền tham số).",
+          "readability-flesch_kincaid_reading_ease-sm": 115.475,
+          "familiarity-freq-exclude_stop_words-sm": 0.655,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": "111",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cải thiện cách đọc dữ liệu đầu vào cho các chuỗi có khoảng trắng (Bài 3).",
+        "Thuật toán xếp hạng và xử lý các trường hợp hòa điểm cần được xây dựng lại hoàn chỉnh và chính xác hơn (Bài 3).",
+        "Nên sử dụng các cấu trúc dữ liệu và thuật toán chuẩn của C++ (như `std::string`, `std::vector`, `std::sort`) để tăng tính ổn định và hiệu quả.",
+        "Sử dụng `cin.getline(dt[i].ten, sizeof(dt[i].ten));` hoặc `std::getline(std::cin, string_variable);` để đọc toàn bộ dòng. Lưu ý cần xử lý ký tự xuống dòng còn lại trong buffer sau khi đọc số (ví dụ: `cin.ignore();`).",
+        "Cách tiếp cận chuẩn là lưu trữ các đội vào một `std::vector<DoiTuyen>`, sau đó sử dụng `std::sort` với một hàm so sánh tùy chỉnh (lambda hoặc functor) để sắp xếp theo tổng điểm, rồi đến share, comment, like (tất cả đều giảm dần). Sau đó in ra 3 đội đầu tiên (hoặc nhiều hơn nếu có các đội đồng hạng 3).",
+        "Sử dụng `std::vector<int> rank(n);` để tạo mảng động theo chuẩn C++."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cải thiện cách đọc dữ liệu đầu vào cho các chuỗi có khoảng trắng (Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 129.862,
+          "familiarity-freq-exclude_stop_words-sm": 0.746,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thuật toán xếp hạng và xử lý các trường hợp hòa điểm cần được xây dựng lại hoàn chỉnh và chính xác hơn (Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 154.388,
+          "familiarity-freq-exclude_stop_words-sm": 0.766,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nên sử dụng các cấu trúc dữ liệu và thuật toán chuẩn của C++ (như `std::string`, `std::vector`, `std::sort`) để tăng tính ổn định và hiệu quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.699,
+          "familiarity-freq-exclude_stop_words-sm": 0.732,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `cin.getline(dt[i].ten, sizeof(dt[i].ten));` hoặc `std::getline(std::cin, string_variable);` để đọc toàn bộ dòng. Lưu ý cần xử lý ký tự xuống dòng còn lại trong buffer sau khi đọc số (ví dụ: `cin.ignore();`).",
+          "readability-flesch_kincaid_reading_ease-sm": 124.963,
+          "familiarity-freq-exclude_stop_words-sm": 0.753,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cách tiếp cận chuẩn là lưu trữ các đội vào một `std::vector<DoiTuyen>`, sau đó sử dụng `std::sort` với một hàm so sánh tùy chỉnh (lambda hoặc functor) để sắp xếp theo tổng điểm, rồi đến share, comment, like (tất cả đều giảm dần). Sau đó in ra 3 đội đầu tiên (hoặc nhiều hơn nếu có các đội đồng hạng 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 122.56,
+          "familiarity-freq-exclude_stop_words-sm": 0.766,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `std::vector<int> rank(n);` để tạo mảng động theo chuẩn C++.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.295,
+          "familiarity-freq-exclude_stop_words-sm": 0.763,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "112",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 1: Cần bổ sung kiểm tra đối xứng qua đường chéo chính theo yêu cầu của đề bài.",
+        "Bài 2: Cần cải thiện việc xử lý chuỗi để tránh lỗi tràn bộ nhớ tiềm ẩn và đảm bảo tính bền vững của chuỗi (null-termination). Nên dùng ký tự hằng ('a', 'z') thay vì giá trị ASCII (97, 122) để tăng tính dễ đọc.",
+        "Bài 3: Cần sửa lỗi đọc dữ liệu đầu vào để phù hợp với định dạng đề bài (đọc cả nhãn 'Name:', 'Like:', v.v. và xử lý ký tự xuống dòng sau khi đọc số).",
+        "Tạo thêm một hàm kiểm tra đối xứng qua đường chéo chính (`a[i][j] == a[j][i]`). Sau đó, trong `ktraDoiXung`, gọi cả hai hàm và trả về `true` nếu một trong hai hàm trả về `true`.",
+        "Đảm bảo vòng lặp dịch chuyển không đọc ngoài giới hạn mảng (ví dụ: `for (int j = i; j < n - 2; j++)`). Quan trọng hơn, sau khi giảm `n`, cần gán `a[n] = '\\0';` để đảm bảo chuỗi được kết thúc null đúng cách.",
+        "Thay thế `97` bằng `'a'` và `122` bằng `'z'` để mã dễ hiểu hơn.",
+        "Để đọc đúng định dạng, cần đọc toàn bộ dòng (`std::getline`) và sau đó phân tích cú pháp để trích xuất nhãn và giá trị. Ví dụ, đọc `\"Name: Tên đội\"` vào một `std::string`, sau đó dùng `substr` để lấy tên. Tương tự cho Like, Comment, Share. Tránh dùng `cin.ignore()` một cách tùy tiện."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 1: Cần bổ sung kiểm tra đối xứng qua đường chéo chính theo yêu cầu của đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.666,
+          "familiarity-freq-exclude_stop_words-sm": 0.83,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 2: Cần cải thiện việc xử lý chuỗi để tránh lỗi tràn bộ nhớ tiềm ẩn và đảm bảo tính bền vững của chuỗi (null-termination). Nên dùng ký tự hằng ('a', 'z') thay vì giá trị ASCII (97, 122) để tăng tính dễ đọc.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.029,
+          "familiarity-freq-exclude_stop_words-sm": 0.776,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cần sửa lỗi đọc dữ liệu đầu vào để phù hợp với định dạng đề bài (đọc cả nhãn 'Name:', 'Like:', v.v. và xử lý ký tự xuống dòng sau khi đọc số).",
+          "readability-flesch_kincaid_reading_ease-sm": 137.47,
+          "familiarity-freq-exclude_stop_words-sm": 0.824,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Tạo thêm một hàm kiểm tra đối xứng qua đường chéo chính (`a[i][j] == a[j][i]`). Sau đó, trong `ktraDoiXung`, gọi cả hai hàm và trả về `true` nếu một trong hai hàm trả về `true`.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.494,
+          "familiarity-freq-exclude_stop_words-sm": 0.74,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đảm bảo vòng lặp dịch chuyển không đọc ngoài giới hạn mảng (ví dụ: `for (int j = i; j < n - 2; j++)`). Quan trọng hơn, sau khi giảm `n`, cần gán `a[n] = '\\0';` để đảm bảo chuỗi được kết thúc null đúng cách.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.533,
+          "familiarity-freq-exclude_stop_words-sm": 0.774,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế `97` bằng `'a'` và `122` bằng `'z'` để mã dễ hiểu hơn.",
+          "readability-flesch_kincaid_reading_ease-sm": 169.123,
+          "familiarity-freq-exclude_stop_words-sm": 0.86,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để đọc đúng định dạng, cần đọc toàn bộ dòng (`std::getline`) và sau đó phân tích cú pháp để trích xuất nhãn và giá trị. Ví dụ, đọc `\"Name: Tên đội\"` vào một `std::string`, sau đó dùng `substr` để lấy tên. Tương tự cho Like, Comment, Share. Tránh dùng `cin.ignore()` một cách tùy tiện.",
+          "readability-flesch_kincaid_reading_ease-sm": 158.87,
+          "familiarity-freq-exclude_stop_words-sm": 0.78,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": "113",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 1: Cần đọc input `n` là kích thước cạnh của ma trận, không phải tổng số phần tử. Cần điều chỉnh logic kiểm tra đối xứng để trả về `True` nếu thỏa mãn MỘT TRONG HAI tính chất.",
+        "Bài 2: Ý tưởng xử lý trùng lặp chưa đúng yêu cầu. Cần xóa *toàn bộ* nhóm ký tự trùng lặp liên tiếp và lặp lại quá trình xóa cho đến khi không còn cặp nào.",
+        "Bài 3: Cần xử lý số lượng đội không giới hạn và trường hợp đồng hạng mở rộng ở vị trí top 3.",
+        "Nếu 'n' là tổng số phần tử, cần tính `int size = sqrt(n);` và dùng `size` làm kích thước ma trận. Hoặc làm rõ giả định về input.",
+        "Tách kiểm tra đối xứng chính và phụ thành hai hàm riêng, hoặc lưu kết quả vào biến boolean, sau đó trả về `isSymmetricChinh || isSymmetricPhu`.",
+        "Cần một thuật toán khác, ví dụ dùng stack hoặc duyệt qua chuỗi để tìm nhóm trùng lặp, xóa chúng, rồi lặp lại quá trình trên chuỗi mới.",
+        "Bọc logic xóa vào một vòng lặp `while` cho đến khi không có thay đổi nào xảy ra trong một lần duyệt.",
+        "Sử dụng `std::string` hoặc cấp phát động bộ nhớ cho chuỗi để xử lý chuỗi có độ dài tùy ý.",
+        "Sử dụng `std::vector<Team>` để lưu trữ đội, cho phép số lượng đội linh hoạt.",
+        "Sau khi sắp xếp, in ra 3 đội đầu tiên. Sau đó, kiểm tra xem có các đội tiếp theo có điểm và tiêu chí phụ bằng với đội thứ 3 hay không, và in ra chúng."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 1: Cần đọc input `n` là kích thước cạnh của ma trận, không phải tổng số phần tử. Cần điều chỉnh logic kiểm tra đối xứng để trả về `True` nếu thỏa mãn MỘT TRONG HAI tính chất.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.566,
+          "familiarity-freq-exclude_stop_words-sm": 0.815,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 2: Ý tưởng xử lý trùng lặp chưa đúng yêu cầu. Cần xóa *toàn bộ* nhóm ký tự trùng lặp liên tiếp và lặp lại quá trình xóa cho đến khi không còn cặp nào.",
+          "readability-flesch_kincaid_reading_ease-sm": 162.45,
+          "familiarity-freq-exclude_stop_words-sm": 0.64,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cần xử lý số lượng đội không giới hạn và trường hợp đồng hạng mở rộng ở vị trí top 3.",
+          "readability-flesch_kincaid_reading_ease-sm": 165.099,
+          "familiarity-freq-exclude_stop_words-sm": 0.86,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nếu 'n' là tổng số phần tử, cần tính `int size = sqrt(n);` và dùng `size` làm kích thước ma trận. Hoặc làm rõ giả định về input.",
+          "readability-flesch_kincaid_reading_ease-sm": 166.801,
+          "familiarity-freq-exclude_stop_words-sm": 0.834,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Tách kiểm tra đối xứng chính và phụ thành hai hàm riêng, hoặc lưu kết quả vào biến boolean, sau đó trả về `isSymmetricChinh || isSymmetricPhu`.",
+          "readability-flesch_kincaid_reading_ease-sm": 105.901,
+          "familiarity-freq-exclude_stop_words-sm": 0.771,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một thuật toán khác, ví dụ dùng stack hoặc duyệt qua chuỗi để tìm nhóm trùng lặp, xóa chúng, rồi lặp lại quá trình trên chuỗi mới.",
+          "readability-flesch_kincaid_reading_ease-sm": 130.072,
+          "familiarity-freq-exclude_stop_words-sm": 0.701,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bọc logic xóa vào một vòng lặp `while` cho đến khi không có thay đổi nào xảy ra trong một lần duyệt.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.6,
+          "familiarity-freq-exclude_stop_words-sm": 0.738,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `std::string` hoặc cấp phát động bộ nhớ cho chuỗi để xử lý chuỗi có độ dài tùy ý.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.937,
+          "familiarity-freq-exclude_stop_words-sm": 0.792,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `std::vector<Team>` để lưu trữ đội, cho phép số lượng đội linh hoạt.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.024,
+          "familiarity-freq-exclude_stop_words-sm": 0.773,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi sắp xếp, in ra 3 đội đầu tiên. Sau đó, kiểm tra xem có các đội tiếp theo có điểm và tiêu chí phụ bằng với đội thứ 3 hay không, và in ra chúng.",
+          "readability-flesch_kincaid_reading_ease-sm": 137.755,
+          "familiarity-freq-exclude_stop_words-sm": 0.896,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 10
+    },
+    {
+      "row_index": "115",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Để tránh thay đổi ma trận gốc, bạn có thể tạo một bản sao của ma trận trước khi thực hiện phép hoán đổi, hoặc viết lại logic kiểm tra đối xứng qua đường chéo phụ trực tiếp mà không cần hoán đổi. Ví dụ: `a[i][j] == a[n-1-j][n-1-i]` (nếu theo định nghĩa chuẩn) hoặc `a[i][j] == a[j][n-1-i]` (nếu theo logic của bạn sau khi lật ngang).",
+        "Viết code để giải quyết bài toán xóa các chữ cái trùng nhau liên tiếp trong chuỗi.",
+        "Thay thế `=` bằng `==` trong tất cả các điều kiện so sánh.",
+        "Để đọc các nhãn, bạn có thể đọc cả dòng bằng `getline`, sau đó phân tích chuỗi để lấy tên đội và các số. Hoặc đọc nhãn bằng `cin >> string_variable;` trước khi đọc giá trị.",
+        "Sau khi sắp xếp, chỉ in ra `min(3, n_valid_teams)` đội đầu tiên. Cần điều chỉnh `n` trong `nhap_mang` để chỉ đếm số đội hợp lệ."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Để tránh thay đổi ma trận gốc, bạn có thể tạo một bản sao của ma trận trước khi thực hiện phép hoán đổi, hoặc viết lại logic kiểm tra đối xứng qua đường chéo phụ trực tiếp mà không cần hoán đổi. Ví dụ: `a[i][j] == a[n-1-j][n-1-i]` (nếu theo định nghĩa chuẩn) hoặc `a[i][j] == a[j][n-1-i]` (nếu theo logic của bạn sau khi lật ngang).",
+          "readability-flesch_kincaid_reading_ease-sm": 135.916,
+          "familiarity-freq-exclude_stop_words-sm": 0.746,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Viết code để giải quyết bài toán xóa các chữ cái trùng nhau liên tiếp trong chuỗi.",
+          "readability-flesch_kincaid_reading_ease-sm": 123.56,
+          "familiarity-freq-exclude_stop_words-sm": 0.751,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế `=` bằng `==` trong tất cả các điều kiện so sánh.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.365,
+          "familiarity-freq-exclude_stop_words-sm": 0.742,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để đọc các nhãn, bạn có thể đọc cả dòng bằng `getline`, sau đó phân tích chuỗi để lấy tên đội và các số. Hoặc đọc nhãn bằng `cin >> string_variable;` trước khi đọc giá trị.",
+          "readability-flesch_kincaid_reading_ease-sm": 155.076,
+          "familiarity-freq-exclude_stop_words-sm": 0.785,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi sắp xếp, chỉ in ra `min(3, n_valid_teams)` đội đầu tiên. Cần điều chỉnh `n` trong `nhap_mang` để chỉ đếm số đội hợp lệ.",
+          "readability-flesch_kincaid_reading_ease-sm": 144.709,
+          "familiarity-freq-exclude_stop_words-sm": 0.725,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": "116",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cải thiện kỹ năng thiết kế thuật toán cho các bài toán xử lý chuỗi phức tạp (Bài 2).",
+        "Cần rèn luyện kỹ năng triển khai thuật toán sắp xếp với các tiêu chí so sánh phức tạp (Bài 3).",
+        "Cần kiểm tra kỹ các điều kiện dừng vòng lặp và điều kiện kết thúc nhập liệu (Bài 2, Bài 3).",
+        "Thực hành kiểm thử kỹ lưỡng hơn với các trường hợp biên và các trường hợp đặc biệt để đảm bảo tính đúng đắn của kết quả.",
+        "Sử dụng một vòng lặp `while` bên ngoài để lặp lại quá trình xóa cho đến khi không còn cặp ký tự trùng lặp nào. Bên trong vòng lặp, tìm cặp đầu tiên, xóa chúng bằng cách dịch chuyển các ký tự còn lại, sau đó bắt đầu lại việc kiểm tra từ đầu chuỗi hoặc từ vị trí gần đó để đảm bảo xử lý 'từ trái sang phải' và 'lặp lại'.",
+        "Sử dụng `strcmp(team.name, \"000\") == 0` để so sánh toàn bộ chuỗi tên đội với \"000\" một cách chính xác.",
+        "Thay đổi điều kiện vòng lặp bên trong thành `for(int j = i + 1; j < n; ++j)` để thực hiện sắp xếp chọn hoặc nổi bọt đúng cách.",
+        "Trong điều kiện `if (calPoint(teams[i]) < calPoint(teams[j]))`, cần bổ sung thêm các điều kiện `else if` để so sánh `share`, `comment`, `like` khi điểm số bằng nhau, theo thứ tự ưu tiên giảm dần.",
+        "Sau khi cập nhật `len`, ký tự null phải được đặt tại `s[len] = 0;` để kết thúc chuỗi đúng cách."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cải thiện kỹ năng thiết kế thuật toán cho các bài toán xử lý chuỗi phức tạp (Bài 2).",
+          "readability-flesch_kincaid_reading_ease-sm": 135.775,
+          "familiarity-freq-exclude_stop_words-sm": 0.671,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần rèn luyện kỹ năng triển khai thuật toán sắp xếp với các tiêu chí so sánh phức tạp (Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 141.206,
+          "familiarity-freq-exclude_stop_words-sm": 0.622,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần kiểm tra kỹ các điều kiện dừng vòng lặp và điều kiện kết thúc nhập liệu (Bài 2, Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 133.149,
+          "familiarity-freq-exclude_stop_words-sm": 0.731,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thực hành kiểm thử kỹ lưỡng hơn với các trường hợp biên và các trường hợp đặc biệt để đảm bảo tính đúng đắn của kết quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.363,
+          "familiarity-freq-exclude_stop_words-sm": 0.799,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Sử dụng một vòng lặp `while` bên ngoài để lặp lại quá trình xóa cho đến khi không còn cặp ký tự trùng lặp nào. Bên trong vòng lặp, tìm cặp đầu tiên, xóa chúng bằng cách dịch chuyển các ký tự còn lại, sau đó bắt đầu lại việc kiểm tra từ đầu chuỗi hoặc từ vị trí gần đó để đảm bảo xử lý 'từ trái sang phải' và 'lặp lại'.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.492,
+          "familiarity-freq-exclude_stop_words-sm": 0.765,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `strcmp(team.name, \"000\") == 0` để so sánh toàn bộ chuỗi tên đội với \"000\" một cách chính xác.",
+          "readability-flesch_kincaid_reading_ease-sm": 150.386,
+          "familiarity-freq-exclude_stop_words-sm": 0.831,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi điều kiện vòng lặp bên trong thành `for(int j = i + 1; j < n; ++j)` để thực hiện sắp xếp chọn hoặc nổi bọt đúng cách.",
+          "readability-flesch_kincaid_reading_ease-sm": 142.466,
+          "familiarity-freq-exclude_stop_words-sm": 0.762,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong điều kiện `if (calPoint(teams[i]) < calPoint(teams[j]))`, cần bổ sung thêm các điều kiện `else if` để so sánh `share`, `comment`, `like` khi điểm số bằng nhau, theo thứ tự ưu tiên giảm dần.",
+          "readability-flesch_kincaid_reading_ease-sm": 126.823,
+          "familiarity-freq-exclude_stop_words-sm": 0.692,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi cập nhật `len`, ký tự null phải được đặt tại `s[len] = 0;` để kết thúc chuỗi đúng cách.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.004,
+          "familiarity-freq-exclude_stop_words-sm": 0.826,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 9
+    },
+    {
+      "row_index": "118",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Thay `&&` bằng `||` để kiểm tra điều kiện 'HOẶC'.",
+        "Triển khai logic kiểm tra đối xứng qua đường chéo phụ. Ví dụ, so sánh `a[i][j]` với `a[n-1-j][n-1-i]` hoặc `a[n-1-i][n-1-j]`.",
+        "Gọi `cout << ktraDoixung(a,n);` trong `main` để hiển thị kết quả cuối cùng của bài toán.",
+        "Để xóa một đoạn từ `start` đến `end`, cần dịch chuyển các phần tử từ `end + 1` về vị trí `start`. Ví dụ: `for (int i = start; i <= n - (end - start + 1) - 1; ++i) { a[i] = a[i + (end - start + 1)]; }` sau đó cập nhật `n`.",
+        "Khi tìm thấy `a[i] == a[i+1]`, gán `start = i`. Sau đó, dùng một vòng lặp khác để tìm `end` bằng cách duyệt `k` từ `i+1` cho đến khi `a[k] != a[k+1]` hoặc hết chuỗi. Trả về `true` và các giá trị `start`, `end` đã tìm được.",
+        "Gọi `XoaLientuc(a, start, end, n);` sau khi đọc chuỗi để thực hiện toàn bộ quá trình xóa lặp lại.",
+        "Để đọc đúng định dạng `Name: Tên đội`, cần đọc cả nhãn. Ví dụ: `string label; getline(cin, label, ':'); cin.getline(Name, 50);` hoặc sử dụng `cin >> string_label; cin.getline(Name, 50);`.",
+        "Thêm `i++;` sau `a[i].input();` để chuyển sang vị trí mảng tiếp theo cho đội mới.",
+        "Sau khi nhập dữ liệu, cần thêm các bước để tính điểm cho từng đội, lưu trữ điểm, sắp xếp danh sách các đội (ví dụ: sử dụng `std::sort` với một hàm so sánh tùy chỉnh) và in ra 3 đội đứng đầu."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Thay `&&` bằng `||` để kiểm tra điều kiện 'HOẶC'.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.086,
+          "familiarity-freq-exclude_stop_words-sm": 0.77,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Triển khai logic kiểm tra đối xứng qua đường chéo phụ. Ví dụ, so sánh `a[i][j]` với `a[n-1-j][n-1-i]` hoặc `a[n-1-i][n-1-j]`.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.85,
+          "familiarity-freq-exclude_stop_words-sm": 0.688,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Gọi `cout << ktraDoixung(a,n);` trong `main` để hiển thị kết quả cuối cùng của bài toán.",
+          "readability-flesch_kincaid_reading_ease-sm": 126.823,
+          "familiarity-freq-exclude_stop_words-sm": 0.757,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để xóa một đoạn từ `start` đến `end`, cần dịch chuyển các phần tử từ `end + 1` về vị trí `start`. Ví dụ: `for (int i = start; i <= n - (end - start + 1) - 1; ++i) { a[i] = a[i + (end - start + 1)]; }` sau đó cập nhật `n`.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.606,
+          "familiarity-freq-exclude_stop_words-sm": 0.805,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khi tìm thấy `a[i] == a[i+1]`, gán `start = i`. Sau đó, dùng một vòng lặp khác để tìm `end` bằng cách duyệt `k` từ `i+1` cho đến khi `a[k] != a[k+1]` hoặc hết chuỗi. Trả về `true` và các giá trị `start`, `end` đã tìm được.",
+          "readability-flesch_kincaid_reading_ease-sm": 161.888,
+          "familiarity-freq-exclude_stop_words-sm": 0.693,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Gọi `XoaLientuc(a, start, end, n);` sau khi đọc chuỗi để thực hiện toàn bộ quá trình xóa lặp lại.",
+          "readability-flesch_kincaid_reading_ease-sm": 121.063,
+          "familiarity-freq-exclude_stop_words-sm": 0.802,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để đọc đúng định dạng `Name: Tên đội`, cần đọc cả nhãn. Ví dụ: `string label; getline(cin, label, ':'); cin.getline(Name, 50);` hoặc sử dụng `cin >> string_label; cin.getline(Name, 50);`.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.467,
+          "familiarity-freq-exclude_stop_words-sm": 0.777,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `i++;` sau `a[i].input();` để chuyển sang vị trí mảng tiếp theo cho đội mới.",
+          "readability-flesch_kincaid_reading_ease-sm": 125.213,
+          "familiarity-freq-exclude_stop_words-sm": 0.793,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi nhập dữ liệu, cần thêm các bước để tính điểm cho từng đội, lưu trữ điểm, sắp xếp danh sách các đội (ví dụ: sử dụng `std::sort` với một hàm so sánh tùy chỉnh) và in ra 3 đội đứng đầu.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.278,
+          "familiarity-freq-exclude_stop_words-sm": 0.741,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 9
+    },
+    {
+      "row_index": "119",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 1: Cần sửa logic kiểm tra đối xứng: nếu một trong hai điều kiện (đối xứng chính HOẶC đối xứng phụ) đúng thì trả về True. Hiện tại, hàm sẽ trả về False ngay nếu không đối xứng qua đường chéo chính mà không kiểm tra đường chéo phụ. Kiểm tra lại công thức đối xứng qua đường chéo phụ để đảm bảo chính xác.",
+        "Bài 2: Cần xử lý trường hợp `i--` có thể làm `i` trở thành giá trị âm, dẫn đến lỗi truy cập ngoài biên mảng (`str[-1]`).",
+        "Bài 3: Cách đọc input cần được sửa lại hoàn toàn để phù hợp với yêu cầu đề bài (đọc cho đến khi tên đội là '000', không phải đọc số lượng đội trước). Logic xếp hạng cần được triển khai để tìm ra 3 đội có điểm cao nhất, bao gồm cả việc xử lý các tiêu chí phụ khi điểm bằng nhau (`share`, `comment`, `like`). Hiện tại, code chỉ tìm các đội có điểm cao nhất mà không giới hạn 3 đội và không xử lý tie-breaking.",
+        "Tách việc kiểm tra đối xứng chính và phụ thành hai hàm riêng biệt, hoặc gán kết quả kiểm tra từng loại vào biến boolean, sau đó trả về `ket_qua_chinh || ket_qua_phu`.",
+        "Thêm điều kiện kiểm tra `if (i < 0) i = 0;` sau `i--;` để đảm bảo `i` không bao giờ nhỏ hơn 0. Hoặc sử dụng một con trỏ ghi (`write_idx`) và con trỏ đọc (`read_idx`) để xây dựng chuỗi mới hiệu quả hơn.",
+        "Sử dụng vòng lặp `while(true)` hoặc `do-while` để đọc từng đội. Sau khi đọc tên đội, kiểm tra nếu `strcmp(name, \"000\") == 0` thì thoát vòng lặp. Cần đảm bảo `cin.ignore()` được sử dụng đúng cách giữa `cin >> int` và `cin.getline`.",
+        "Sử dụng một `std::vector<Team>` và `std::sort` với một hàm so sánh tùy chỉnh (hoặc overload `operator<`) để sắp xếp tất cả các đội theo điểm, sau đó là tiêu chí phụ. Sau đó, in ra 3 đội đầu tiên (hoặc nhiều hơn nếu có các đội bằng điểm ở vị trí thứ 3)."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 1: Cần sửa logic kiểm tra đối xứng: nếu một trong hai điều kiện (đối xứng chính HOẶC đối xứng phụ) đúng thì trả về True. Hiện tại, hàm sẽ trả về False ngay nếu không đối xứng qua đường chéo chính mà không kiểm tra đường chéo phụ. Kiểm tra lại công thức đối xứng qua đường chéo phụ để đảm bảo chính xác.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.506,
+          "familiarity-freq-exclude_stop_words-sm": 0.772,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 2: Cần xử lý trường hợp `i--` có thể làm `i` trở thành giá trị âm, dẫn đến lỗi truy cập ngoài biên mảng (`str[-1]`).",
+          "readability-flesch_kincaid_reading_ease-sm": 150.561,
+          "familiarity-freq-exclude_stop_words-sm": 0.803,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cách đọc input cần được sửa lại hoàn toàn để phù hợp với yêu cầu đề bài (đọc cho đến khi tên đội là '000', không phải đọc số lượng đội trước). Logic xếp hạng cần được triển khai để tìm ra 3 đội có điểm cao nhất, bao gồm cả việc xử lý các tiêu chí phụ khi điểm bằng nhau (`share`, `comment`, `like`). Hiện tại, code chỉ tìm các đội có điểm cao nhất mà không giới hạn 3 đội và không xử lý tie-breaking.",
+          "readability-flesch_kincaid_reading_ease-sm": 132.936,
+          "familiarity-freq-exclude_stop_words-sm": 0.849,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Tách việc kiểm tra đối xứng chính và phụ thành hai hàm riêng biệt, hoặc gán kết quả kiểm tra từng loại vào biến boolean, sau đó trả về `ket_qua_chinh || ket_qua_phu`.",
+          "readability-flesch_kincaid_reading_ease-sm": 133.126,
+          "familiarity-freq-exclude_stop_words-sm": 0.749,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm điều kiện kiểm tra `if (i < 0) i = 0;` sau `i--;` để đảm bảo `i` không bao giờ nhỏ hơn 0. Hoặc sử dụng một con trỏ ghi (`write_idx`) và con trỏ đọc (`read_idx`) để xây dựng chuỗi mới hiệu quả hơn.",
+          "readability-flesch_kincaid_reading_ease-sm": 145.195,
+          "familiarity-freq-exclude_stop_words-sm": 0.826,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng vòng lặp `while(true)` hoặc `do-while` để đọc từng đội. Sau khi đọc tên đội, kiểm tra nếu `strcmp(name, \"000\") == 0` thì thoát vòng lặp. Cần đảm bảo `cin.ignore()` được sử dụng đúng cách giữa `cin >> int` và `cin.getline`.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.961,
+          "familiarity-freq-exclude_stop_words-sm": 0.677,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng một `std::vector<Team>` và `std::sort` với một hàm so sánh tùy chỉnh (hoặc overload `operator<`) để sắp xếp tất cả các đội theo điểm, sau đó là tiêu chí phụ. Sau đó, in ra 3 đội đầu tiên (hoặc nhiều hơn nếu có các đội bằng điểm ở vị trí thứ 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 129.205,
+          "familiarity-freq-exclude_stop_words-sm": 0.788,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 7
+    },
+    {
+      "row_index": "122",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Để kiểm tra đối xứng qua đường chéo chính, cần so sánh từng cặp phần tử: `Matrix[i][j] == Matrix[j][i]` cho tất cả `i, j` với `i != j`. Tương tự cho đường chéo phụ, cần so sánh `Matrix[i][j] == Matrix[n-1-j][n-1-i]`.",
+        "Thay đổi logic trong các hàm kiểm tra đối xứng để lặp qua các phần tử và so sánh `Matrix[i][j]` với phần tử đối xứng của nó. Ví dụ, cho đường chéo chính, bạn chỉ cần lặp `i` từ 0 đến `n-1` và `j` từ `i+1` đến `n-1`, sau đó kiểm tra `Matrix[i][j] == Matrix[j][i]`.",
+        "Viết mã nguồn để thực hiện việc xóa các ký tự trùng lặp liên tiếp trong chuỗi theo yêu cầu đề bài. Có thể sử dụng một vòng lặp và một chuỗi tạm thời hoặc các phương thức của `std::string` như `erase`.",
+        "Sử dụng vòng lặp `while` để đọc dữ liệu cho đến khi `Name` của đội là '000'. Đọc cả nhãn 'Name:', 'Like:', 'Comment:', 'Share:' thay vì chỉ đọc giá trị, hoặc điều chỉnh hàm `InputDoiTuyen` để phù hợp với định dạng input của đề bài.",
+        "Sau khi tính điểm cho tất cả các đội, cần lưu trữ thông tin đội (tên, điểm, like, comment, share) vào một cấu trúc dữ liệu có thể sắp xếp (ví dụ: `std::vector<DoiTuyen>`). Sau đó, sử dụng `std::sort` với một hàm so sánh tùy chỉnh (custom comparator) để sắp xếp các đội theo điểm, rồi đến share, comment, like. Cuối cùng, in ra 3 đội đầu tiên.",
+        "Nên sử dụng `std::vector<int> DiemSo(n);` hoặc cấp phát động `new int[n]` để đảm bảo tính tương thích và an toàn trong C++ chuẩn."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo chính, cần so sánh từng cặp phần tử: `Matrix[i][j] == Matrix[j][i]` cho tất cả `i, j` với `i != j`. Tương tự cho đường chéo phụ, cần so sánh `Matrix[i][j] == Matrix[n-1-j][n-1-i]`.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.942,
+          "familiarity-freq-exclude_stop_words-sm": 0.704,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi logic trong các hàm kiểm tra đối xứng để lặp qua các phần tử và so sánh `Matrix[i][j]` với phần tử đối xứng của nó. Ví dụ, cho đường chéo chính, bạn chỉ cần lặp `i` từ 0 đến `n-1` và `j` từ `i+1` đến `n-1`, sau đó kiểm tra `Matrix[i][j] == Matrix[j][i]`.",
+          "readability-flesch_kincaid_reading_ease-sm": 157.576,
+          "familiarity-freq-exclude_stop_words-sm": 0.75,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Viết mã nguồn để thực hiện việc xóa các ký tự trùng lặp liên tiếp trong chuỗi theo yêu cầu đề bài. Có thể sử dụng một vòng lặp và một chuỗi tạm thời hoặc các phương thức của `std::string` như `erase`.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.19,
+          "familiarity-freq-exclude_stop_words-sm": 0.779,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng vòng lặp `while` để đọc dữ liệu cho đến khi `Name` của đội là '000'. Đọc cả nhãn 'Name:', 'Like:', 'Comment:', 'Share:' thay vì chỉ đọc giá trị, hoặc điều chỉnh hàm `InputDoiTuyen` để phù hợp với định dạng input của đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.505,
+          "familiarity-freq-exclude_stop_words-sm": 0.858,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi tính điểm cho tất cả các đội, cần lưu trữ thông tin đội (tên, điểm, like, comment, share) vào một cấu trúc dữ liệu có thể sắp xếp (ví dụ: `std::vector<DoiTuyen>`). Sau đó, sử dụng `std::sort` với một hàm so sánh tùy chỉnh (custom comparator) để sắp xếp các đội theo điểm, rồi đến share, comment, like. Cuối cùng, in ra 3 đội đầu tiên.",
+          "readability-flesch_kincaid_reading_ease-sm": 128.066,
+          "familiarity-freq-exclude_stop_words-sm": 0.787,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nên sử dụng `std::vector<int> DiemSo(n);` hoặc cấp phát động `new int[n]` để đảm bảo tính tương thích và an toàn trong C++ chuẩn.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.13,
+          "familiarity-freq-exclude_stop_words-sm": 0.795,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "125",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần hoàn thiện logic cốt lõi cho việc kiểm tra đối xứng ma trận (Bài 1).",
+        "Logic xóa ký tự trong chuỗi (Bài 2) cần được sửa đổi để hiệu quả và chính xác hơn.",
+        "Cần khắc phục lỗi nghiêm trọng trong việc truyền và gán giá trị biến `n` trong hàm `setArray` (Bài 3).",
+        "Cần triển khai các quy tắc phá vỡ hòa (tie-breaking) cho việc xếp hạng đội tuyển (Bài 3).",
+        "Cần đảm bảo chương trình đọc đúng định dạng đầu vào như mô tả trong đề bài (Bài 3).",
+        "Thêm logic so sánh các phần tử `a[i][j]` với `a[j][i]` cho đường chéo chính và `a[i][j]` với `a[sqrt(n)-1-j][sqrt(n)-1-i]` hoặc tương tự cho đường chéo phụ.",
+        "Thêm `return 1;` hoặc giá trị phù hợp ở cuối hàm.",
+        "Thay thế vòng lặp lồng nhau này bằng một lần dịch chuyển chuỗi hiệu quả hơn, ví dụ: `strcpy(s + pos, s + pos + count);`.",
+        "Đảm bảo điều kiện vòng lặp `i < strlen(s) - 1` khi truy cập `s[i+1]`.",
+        "Di chuyển `n = i;` lên trước `return 1;` hoặc đảm bảo nó được gán giá trị trước khi hàm kết thúc khi đọc dữ liệu thành công.",
+        "Khi `max == a[i].Diem`, cần thêm các điều kiện `if` lồng nhau để so sánh `share`, `comment`, `like`.",
+        "Xóa các câu lệnh `cout` in ra prompt và chỉ đọc giá trị theo định dạng đề bài.",
+        "Thay `100` bằng `sizeof(name)` hoặc `40` để tránh tràn bộ đệm."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần hoàn thiện logic cốt lõi cho việc kiểm tra đối xứng ma trận (Bài 1).",
+          "readability-flesch_kincaid_reading_ease-sm": 121.858,
+          "familiarity-freq-exclude_stop_words-sm": 0.663,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Logic xóa ký tự trong chuỗi (Bài 2) cần được sửa đổi để hiệu quả và chính xác hơn.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.761,
+          "familiarity-freq-exclude_stop_words-sm": 0.783,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần khắc phục lỗi nghiêm trọng trong việc truyền và gán giá trị biến `n` trong hàm `setArray` (Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 148.83,
+          "familiarity-freq-exclude_stop_words-sm": 0.663,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần triển khai các quy tắc phá vỡ hòa (tie-breaking) cho việc xếp hạng đội tuyển (Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 134.118,
+          "familiarity-freq-exclude_stop_words-sm": 0.725,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần đảm bảo chương trình đọc đúng định dạng đầu vào như mô tả trong đề bài (Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 166.024,
+          "familiarity-freq-exclude_stop_words-sm": 0.816,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm logic so sánh các phần tử `a[i][j]` với `a[j][i]` cho đường chéo chính và `a[i][j]` với `a[sqrt(n)-1-j][sqrt(n)-1-i]` hoặc tương tự cho đường chéo phụ.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.147,
+          "familiarity-freq-exclude_stop_words-sm": 0.704,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `return 1;` hoặc giá trị phù hợp ở cuối hàm.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.086,
+          "familiarity-freq-exclude_stop_words-sm": 0.82,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay thế vòng lặp lồng nhau này bằng một lần dịch chuyển chuỗi hiệu quả hơn, ví dụ: `strcpy(s + pos, s + pos + count);`.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.136,
+          "familiarity-freq-exclude_stop_words-sm": 0.846,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đảm bảo điều kiện vòng lặp `i < strlen(s) - 1` khi truy cập `s[i+1]`.",
+          "readability-flesch_kincaid_reading_ease-sm": 150.7,
+          "familiarity-freq-exclude_stop_words-sm": 0.661,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Di chuyển `n = i;` lên trước `return 1;` hoặc đảm bảo nó được gán giá trị trước khi hàm kết thúc khi đọc dữ liệu thành công.",
+          "readability-flesch_kincaid_reading_ease-sm": 142.63,
+          "familiarity-freq-exclude_stop_words-sm": 0.838,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khi `max == a[i].Diem`, cần thêm các điều kiện `if` lồng nhau để so sánh `share`, `comment`, `like`.",
+          "readability-flesch_kincaid_reading_ease-sm": 133.641,
+          "familiarity-freq-exclude_stop_words-sm": 0.654,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xóa các câu lệnh `cout` in ra prompt và chỉ đọc giá trị theo định dạng đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.465,
+          "familiarity-freq-exclude_stop_words-sm": 0.836,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay `100` bằng `sizeof(name)` hoặc `40` để tránh tràn bộ đệm.",
+          "readability-flesch_kincaid_reading_ease-sm": 164.698,
+          "familiarity-freq-exclude_stop_words-sm": 0.53,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 13
+    },
+    {
+      "row_index": "127",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Loại bỏ các hàm kiểm tra đối xứng không chính xác hoặc dư thừa (`CheckingDuongCheoChinh` và `CheckingDuongCheoPhu`) để tăng tính rõ ràng và hiệu quả của mã.",
+        "Cải thiện hiệu suất vòng lặp trong các hàm kiểm tra đối xứng (ví dụ: chỉ duyệt một nửa ma trận thay vì toàn bộ) để tránh các phép so sánh trùng lặp.",
+        "Đặt tên biến và hàm rõ ràng hơn, tránh sự trùng lặp tên như `CheckingDuongCheoChinh` và `CheckingDuongCheoChinh2`.",
+        "Để kiểm tra đối xứng qua đường chéo chính, cần so sánh `a[i][j]` với `a[j][i]`. Có thể loại bỏ hàm này và chỉ sử dụng `CheckingDuongCheoChinh2`.",
+        "Để kiểm tra đối xứng qua đường chéo phụ, cần so sánh `a[i][j]` với `a[n - 1 - j][n - 1 - i]`. Có thể loại bỏ hàm này và chỉ sử dụng `CheckingDuongCheoPhu2`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Loại bỏ các hàm kiểm tra đối xứng không chính xác hoặc dư thừa (`CheckingDuongCheoChinh` và `CheckingDuongCheoPhu`) để tăng tính rõ ràng và hiệu quả của mã.",
+          "readability-flesch_kincaid_reading_ease-sm": 118.06,
+          "familiarity-freq-exclude_stop_words-sm": 0.69,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cải thiện hiệu suất vòng lặp trong các hàm kiểm tra đối xứng (ví dụ: chỉ duyệt một nửa ma trận thay vì toàn bộ) để tránh các phép so sánh trùng lặp.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.885,
+          "familiarity-freq-exclude_stop_words-sm": 0.584,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Đặt tên biến và hàm rõ ràng hơn, tránh sự trùng lặp tên như `CheckingDuongCheoChinh` và `CheckingDuongCheoChinh2`.",
+          "readability-flesch_kincaid_reading_ease-sm": 147.835,
+          "familiarity-freq-exclude_stop_words-sm": 0.581,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo chính, cần so sánh `a[i][j]` với `a[j][i]`. Có thể loại bỏ hàm này và chỉ sử dụng `CheckingDuongCheoChinh2`.",
+          "readability-flesch_kincaid_reading_ease-sm": 137.72,
+          "familiarity-freq-exclude_stop_words-sm": 0.725,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo phụ, cần so sánh `a[i][j]` với `a[n - 1 - j][n - 1 - i]`. Có thể loại bỏ hàm này và chỉ sử dụng `CheckingDuongCheoPhu2`.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.565,
+          "familiarity-freq-exclude_stop_words-sm": 0.73,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": "128",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Di chuyển `return true` ra ngoài vòng lặp sau khi tất cả các cặp đã được kiểm tra. Trả về `false` ngay khi tìm thấy một cặp không đối xứng.",
+        "Sửa thành `Mat[i][j] == Mat[j][i]` cho tất cả các cặp `(i, j)` trong nửa trên/dưới của ma trận.",
+        "Chỉ cần kiểm tra `Mat[i][j] == Mat[row - 1 - j][col - 1 - i]` cho tất cả các cặp `(i, j)`.",
+        "Đọc tất cả `n` phần tử từ một dòng duy nhất sau khi đọc `n`.",
+        "Sửa thành `Team[i].input();`.",
+        "Sửa thành `TEAMS Team[MAXTEAM];` và `TEAMS Team[]` (sử dụng tên struct đã định nghĩa là `TEAMS`).",
+        "Cần một thuật toán sắp xếp hoặc duy trì top 3 đúng đắn (ví dụ: sử dụng mảng/vector để lưu các đội và sắp xếp, hoặc duy trì 3 biến cho 3 đội hàng đầu), không sử dụng `break` trong vòng lặp này.",
+        "Sử dụng vòng lặp `while(true)` và kiểm tra `name == \"000\"` để dừng việc nhập liệu.",
+        "Thêm phần in kết quả sau khi đã xác định được 3 đội chiến thắng trong hàm `main` hoặc một hàm riêng biệt."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Di chuyển `return true` ra ngoài vòng lặp sau khi tất cả các cặp đã được kiểm tra. Trả về `false` ngay khi tìm thấy một cặp không đối xứng.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.768,
+          "familiarity-freq-exclude_stop_words-sm": 0.72,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa thành `Mat[i][j] == Mat[j][i]` cho tất cả các cặp `(i, j)` trong nửa trên/dưới của ma trận.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.175,
+          "familiarity-freq-exclude_stop_words-sm": 0.592,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Chỉ cần kiểm tra `Mat[i][j] == Mat[row - 1 - j][col - 1 - i]` cho tất cả các cặp `(i, j)`.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.702,
+          "familiarity-freq-exclude_stop_words-sm": 0.677,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đọc tất cả `n` phần tử từ một dòng duy nhất sau khi đọc `n`.",
+          "readability-flesch_kincaid_reading_ease-sm": 169.739,
+          "familiarity-freq-exclude_stop_words-sm": 0.866,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa thành `Team[i].input();`.",
+          "readability-flesch_kincaid_reading_ease-sm": 117.16,
+          "familiarity-freq-exclude_stop_words-sm": 0.744,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa thành `TEAMS Team[MAXTEAM];` và `TEAMS Team[]` (sử dụng tên struct đã định nghĩa là `TEAMS`).",
+          "readability-flesch_kincaid_reading_ease-sm": 146.05,
+          "familiarity-freq-exclude_stop_words-sm": 0.62,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một thuật toán sắp xếp hoặc duy trì top 3 đúng đắn (ví dụ: sử dụng mảng/vector để lưu các đội và sắp xếp, hoặc duy trì 3 biến cho 3 đội hàng đầu), không sử dụng `break` trong vòng lặp này.",
+          "readability-flesch_kincaid_reading_ease-sm": 125.202,
+          "familiarity-freq-exclude_stop_words-sm": 0.722,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng vòng lặp `while(true)` và kiểm tra `name == \"000\"` để dừng việc nhập liệu.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.263,
+          "familiarity-freq-exclude_stop_words-sm": 0.754,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm phần in kết quả sau khi đã xác định được 3 đội chiến thắng trong hàm `main` hoặc một hàm riêng biệt.",
+          "readability-flesch_kincaid_reading_ease-sm": 140.852,
+          "familiarity-freq-exclude_stop_words-sm": 0.81,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 9
+    },
+    {
+      "row_index": "131",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cải thiện kỹ năng đọc và xử lý input, đặc biệt với ma trận và chuỗi.",
+        "Cần hoàn thiện luồng xử lý chính của chương trình, bao gồm đọc dữ liệu, lưu trữ, xử lý logic và xuất kết quả.",
+        "Cần chú ý hơn đến việc kiểm tra các trường hợp biên và logic điều kiện để đảm bảo tính đúng đắn của thuật toán.",
+        "Cần nắm vững cách khai báo và sử dụng các kiểu dữ liệu cơ bản như `std::string`.",
+        "Sửa `a[m][n]` thành `a[i][j]` và điều chỉnh vòng lặp từ `0` đến `n-1` (hoặc `1` đến `n` tùy cách lập trình) để phù hợp với kích thước ma trận `n x n`.",
+        "Cần kiểm tra tất cả các cặp phần tử liên quan trước khi kết luận đối xứng. Nếu tìm thấy bất kỳ cặp nào không đối xứng, trả về `FALSE`. Nếu duyệt hết mà không có cặp nào không đối xứng, trả về `TRUE`. Công thức kiểm tra đối xứng qua đường chéo phụ là `a[i][j] == a[n-1-j][n-1-i]` hoặc `a[i][j] == a[n-1-i][n-1-j]`.",
+        "Chỉ cần khai báo `string strEngLetters;` để làm việc với một chuỗi đơn. Hàm `getline` cũng sẽ hoạt động đúng với kiểu `std::string`.",
+        "Cần bổ sung code vào hàm `main` để thực hiện các bước: 1. Tạo một `std::vector<DoiTuyen>` để lưu trữ các đội. 2. Đọc input theo định dạng yêu cầu cho đến khi gặp '000'. 3. Với mỗi đội, tính điểm bằng hàm `TinhDiem`. 4. Sử dụng `std::sort` với một hàm so sánh tùy chỉnh để sắp xếp các đội. 5. In ra tên của 3 đội đầu tiên."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cải thiện kỹ năng đọc và xử lý input, đặc biệt với ma trận và chuỗi.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.815,
+          "familiarity-freq-exclude_stop_words-sm": 0.813,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần hoàn thiện luồng xử lý chính của chương trình, bao gồm đọc dữ liệu, lưu trữ, xử lý logic và xuất kết quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 136.65,
+          "familiarity-freq-exclude_stop_words-sm": 0.816,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần chú ý hơn đến việc kiểm tra các trường hợp biên và logic điều kiện để đảm bảo tính đúng đắn của thuật toán.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.084,
+          "familiarity-freq-exclude_stop_words-sm": 0.818,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần nắm vững cách khai báo và sử dụng các kiểu dữ liệu cơ bản như `std::string`.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.929,
+          "familiarity-freq-exclude_stop_words-sm": 0.76,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sửa `a[m][n]` thành `a[i][j]` và điều chỉnh vòng lặp từ `0` đến `n-1` (hoặc `1` đến `n` tùy cách lập trình) để phù hợp với kích thước ma trận `n x n`.",
+          "readability-flesch_kincaid_reading_ease-sm": 165.099,
+          "familiarity-freq-exclude_stop_words-sm": 0.646,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần kiểm tra tất cả các cặp phần tử liên quan trước khi kết luận đối xứng. Nếu tìm thấy bất kỳ cặp nào không đối xứng, trả về `FALSE`. Nếu duyệt hết mà không có cặp nào không đối xứng, trả về `TRUE`. Công thức kiểm tra đối xứng qua đường chéo phụ là `a[i][j] == a[n-1-j][n-1-i]` hoặc `a[i][j] == a[n-1-i][n-1-j]`.",
+          "readability-flesch_kincaid_reading_ease-sm": 156.899,
+          "familiarity-freq-exclude_stop_words-sm": 0.75,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Chỉ cần khai báo `string strEngLetters;` để làm việc với một chuỗi đơn. Hàm `getline` cũng sẽ hoạt động đúng với kiểu `std::string`.",
+          "readability-flesch_kincaid_reading_ease-sm": 139.607,
+          "familiarity-freq-exclude_stop_words-sm": 0.74,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần bổ sung code vào hàm `main` để thực hiện các bước: 1. Tạo một `std::vector<DoiTuyen>` để lưu trữ các đội. 2. Đọc input theo định dạng yêu cầu cho đến khi gặp '000'. 3. Với mỗi đội, tính điểm bằng hàm `TinhDiem`. 4. Sử dụng `std::sort` với một hàm so sánh tùy chỉnh để sắp xếp các đội. 5. In ra tên của 3 đội đầu tiên.",
+          "readability-flesch_kincaid_reading_ease-sm": 158.123,
+          "familiarity-freq-exclude_stop_words-sm": 0.792,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 8
+    },
+    {
+      "row_index": "133",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Kiến thức cơ bản về C++: Cần nắm vững hơn về cách khai báo và sử dụng chuỗi ký tự (char[] hoặc std::string thay vì char), cách truyền mảng vào hàm, và phân biệt toán tử gán (=) với toán tử so sánh (==).",
+        "Logic lập trình: Cần cải thiện khả năng xây dựng thuật toán hoàn chỉnh cho các yêu cầu phức tạp như kiểm tra đối xứng, xóa ký tự lặp lại liên tiếp nhiều lần, và sắp xếp với nhiều tiêu chí phụ.",
+        "Kiểm soát luồng chương trình: Các vòng lặp và điều kiện rẽ nhánh cần được viết chặt chẽ hơn để đảm bảo chương trình chạy đúng theo ý đồ (ví dụ: vòng lặp nhập liệu không chạy, hàm kiểm tra trả về sớm).",
+        "Hoàn thiện chức năng: Các hàm quan trọng thường bị bỏ trống hoặc không được gọi, dẫn đến chương trình không thực hiện được yêu cầu đề bài.",
+        "Thay đổi thành `if (a[0][0] == a[m][m])` để thực hiện so sánh.",
+        "Cần cung cấp đầy đủ các chỉ mục cho mảng 2 chiều, ví dụ `a[j][k]`.",
+        "Gọi hàm `kiemtradoixung(a, actual_dimension);` sau khi nhập mảng, đảm bảo `actual_dimension` là kích thước thực của ma trận.",
+        "Chỉ trả về `0` sau khi đã kiểm tra tất cả các cặp ký tự trong vòng lặp.",
+        "Truyền toàn bộ chuỗi `a` vào hàm `kiemtra`, tức là `kiemtra(a)`.",
+        "Triển khai logic xóa ký tự (ví dụ: dịch chuyển các ký tự còn lại hoặc sử dụng một chuỗi mới).",
+        "Sử dụng `char Name[41];` cho chuỗi kiểu C hoặc `std::string Name;` cho chuỗi C++.",
+        "Thay đổi điều kiện vòng lặp để nó có thể chạy (ví dụ: `for (int i = 0; ; i++)` và sử dụng điều kiện `Name == \"000\"` để thoát).",
+        "Nếu `Name` là `char[]`, sử dụng `strcmp(team[i].Name, \"000\") == 0`. Nếu `Name` là `std::string`, sử dụng `team[i].Name == \"000\"`.",
+        "Triển khai thuật toán sắp xếp (ví dụ: `std::sort` với hàm so sánh tùy chỉnh hoặc một thuật toán sắp xếp thủ công) để xếp hạng các đội theo điểm và các tiêu chí phụ.",
+        "Khai báo một mảng `doituyen` trong `main` và truyền nó vào hàm, ví dụ: `doituyen teams[MAX_TEAMS]; nhapdoituyen(teams);`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Kiến thức cơ bản về C++: Cần nắm vững hơn về cách khai báo và sử dụng chuỗi ký tự (char[] hoặc std::string thay vì char), cách truyền mảng vào hàm, và phân biệt toán tử gán (=) với toán tử so sánh (==).",
+          "readability-flesch_kincaid_reading_ease-sm": 159.65,
+          "familiarity-freq-exclude_stop_words-sm": 0.799,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Logic lập trình: Cần cải thiện khả năng xây dựng thuật toán hoàn chỉnh cho các yêu cầu phức tạp như kiểm tra đối xứng, xóa ký tự lặp lại liên tiếp nhiều lần, và sắp xếp với nhiều tiêu chí phụ.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.806,
+          "familiarity-freq-exclude_stop_words-sm": 0.744,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Kiểm soát luồng chương trình: Các vòng lặp và điều kiện rẽ nhánh cần được viết chặt chẽ hơn để đảm bảo chương trình chạy đúng theo ý đồ (ví dụ: vòng lặp nhập liệu không chạy, hàm kiểm tra trả về sớm).",
+          "readability-flesch_kincaid_reading_ease-sm": 155.501,
+          "familiarity-freq-exclude_stop_words-sm": 0.651,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Hoàn thiện chức năng: Các hàm quan trọng thường bị bỏ trống hoặc không được gọi, dẫn đến chương trình không thực hiện được yêu cầu đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.201,
+          "familiarity-freq-exclude_stop_words-sm": 0.859,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi thành `if (a[0][0] == a[m][m])` để thực hiện so sánh.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.13,
+          "familiarity-freq-exclude_stop_words-sm": 0.736,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần cung cấp đầy đủ các chỉ mục cho mảng 2 chiều, ví dụ `a[j][k]`.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.745,
+          "familiarity-freq-exclude_stop_words-sm": 0.738,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Gọi hàm `kiemtradoixung(a, actual_dimension);` sau khi nhập mảng, đảm bảo `actual_dimension` là kích thước thực của ma trận.",
+          "readability-flesch_kincaid_reading_ease-sm": 103.75,
+          "familiarity-freq-exclude_stop_words-sm": 0.679,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Chỉ trả về `0` sau khi đã kiểm tra tất cả các cặp ký tự trong vòng lặp.",
+          "readability-flesch_kincaid_reading_ease-sm": 161.155,
+          "familiarity-freq-exclude_stop_words-sm": 0.752,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Truyền toàn bộ chuỗi `a` vào hàm `kiemtra`, tức là `kiemtra(a)`.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.839,
+          "familiarity-freq-exclude_stop_words-sm": 0.649,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Triển khai logic xóa ký tự (ví dụ: dịch chuyển các ký tự còn lại hoặc sử dụng một chuỗi mới).",
+          "readability-flesch_kincaid_reading_ease-sm": 151.863,
+          "familiarity-freq-exclude_stop_words-sm": 0.748,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `char Name[41];` cho chuỗi kiểu C hoặc `std::string Name;` cho chuỗi C++.",
+          "readability-flesch_kincaid_reading_ease-sm": 118.065,
+          "familiarity-freq-exclude_stop_words-sm": 0.805,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi điều kiện vòng lặp để nó có thể chạy (ví dụ: `for (int i = 0; ; i++)` và sử dụng điều kiện `Name == \"000\"` để thoát).",
+          "readability-flesch_kincaid_reading_ease-sm": 152.256,
+          "familiarity-freq-exclude_stop_words-sm": 0.777,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nếu `Name` là `char[]`, sử dụng `strcmp(team[i].Name, \"000\") == 0`. Nếu `Name` là `std::string`, sử dụng `team[i].Name == \"000\"`.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.324,
+          "familiarity-freq-exclude_stop_words-sm": 0.827,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Triển khai thuật toán sắp xếp (ví dụ: `std::sort` với hàm so sánh tùy chỉnh hoặc một thuật toán sắp xếp thủ công) để xếp hạng các đội theo điểm và các tiêu chí phụ.",
+          "readability-flesch_kincaid_reading_ease-sm": 132.696,
+          "familiarity-freq-exclude_stop_words-sm": 0.667,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khai báo một mảng `doituyen` trong `main` và truyền nó vào hàm, ví dụ: `doituyen teams[MAX_TEAMS]; nhapdoituyen(teams);`.",
+          "readability-flesch_kincaid_reading_ease-sm": 120.96,
+          "familiarity-freq-exclude_stop_words-sm": 0.639,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 15
+    },
+    {
+      "row_index": "134",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần cải thiện kỹ năng debug và kiểm tra logic vòng lặp, điều kiện trả về để tránh các lỗi nghiêm trọng.",
+        "Nắm vững cách xử lý chuỗi trong C++ (so sánh chuỗi, xóa ký tự, null-termination) và các hàm thư viện liên quan.",
+        "Hiểu rõ hơn về cơ chế nhập xuất (`cin`, `getline`, `cin.ignore()`) để tránh lỗi buffer và đọc dữ liệu không mong muốn.",
+        "Hoàn thiện thuật toán cho các bài toán phức tạp hơn, bao gồm xử lý lặp lại, sắp xếp với nhiều tiêu chí và các trường hợp biên.",
+        "Chú ý đến các lỗi cú pháp và lỗi biên dịch để đảm bảo chương trình có thể chạy được.",
+        "Chỉ trả về `false` nếu tìm thấy cặp không đối xứng. Nếu duyệt hết ma trận mà không tìm thấy, mới trả về `true`. Tương tự, vòng lặp trong `KiemTraDuongCheoPhu` cần sửa điều kiện và bước nhảy (ví dụ: `i--`, `j--`) để tránh vòng lặp vô hạn và logic kiểm tra cần được điều chỉnh cho đường chéo phụ.",
+        "Truyền `pos` như một tham số cho hàm và đảm bảo nó có giá trị hợp lệ. Sau khi xóa, chuỗi cần được kết thúc bằng ký tự null (`\\0`) để tránh đọc rác.",
+        "Sử dụng `strcmp(player[i].name, \"000\") == 0` để so sánh chuỗi. Thêm `cin.ignore()` sau mỗi lần `cin >>` để xóa ký tự xuống dòng khỏi buffer. Ngoài ra, hàm `calculatePoint` và `find1st` cũng có lỗi về chữ ký hàm và truy cập thành viên."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần cải thiện kỹ năng debug và kiểm tra logic vòng lặp, điều kiện trả về để tránh các lỗi nghiêm trọng.",
+          "readability-flesch_kincaid_reading_ease-sm": 130.669,
+          "familiarity-freq-exclude_stop_words-sm": 0.73,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Nắm vững cách xử lý chuỗi trong C++ (so sánh chuỗi, xóa ký tự, null-termination) và các hàm thư viện liên quan.",
+          "readability-flesch_kincaid_reading_ease-sm": 136.31,
+          "familiarity-freq-exclude_stop_words-sm": 0.727,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Hiểu rõ hơn về cơ chế nhập xuất (`cin`, `getline`, `cin.ignore()`) để tránh lỗi buffer và đọc dữ liệu không mong muốn.",
+          "readability-flesch_kincaid_reading_ease-sm": 130.072,
+          "familiarity-freq-exclude_stop_words-sm": 0.714,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Hoàn thiện thuật toán cho các bài toán phức tạp hơn, bao gồm xử lý lặp lại, sắp xếp với nhiều tiêu chí và các trường hợp biên.",
+          "readability-flesch_kincaid_reading_ease-sm": 133.094,
+          "familiarity-freq-exclude_stop_words-sm": 0.765,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Chú ý đến các lỗi cú pháp và lỗi biên dịch để đảm bảo chương trình có thể chạy được.",
+          "readability-flesch_kincaid_reading_ease-sm": 161.155,
+          "familiarity-freq-exclude_stop_words-sm": 0.848,
+          "convergence-specificity-bert-base": 0.0
+        },
+        {
+          "text": "Chỉ trả về `false` nếu tìm thấy cặp không đối xứng. Nếu duyệt hết ma trận mà không tìm thấy, mới trả về `true`. Tương tự, vòng lặp trong `KiemTraDuongCheoPhu` cần sửa điều kiện và bước nhảy (ví dụ: `i--`, `j--`) để tránh vòng lặp vô hạn và logic kiểm tra cần được điều chỉnh cho đường chéo phụ.",
+          "readability-flesch_kincaid_reading_ease-sm": 146.707,
+          "familiarity-freq-exclude_stop_words-sm": 0.711,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Truyền `pos` như một tham số cho hàm và đảm bảo nó có giá trị hợp lệ. Sau khi xóa, chuỗi cần được kết thúc bằng ký tự null (`\\0`) để tránh đọc rác.",
+          "readability-flesch_kincaid_reading_ease-sm": 160.834,
+          "familiarity-freq-exclude_stop_words-sm": 0.776,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `strcmp(player[i].name, \"000\") == 0` để so sánh chuỗi. Thêm `cin.ignore()` sau mỗi lần `cin >>` để xóa ký tự xuống dòng khỏi buffer. Ngoài ra, hàm `calculatePoint` và `find1st` cũng có lỗi về chữ ký hàm và truy cập thành viên.",
+          "readability-flesch_kincaid_reading_ease-sm": 142.081,
+          "familiarity-freq-exclude_stop_words-sm": 0.705,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 8
+    },
+    {
+      "row_index": "135",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "**Hiểu và xử lý input:** Cần đọc kỹ định dạng input của đề bài để xử lý chính xác (ví dụ: cách nhập ma trận trong Bài 1, cách nhập tên đội có dấu cách và các nhãn 'Name:', 'Like:' trong Bài 3, cách kết thúc input bằng '000').",
+        "**Logic thuật toán cốt lõi:** Cần cải thiện đáng kể logic cho các thuật toán chính: kiểm tra đối xứng ma trận, xóa ký tự trùng lặp liên tiếp (đặc biệt là tính chất lặp lại sau khi xóa), và thuật toán sắp xếp với nhiều tiêu chí phụ.",
+        "**Xử lý chuỗi C-style:** Nắm vững cách so sánh chuỗi (`strcmp`) và đọc chuỗi có dấu cách (`cin.getline`) khi làm việc với `char[]` trong C++.",
+        "**Kiểm soát vòng lặp và chỉ mục:** Cần kiểm tra kỹ các điều kiện dừng vòng lặp và chỉ mục mảng để tránh lỗi runtime (ví dụ: vòng lặp vô hạn, truy cập ngoài giới hạn mảng).",
+        "**Tính toàn vẹn dữ liệu khi sắp xếp:** Khi sắp xếp các struct, cần đảm bảo hoán đổi toàn bộ struct chứ không chỉ một trường dữ liệu (ví dụ: `tong` trong Bài 3) để tránh làm sai lệch dữ liệu.",
+        "Để kiểm tra đối xứng qua đường chéo chính, bạn cần so sánh `a[i][j]` với `a[j][i]`. Đối với đường chéo phụ, so sánh `a[i][j]` với `a[n-1-j][n-1-i]`. Không cần tạo mảng phụ `b` và `c` theo cách này.",
+        "Cần một vòng lặp `while` bên ngoài để lặp lại quá trình xóa cho đến khi không còn ký tự trùng lặp nào có thể xóa được. Bên trong vòng lặp, bạn duyệt chuỗi để tìm các cặp ký tự trùng lặp liên tiếp và xóa chúng. Sau khi xóa, bạn cần kiểm tra lại từ đầu chuỗi hoặc từ vị trí trước đó.",
+        "Sử dụng `strcmp(a[i].name, \"000\") == 0` để so sánh chuỗi. Để đọc tên có dấu cách, dùng `cin.getline(a[i].name, 40)` sau khi xử lý ký tự xuống dòng. Trong hàm `sapxep`, cần hoán đổi toàn bộ `SinhVien` struct (`SinhVien temp = a[max_pos]; a[max_pos] = a[i]; a[i] = temp;`) và điều chỉnh logic sắp xếp để bao gồm các tiêu chí phụ (share, comment, like) khi điểm bằng nhau."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "**Hiểu và xử lý input:** Cần đọc kỹ định dạng input của đề bài để xử lý chính xác (ví dụ: cách nhập ma trận trong Bài 1, cách nhập tên đội có dấu cách và các nhãn 'Name:', 'Like:' trong Bài 3, cách kết thúc input bằng '000').",
+          "readability-flesch_kincaid_reading_ease-sm": 149.163,
+          "familiarity-freq-exclude_stop_words-sm": 0.857,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "**Logic thuật toán cốt lõi:** Cần cải thiện đáng kể logic cho các thuật toán chính: kiểm tra đối xứng ma trận, xóa ký tự trùng lặp liên tiếp (đặc biệt là tính chất lặp lại sau khi xóa), và thuật toán sắp xếp với nhiều tiêu chí phụ.",
+          "readability-flesch_kincaid_reading_ease-sm": 128.445,
+          "familiarity-freq-exclude_stop_words-sm": 0.691,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "**Xử lý chuỗi C-style:** Nắm vững cách so sánh chuỗi (`strcmp`) và đọc chuỗi có dấu cách (`cin.getline`) khi làm việc với `char[]` trong C++.",
+          "readability-flesch_kincaid_reading_ease-sm": 148.421,
+          "familiarity-freq-exclude_stop_words-sm": 0.686,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "**Kiểm soát vòng lặp và chỉ mục:** Cần kiểm tra kỹ các điều kiện dừng vòng lặp và chỉ mục mảng để tránh lỗi runtime (ví dụ: vòng lặp vô hạn, truy cập ngoài giới hạn mảng).",
+          "readability-flesch_kincaid_reading_ease-sm": 153.76,
+          "familiarity-freq-exclude_stop_words-sm": 0.611,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "**Tính toàn vẹn dữ liệu khi sắp xếp:** Khi sắp xếp các struct, cần đảm bảo hoán đổi toàn bộ struct chứ không chỉ một trường dữ liệu (ví dụ: `tong` trong Bài 3) để tránh làm sai lệch dữ liệu.",
+          "readability-flesch_kincaid_reading_ease-sm": 145.664,
+          "familiarity-freq-exclude_stop_words-sm": 0.698,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo chính, bạn cần so sánh `a[i][j]` với `a[j][i]`. Đối với đường chéo phụ, so sánh `a[i][j]` với `a[n-1-j][n-1-i]`. Không cần tạo mảng phụ `b` và `c` theo cách này.",
+          "readability-flesch_kincaid_reading_ease-sm": 149.768,
+          "familiarity-freq-exclude_stop_words-sm": 0.714,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần một vòng lặp `while` bên ngoài để lặp lại quá trình xóa cho đến khi không còn ký tự trùng lặp nào có thể xóa được. Bên trong vòng lặp, bạn duyệt chuỗi để tìm các cặp ký tự trùng lặp liên tiếp và xóa chúng. Sau khi xóa, bạn cần kiểm tra lại từ đầu chuỗi hoặc từ vị trí trước đó.",
+          "readability-flesch_kincaid_reading_ease-sm": 157.546,
+          "familiarity-freq-exclude_stop_words-sm": 0.714,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `strcmp(a[i].name, \"000\") == 0` để so sánh chuỗi. Để đọc tên có dấu cách, dùng `cin.getline(a[i].name, 40)` sau khi xử lý ký tự xuống dòng. Trong hàm `sapxep`, cần hoán đổi toàn bộ `SinhVien` struct (`SinhVien temp = a[max_pos]; a[max_pos] = a[i]; a[i] = temp;`) và điều chỉnh logic sắp xếp để bao gồm các tiêu chí phụ (share, comment, like) khi điểm bằng nhau.",
+          "readability-flesch_kincaid_reading_ease-sm": 131.347,
+          "familiarity-freq-exclude_stop_words-sm": 0.764,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 8
+    },
+    {
+      "row_index": "136",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Để kiểm tra đối xứng qua đường chéo chính, cần so sánh a[i][j] với a[j][i]. Đối với đường chéo phụ, cần so sánh a[i][j] với a[n-1-j][n-1-i] (hoặc tương tự tùy định nghĩa).",
+        "Không được thay đổi biến điều khiển vòng lặp 'n' bên trong vòng lặp. Sử dụng một biến khác nếu cần đếm hoặc thay đổi chỉ số.",
+        "Sau khi in 'false' cho trường hợp input không hợp lệ, nên thêm 'return 0;' để dừng chương trình.",
+        "Các hàm nên trả về 'bool' (true/false). Hàm main sẽ gọi hai hàm này và kết hợp kết quả bằng toán tử OR (||) để trả về kết quả cuối cùng.",
+        "Cần thêm logic để duyệt chuỗi, tìm các ký tự trùng lặp liên tiếp và xóa chúng. Quá trình này có thể cần lặp lại cho đến khi không còn cặp ký tự trùng lặp nào.",
+        "Vui lòng nộp code cho Bài tập 3 để được chấm điểm."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo chính, cần so sánh a[i][j] với a[j][i]. Đối với đường chéo phụ, cần so sánh a[i][j] với a[n-1-j][n-1-i] (hoặc tương tự tùy định nghĩa).",
+          "readability-flesch_kincaid_reading_ease-sm": 129.862,
+          "familiarity-freq-exclude_stop_words-sm": 0.69,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Không được thay đổi biến điều khiển vòng lặp 'n' bên trong vòng lặp. Sử dụng một biến khác nếu cần đếm hoặc thay đổi chỉ số.",
+          "readability-flesch_kincaid_reading_ease-sm": 152.399,
+          "familiarity-freq-exclude_stop_words-sm": 0.805,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi in 'false' cho trường hợp input không hợp lệ, nên thêm 'return 0;' để dừng chương trình.",
+          "readability-flesch_kincaid_reading_ease-sm": 147.476,
+          "familiarity-freq-exclude_stop_words-sm": 0.952,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Các hàm nên trả về 'bool' (true/false). Hàm main sẽ gọi hai hàm này và kết hợp kết quả bằng toán tử OR (||) để trả về kết quả cuối cùng.",
+          "readability-flesch_kincaid_reading_ease-sm": 164.346,
+          "familiarity-freq-exclude_stop_words-sm": 0.815,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần thêm logic để duyệt chuỗi, tìm các ký tự trùng lặp liên tiếp và xóa chúng. Quá trình này có thể cần lặp lại cho đến khi không còn cặp ký tự trùng lặp nào.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.315,
+          "familiarity-freq-exclude_stop_words-sm": 0.739,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Vui lòng nộp code cho Bài tập 3 để được chấm điểm.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.405,
+          "familiarity-freq-exclude_stop_words-sm": 0.838,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 6
+    },
+    {
+      "row_index": "137",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Cần đọc kỹ đề bài hơn, đặc biệt là các yêu cầu về logic kết hợp (ví dụ: \"hoặc\" trong Bài 1) và các tiêu chí sắp xếp phức tạp (Bài 3).",
+        "Cần kiểm tra kỹ luồng xử lý của hàm, đặc biệt là các điều kiện `return` để tránh trả về sớm hoặc sai logic.",
+        "Cần hoàn thiện code, không để các phần quan trọng như đọc input, tính toán chính bị bỏ trống.",
+        "Cần tính toán và lưu trữ các giá trị trung gian (ví dụ: tổng điểm trong Bài 3) để đơn giản hóa logic.",
+        "Tách thành hai hàm kiểm tra riêng biệt cho đường chéo chính và đường chéo phụ. Sau đó, gọi `return checkMainDiagonal() || checkAntiDiagonal();`. Sửa lỗi `return true` bị đặt sai vị trí trong vòng lặp của hàm kiểm tra đường chéo phụ.",
+        "Thêm `cout << endl;` sau mỗi hàng để in ma trận đúng định dạng.",
+        "Triển khai đầy đủ logic đọc input theo định dạng đề bài, lưu trữ vào mảng `teams`.",
+        "Thêm `int score;` vào struct và tính toán điểm cho mỗi đội sau khi đọc input.",
+        "Thay đổi điều kiện `if` để so sánh theo tổng điểm trước, sau đó là share, comment, like theo đúng thứ tự ưu tiên của đề bài.",
+        "Xóa dòng `cout << soDoiManhNhat <<endl;`."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Cần đọc kỹ đề bài hơn, đặc biệt là các yêu cầu về logic kết hợp (ví dụ: \"hoặc\" trong Bài 1) và các tiêu chí sắp xếp phức tạp (Bài 3).",
+          "readability-flesch_kincaid_reading_ease-sm": 137.343,
+          "familiarity-freq-exclude_stop_words-sm": 0.822,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần kiểm tra kỹ luồng xử lý của hàm, đặc biệt là các điều kiện `return` để tránh trả về sớm hoặc sai logic.",
+          "readability-flesch_kincaid_reading_ease-sm": 131.637,
+          "familiarity-freq-exclude_stop_words-sm": 0.746,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần hoàn thiện code, không để các phần quan trọng như đọc input, tính toán chính bị bỏ trống.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.929,
+          "familiarity-freq-exclude_stop_words-sm": 0.852,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần tính toán và lưu trữ các giá trị trung gian (ví dụ: tổng điểm trong Bài 3) để đơn giản hóa logic.",
+          "readability-flesch_kincaid_reading_ease-sm": 135.673,
+          "familiarity-freq-exclude_stop_words-sm": 0.832,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Tách thành hai hàm kiểm tra riêng biệt cho đường chéo chính và đường chéo phụ. Sau đó, gọi `return checkMainDiagonal() || checkAntiDiagonal();`. Sửa lỗi `return true` bị đặt sai vị trí trong vòng lặp của hàm kiểm tra đường chéo phụ.",
+          "readability-flesch_kincaid_reading_ease-sm": 128.741,
+          "familiarity-freq-exclude_stop_words-sm": 0.674,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `cout << endl;` sau mỗi hàng để in ma trận đúng định dạng.",
+          "readability-flesch_kincaid_reading_ease-sm": 154.745,
+          "familiarity-freq-exclude_stop_words-sm": 0.837,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Triển khai đầy đủ logic đọc input theo định dạng đề bài, lưu trữ vào mảng `teams`.",
+          "readability-flesch_kincaid_reading_ease-sm": 134.118,
+          "familiarity-freq-exclude_stop_words-sm": 0.765,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thêm `int score;` vào struct và tính toán điểm cho mỗi đội sau khi đọc input.",
+          "readability-flesch_kincaid_reading_ease-sm": 122.765,
+          "familiarity-freq-exclude_stop_words-sm": 0.843,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay đổi điều kiện `if` để so sánh theo tổng điểm trước, sau đó là share, comment, like theo đúng thứ tự ưu tiên của đề bài.",
+          "readability-flesch_kincaid_reading_ease-sm": 121.972,
+          "familiarity-freq-exclude_stop_words-sm": 0.868,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Xóa dòng `cout << soDoiManhNhat <<endl;`.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.834,
+          "familiarity-freq-exclude_stop_words-sm": 0.498,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 10
+    },
+    {
+      "row_index": "138",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Bài 1: Hàm 'ktraDoiXungQuaDuongCheoPhu' cần trả về kết quả kiểm tra thay vì luôn trả về 'true'.",
+        "Bài 2: Cần điều chỉnh chỉ số vòng lặp 'i' trong hàm 'xoaKiTu' sau khi xóa để kiểm tra lại từ đầu chuỗi hoặc vị trí phù hợp.",
+        "Bài 2: Xử lý các trường hợp biên để tránh lỗi truy cập ngoài mảng (ví dụ: 'a[i+1]' khi 'i' là 'n-1').",
+        "Bài 3: Cần đọc hiểu kỹ yêu cầu đề bài về việc đọc nhiều đội tuyển, tính điểm, sắp xếp và in ra kết quả.",
+        "Bài 3: Hàm 'input' cần nhận một mảng/vector các 'DoiTuyen' và xử lý điều kiện dừng '000'.",
+        "Bài 3: Cần triển khai logic tính điểm, sắp xếp và in ra 3 đội có điểm cao nhất.",
+        "Thay 'return true;' bằng 'return ktraDoiXungQuaDuongCheoChinh(temp, n);'.",
+        "Sau khi gọi 'xoa2thanhPhan', cần điều chỉnh 'i' (ví dụ: 'i = max(-1, i-2);') để kiểm tra lại các ký tự có thể đã dịch chuyển. Đồng thời, thêm kiểm tra biên cho 'a[i+1]' để tránh truy cập ngoài mảng.",
+        "Sử dụng 'std::vector<DoiTuyen>' để lưu trữ các đội. Thay đổi hàm 'input' để đọc từng đội một cho đến khi tên đội là '000'. Sử dụng 'std::getline' để đọc tên đội có khoảng trắng.",
+        "Cần định nghĩa đầy đủ hàm 'output' nếu muốn sử dụng, hoặc xóa khai báo nếu không cần thiết."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Bài 1: Hàm 'ktraDoiXungQuaDuongCheoPhu' cần trả về kết quả kiểm tra thay vì luôn trả về 'true'.",
+          "readability-flesch_kincaid_reading_ease-sm": 124.886,
+          "familiarity-freq-exclude_stop_words-sm": 0.844,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 2: Cần điều chỉnh chỉ số vòng lặp 'i' trong hàm 'xoaKiTu' sau khi xóa để kiểm tra lại từ đầu chuỗi hoặc vị trí phù hợp.",
+          "readability-flesch_kincaid_reading_ease-sm": 142.976,
+          "familiarity-freq-exclude_stop_words-sm": 0.808,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 2: Xử lý các trường hợp biên để tránh lỗi truy cập ngoài mảng (ví dụ: 'a[i+1]' khi 'i' là 'n-1').",
+          "readability-flesch_kincaid_reading_ease-sm": 146.05,
+          "familiarity-freq-exclude_stop_words-sm": 0.81,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cần đọc hiểu kỹ yêu cầu đề bài về việc đọc nhiều đội tuyển, tính điểm, sắp xếp và in ra kết quả.",
+          "readability-flesch_kincaid_reading_ease-sm": 127.316,
+          "familiarity-freq-exclude_stop_words-sm": 0.872,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Hàm 'input' cần nhận một mảng/vector các 'DoiTuyen' và xử lý điều kiện dừng '000'.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.565,
+          "familiarity-freq-exclude_stop_words-sm": 0.826,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Bài 3: Cần triển khai logic tính điểm, sắp xếp và in ra 3 đội có điểm cao nhất.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.571,
+          "familiarity-freq-exclude_stop_words-sm": 0.883,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Thay 'return true;' bằng 'return ktraDoiXungQuaDuongCheoChinh(temp, n);'.",
+          "readability-flesch_kincaid_reading_ease-sm": 42.616,
+          "familiarity-freq-exclude_stop_words-sm": 0.923,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi gọi 'xoa2thanhPhan', cần điều chỉnh 'i' (ví dụ: 'i = max(-1, i-2);') để kiểm tra lại các ký tự có thể đã dịch chuyển. Đồng thời, thêm kiểm tra biên cho 'a[i+1]' để tránh truy cập ngoài mảng.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.312,
+          "familiarity-freq-exclude_stop_words-sm": 0.834,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng 'std::vector<DoiTuyen>' để lưu trữ các đội. Thay đổi hàm 'input' để đọc từng đội một cho đến khi tên đội là '000'. Sử dụng 'std::getline' để đọc tên đội có khoảng trắng.",
+          "readability-flesch_kincaid_reading_ease-sm": 150.873,
+          "familiarity-freq-exclude_stop_words-sm": 0.84,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Cần định nghĩa đầy đủ hàm 'output' nếu muốn sử dụng, hoặc xóa khai báo nếu không cần thiết.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.666,
+          "familiarity-freq-exclude_stop_words-sm": 0.847,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 10
+    },
+    {
+      "row_index": "139",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Đọc tổng số phần tử (ví dụ `total_elements`), sau đó tính kích thước cạnh `n = sqrt(total_elements)`. Đảm bảo `total_elements` là số chính phương.",
+        "Để kiểm tra đối xứng qua đường chéo chính, so sánh `a[i][j]` với `a[j][i]`. Để kiểm tra đối xứng qua đường chéo phụ, so sánh `a[i][j]` với `a[n-1-j][n-1-i]`.",
+        "Sử dụng `cin.ignore(numeric_limits<streamsize>::max(), '\\n');` sau mỗi lần nhập số (`cin >> like;`, `cin >> com;`, `cin >> share;`) để xóa bỏ toàn bộ phần còn lại của dòng, đảm bảo `cin.getline` đọc đúng.",
+        "Đổi điều kiện so sánh trong vòng lặp thành `if (list[temp].point < list[j].point)` để tìm đội có điểm cao nhất và sắp xếp giảm dần.",
+        "Khi `list[temp].point == list[j].point`, cần thêm các điều kiện so sánh `share`, `comment`, `like` theo thứ tự ưu tiên để xác định thứ hạng chính xác."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Đọc tổng số phần tử (ví dụ `total_elements`), sau đó tính kích thước cạnh `n = sqrt(total_elements)`. Đảm bảo `total_elements` là số chính phương.",
+          "readability-flesch_kincaid_reading_ease-sm": 145.925,
+          "familiarity-freq-exclude_stop_words-sm": 0.72,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo chính, so sánh `a[i][j]` với `a[j][i]`. Để kiểm tra đối xứng qua đường chéo phụ, so sánh `a[i][j]` với `a[n-1-j][n-1-i]`.",
+          "readability-flesch_kincaid_reading_ease-sm": 136.345,
+          "familiarity-freq-exclude_stop_words-sm": 0.66,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng `cin.ignore(numeric_limits<streamsize>::max(), '\\n');` sau mỗi lần nhập số (`cin >> like;`, `cin >> com;`, `cin >> share;`) để xóa bỏ toàn bộ phần còn lại của dòng, đảm bảo `cin.getline` đọc đúng.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.6,
+          "familiarity-freq-exclude_stop_words-sm": 0.789,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đổi điều kiện so sánh trong vòng lặp thành `if (list[temp].point < list[j].point)` để tìm đội có điểm cao nhất và sắp xếp giảm dần.",
+          "readability-flesch_kincaid_reading_ease-sm": 129.297,
+          "familiarity-freq-exclude_stop_words-sm": 0.677,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Khi `list[temp].point == list[j].point`, cần thêm các điều kiện so sánh `share`, `comment`, `like` theo thứ tự ưu tiên để xác định thứ hạng chính xác.",
+          "readability-flesch_kincaid_reading_ease-sm": 130.219,
+          "familiarity-freq-exclude_stop_words-sm": 0.708,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": "140",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Để kiểm tra đối xứng qua đường chéo phụ, cần so sánh `a[i][j]` với `a[n-1-j][n-1-i]`. Vòng lặp nên duyệt qua một nửa ma trận để tránh trùng lặp và so sánh sai. Ví dụ: `for(int i = 0; i < n; i++) { for(int j = 0; j < n - 1 - i; j++) { if (a[i][j] != a[n-1-j][n-1-i]) return false; } }`",
+        "Để xóa ký tự trong chuỗi C-style, cần dịch chuyển các ký tự phía sau lên và đặt ký tự null vào vị trí cuối cùng mới. Ví dụ: `for(int i = k; s[i + length] != '\\0'; i++) { s[i] = s[i + length]; } s[strlen(s) - length] = '\\0';` (hoặc sử dụng `std::string` và các phương thức `erase` để đơn giản hóa việc quản lý bộ nhớ và độ dài chuỗi).",
+        "Sau khi xóa, cần đặt lại `i` về vị trí `k-1` (hoặc `k` nếu `k` là 0) để đảm bảo kiểm tra lại từ vị trí vừa xóa, vì việc xóa có thể tạo ra các cặp trùng lặp mới ở vị trí đó. Hoặc sử dụng một cách tiếp cận khác như dùng stack để quản lý các ký tự còn lại.",
+        "Trong trường hợp `totala == totalb`, cần thêm các điều kiện `if` lồng nhau để so sánh `share`, sau đó `comment`, sau đó `like` để xác định đội nào có thứ hạng cao hơn. Ví dụ, trong hàm so sánh của thuật toán sắp xếp, nếu điểm bằng nhau, hãy so sánh `share` trước, nếu `share` bằng nhau thì so sánh `comment`, v.v.",
+        "Chỉ cần gán `k = 0;` hoặc đơn giản là `break;` để thoát vòng lặp khi tên đội là '000'. `k = 0;` là cách an toàn và đúng đắn."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Để kiểm tra đối xứng qua đường chéo phụ, cần so sánh `a[i][j]` với `a[n-1-j][n-1-i]`. Vòng lặp nên duyệt qua một nửa ma trận để tránh trùng lặp và so sánh sai. Ví dụ: `for(int i = 0; i < n; i++) { for(int j = 0; j < n - 1 - i; j++) { if (a[i][j] != a[n-1-j][n-1-i]) return false; } }`",
+          "readability-flesch_kincaid_reading_ease-sm": 154.675,
+          "familiarity-freq-exclude_stop_words-sm": 0.71,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Để xóa ký tự trong chuỗi C-style, cần dịch chuyển các ký tự phía sau lên và đặt ký tự null vào vị trí cuối cùng mới. Ví dụ: `for(int i = k; s[i + length] != '\\0'; i++) { s[i] = s[i + length]; } s[strlen(s) - length] = '\\0';` (hoặc sử dụng `std::string` và các phương thức `erase` để đơn giản hóa việc quản lý bộ nhớ và độ dài chuỗi).",
+          "readability-flesch_kincaid_reading_ease-sm": 147.743,
+          "familiarity-freq-exclude_stop_words-sm": 0.771,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi xóa, cần đặt lại `i` về vị trí `k-1` (hoặc `k` nếu `k` là 0) để đảm bảo kiểm tra lại từ vị trí vừa xóa, vì việc xóa có thể tạo ra các cặp trùng lặp mới ở vị trí đó. Hoặc sử dụng một cách tiếp cận khác như dùng stack để quản lý các ký tự còn lại.",
+          "readability-flesch_kincaid_reading_ease-sm": 165.016,
+          "familiarity-freq-exclude_stop_words-sm": 0.791,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong trường hợp `totala == totalb`, cần thêm các điều kiện `if` lồng nhau để so sánh `share`, sau đó `comment`, sau đó `like` để xác định đội nào có thứ hạng cao hơn. Ví dụ, trong hàm so sánh của thuật toán sắp xếp, nếu điểm bằng nhau, hãy so sánh `share` trước, nếu `share` bằng nhau thì so sánh `comment`, v.v.",
+          "readability-flesch_kincaid_reading_ease-sm": 126.05,
+          "familiarity-freq-exclude_stop_words-sm": 0.732,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Chỉ cần gán `k = 0;` hoặc đơn giản là `break;` để thoát vòng lặp khi tên đội là '000'. `k = 0;` là cách an toàn và đúng đắn.",
+          "readability-flesch_kincaid_reading_ease-sm": 167.415,
+          "familiarity-freq-exclude_stop_words-sm": 0.773,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 5
+    },
+    {
+      "row_index": "142",
+      "case": null,
+      "language": null,
+      "problem_statement": "96_final-123",
+      "reference_code": "",
+      "student_code": "",
+      "hints": [
+        "Sử dụng một biến riêng cho kích thước ma trận (ví dụ: `int N = sqrt(n);`) và không thay đổi nó trong vòng lặp. Đảm bảo các vòng lặp chạy đúng với kích thước ma trận đã tính.",
+        "Trong hàm `main`, cần đọc tổng số phần tử, sau đó đọc các phần tử vào một mảng 2 chiều (hoặc 1 chiều rồi ánh xạ), và gọi hàm `checkMirrorDiagonal` với dữ liệu đó.",
+        "Đọc các phần tử ma trận vào mảng `arr` trước khi gọi hàm, hoặc truyền mảng đã được khởi tạo và điền dữ liệu vào hàm.",
+        "Trong hàm `main`, cần đọc một chuỗi từ đầu vào, sau đó gọi hàm `removeDupeChar` với chuỗi đó và in kết quả ra màn hình.",
+        "Tính độ dài chuỗi một lần trước vòng lặp và lưu vào một biến (ví dụ: `int len = strlen(str);`), sau đó sử dụng biến `len` trong điều kiện vòng lặp. Hoặc, sau mỗi lần xóa, cập nhật lại `len`.",
+        "Sử dụng vòng lặp `do-while` hoặc đọc tên đội đầu tiên trước vòng lặp, sau đó kiểm tra điều kiện. Hoặc sử dụng `while(true)` và `break` khi đọc được '000'.",
+        "Trong mỗi lần lặp của vòng `for (int j{0}; j < n; ++j)`, `max` và `maxIdx` (cùng với `maxTeam`) cần được khởi tạo lại với giá trị của `arr[j]` và `team[j]` trước khi vòng lặp trong (`for (int i{j}; i < n; ++i)`) bắt đầu.",
+        "Trong hàm sắp xếp, khi hai đội có điểm bằng nhau, cần so sánh thêm các tiêu chí share, comment, like theo thứ tự ưu tiên để xác định đội nào xếp trên.",
+        "Sau khi mảng đã được sắp xếp đúng theo tất cả các tiêu chí (điểm, share, comment, like), chỉ cần in ra tên của 3 đội đầu tiên trong mảng đã sắp xếp: `std::cout << team[i].name << '\\n';` cho `i` từ 0 đến 2."
+      ],
+      "hints_with_scores": [
+        {
+          "text": "Sử dụng một biến riêng cho kích thước ma trận (ví dụ: `int N = sqrt(n);`) và không thay đổi nó trong vòng lặp. Đảm bảo các vòng lặp chạy đúng với kích thước ma trận đã tính.",
+          "readability-flesch_kincaid_reading_ease-sm": 159.04,
+          "familiarity-freq-exclude_stop_words-sm": 0.695,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong hàm `main`, cần đọc tổng số phần tử, sau đó đọc các phần tử vào một mảng 2 chiều (hoặc 1 chiều rồi ánh xạ), và gọi hàm `checkMirrorDiagonal` với dữ liệu đó.",
+          "readability-flesch_kincaid_reading_ease-sm": 123.739,
+          "familiarity-freq-exclude_stop_words-sm": 0.749,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Đọc các phần tử ma trận vào mảng `arr` trước khi gọi hàm, hoặc truyền mảng đã được khởi tạo và điền dữ liệu vào hàm.",
+          "readability-flesch_kincaid_reading_ease-sm": 150.325,
+          "familiarity-freq-exclude_stop_words-sm": 0.717,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong hàm `main`, cần đọc một chuỗi từ đầu vào, sau đó gọi hàm `removeDupeChar` với chuỗi đó và in kết quả ra màn hình.",
+          "readability-flesch_kincaid_reading_ease-sm": 119.055,
+          "familiarity-freq-exclude_stop_words-sm": 0.801,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Tính độ dài chuỗi một lần trước vòng lặp và lưu vào một biến (ví dụ: `int len = strlen(str);`), sau đó sử dụng biến `len` trong điều kiện vòng lặp. Hoặc, sau mỗi lần xóa, cập nhật lại `len`.",
+          "readability-flesch_kincaid_reading_ease-sm": 141.19,
+          "familiarity-freq-exclude_stop_words-sm": 0.731,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sử dụng vòng lặp `do-while` hoặc đọc tên đội đầu tiên trước vòng lặp, sau đó kiểm tra điều kiện. Hoặc sử dụng `while(true)` và `break` khi đọc được '000'.",
+          "readability-flesch_kincaid_reading_ease-sm": 153.16,
+          "familiarity-freq-exclude_stop_words-sm": 0.755,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong mỗi lần lặp của vòng `for (int j{0}; j < n; ++j)`, `max` và `maxIdx` (cùng với `maxTeam`) cần được khởi tạo lại với giá trị của `arr[j]` và `team[j]` trước khi vòng lặp trong (`for (int i{j}; i < n; ++i)`) bắt đầu.",
+          "readability-flesch_kincaid_reading_ease-sm": 138.605,
+          "familiarity-freq-exclude_stop_words-sm": 0.695,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Trong hàm sắp xếp, khi hai đội có điểm bằng nhau, cần so sánh thêm các tiêu chí share, comment, like theo thứ tự ưu tiên để xác định đội nào xếp trên.",
+          "readability-flesch_kincaid_reading_ease-sm": 143.942,
+          "familiarity-freq-exclude_stop_words-sm": 0.823,
+          "convergence-specificity-bert-base": 1.0
+        },
+        {
+          "text": "Sau khi mảng đã được sắp xếp đúng theo tất cả các tiêu chí (điểm, share, comment, like), chỉ cần in ra tên của 3 đội đầu tiên trong mảng đã sắp xếp: `std::cout << team[i].name << '\\n';` cho `i` từ 0 đến 2.",
+          "readability-flesch_kincaid_reading_ease-sm": 151.002,
+          "familiarity-freq-exclude_stop_words-sm": 0.826,
+          "convergence-specificity-bert-base": 1.0
+        }
+      ],
+      "hint_count": 9
+    }
+  ]
+}

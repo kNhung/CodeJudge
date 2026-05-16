@@ -1,0 +1,24 @@
+{
+  "mode": "taxonomy",
+  "samples": 95,
+  "output_file": "evaluation/hcmus/output/hcmus_from_48_taxonomy/hcmus_from_48_taxonomy.jsonl",
+  "invalid_cnt": 0,
+  "total_cnt": 95,
+  "processed_unique_ids": 95,
+  "rate_limit_hit": false,
+  "exclude_error_records": true,
+  "excluded_cnt": 30,
+  "excluded_by_reason": {
+    "negative_score": 0,
+    "parse_fail": 3,
+    "list_fallback": 27
+  },
+  "valid_metric_records": 65,
+  "correct_cnt": 56,
+  "accuracy": 0.8615384615384616,
+  "kendalltau": 0.601,
+  "spearmanr": 0.601,
+  "mae_on_10": 1.576,
+  "rmse_on_10": 2.226,
+  "pearson_grade": 0.62
+}

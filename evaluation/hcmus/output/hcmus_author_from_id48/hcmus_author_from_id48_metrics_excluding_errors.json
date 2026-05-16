@@ -1,0 +1,24 @@
+{
+  "mode": "taxonomy",
+  "samples": 95,
+  "output_file": "evaluation/hcmus/output/hcmus_author_from_id48/hcmus_author_from_id48.jsonl",
+  "invalid_cnt": 0,
+  "total_cnt": 95,
+  "processed_unique_ids": 95,
+  "rate_limit_hit": false,
+  "exclude_error_records": true,
+  "excluded_cnt": 32,
+  "excluded_by_reason": {
+    "negative_score": 1,
+    "parse_fail": 0,
+    "list_fallback": 31
+  },
+  "valid_metric_records": 63,
+  "correct_cnt": 40,
+  "accuracy": 0.6349206349206349,
+  "kendalltau": 0.387,
+  "spearmanr": 0.387,
+  "mae_on_10": 3.003,
+  "rmse_on_10": 3.749,
+  "pearson_grade": 0.506
+}
