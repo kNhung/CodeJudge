@@ -9,6 +9,8 @@ import logging
 from typing import Dict, Any, List, Optional, Tuple
 from .llm_client import LLMClient, LLMFactory
 from .prompts import PromptTemplates, SYSTEM_PROMPT_TAXONOMY_ASSESSMENT, ERROR_TAXONOMY
+import time
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -120,12 +122,24 @@ class TaxonomyAssessor:
             )
         
         # Gọi LLM
+        t0 = time.time()
+        t0_iso = datetime.utcnow().isoformat() + "Z"
         llm_response = self.llm_client.call(
             system_prompt=self.system_prompt,
             user_prompt=user_prompt,
             format_json=True
         )
-        llm_usage = self.llm_client.get_last_usage()
+        t1 = time.time()
+        t1_iso = datetime.utcnow().isoformat() + "Z"
+        llm_usage = self.llm_client.get_last_usage() or {}
+        latency = round(t1 - t0, 6)
+        if isinstance(llm_usage, dict):
+            llm_usage.setdefault("latency_seconds", latency)
+            llm_usage.setdefault("timestamps", {})
+            llm_usage["timestamps"].setdefault("started_at", t0_iso)
+            llm_usage["timestamps"].setdefault("finished_at", t1_iso)
+        else:
+            llm_usage = {"latency_seconds": latency, "timestamps": {"started_at": t0_iso, "finished_at": t1_iso}}
         
         # Parse response
         result = self._parse_llm_response(llm_response)
@@ -236,6 +250,40 @@ class TaxonomyAssessor:
 
             if "score_breakdown" not in data:
                 data["score_breakdown"] = {}
+
+            # If the model returned a taxonomy-style breakdown (category keys
+            # like 'missing_dependency_declarations' mapped to severities),
+            # convert that into an `errors` list so downstream code can
+            # reason about typed errors. Also preserve any provided
+            # `quality_score` if present.
+            sb = data.get("score_breakdown")
+            if isinstance(sb, dict) and sb:
+                # Check whether keys match our additive rubric; if not,
+                # assume taxonomy categories were returned.
+                additive_keys = set(self.additive_rubric_keys)
+                sb_keys = set(sb.keys())
+                if not additive_keys.issubset(sb_keys):
+                    converted_errors: List[Dict[str, Any]] = []
+                    for cat, sev in sb.items():
+                        try:
+                            sev_str = str(sev).strip()
+                        except Exception:
+                            sev_str = "Negligible"
+                        if sev_str.lower() in {"none", "no", "ok", "okey"}:
+                            continue
+                        converted_errors.append({
+                            "type": sev_str.capitalize() if sev_str else "Negligible",
+                            "description": cat,
+                        })
+
+                    if converted_errors:
+                        # Attach converted errors and mark reasoning.
+                        data.setdefault("errors", [])
+                        # Prepend converted errors to any existing ones.
+                        data["errors"] = converted_errors + list(data.get("errors", []))
+                        data["reasoning"] = (
+                            str(data.get("reasoning", "")) + " Converted from taxonomy category breakdown"
+                        ).strip()
             
             if "reasoning" not in data:
                 data["reasoning"] = ""
@@ -243,20 +291,60 @@ class TaxonomyAssessor:
             return data
         
         except json.JSONDecodeError:
-            logger.warning(f"Failed to parse JSON. Trying extraction...")
-            
-            # Thử trích xuất JSON từ text
-            json_pattern = r'\{[\s\S]*\}'
-            matches = re.findall(json_pattern, response)
-            
-            if matches:
-                json_str = max(matches, key=len)
+            # Many LLMs wrap valid JSON in markdown fences or short prose.
+            # Try extraction first, and only warn if we really cannot recover JSON.
+
+            extracted_data = None
+
+            # 1) Look for ```json ... ``` code fences and try to parse their content.
+            code_fence_pattern = r'```(?:json)?\s*\n([\s\S]*?)\n```'
+            fence_matches = re.findall(code_fence_pattern, response, flags=re.IGNORECASE)
+            for candidate in fence_matches:
+                candidate = candidate.strip()
+                if not candidate:
+                    continue
                 try:
-                    data = json.loads(json_str)
-                    return self._parse_llm_response(json.dumps(data))
+                    extracted_data = json.loads(candidate)
+                    break
                 except json.JSONDecodeError:
-                    logger.error(f"Could not parse extracted JSON")
-            
+                    # try next candidate
+                    continue
+
+            # 2) Fall back to extracting any JSON object or array substring.
+            if extracted_data is None:
+                json_pattern = r'(\{[\s\S]*\}|\[[\s\S]*\])'
+                matches = re.findall(json_pattern, response)
+
+                if matches:
+                    # Prefer the longest match, then try incremental trimming if needed.
+                    json_str = max(matches, key=len)
+                    # Trim common trailing code fence markers or backticks
+                    json_str = re.sub(r'```+$', '', json_str).strip()
+                    try:
+                        extracted_data = json.loads(json_str)
+                    except json.JSONDecodeError:
+                        # Try to progressively remove leading/trailing non-json garbage
+                        trimmed = json_str
+                        for _ in range(3):
+                            # remove up to first unmatched leading chars
+                            first = trimmed.find('{') if '{' in trimmed else trimmed.find('[')
+                            last = trimmed.rfind('}') if '}' in trimmed else trimmed.rfind(']')
+                            if first == -1 or last == -1 or last <= first:
+                                break
+                            trimmed = trimmed[first:last+1]
+                            try:
+                                extracted_data = json.loads(trimmed)
+                                break
+                            except json.JSONDecodeError:
+                                # shorten further
+                                trimmed = trimmed[1:-1]
+                                continue
+
+            if extracted_data is not None:
+                return self._parse_llm_response(json.dumps(extracted_data))
+
+            logger.warning("Failed to parse JSON after extraction attempts")
+
             # Fallback: No errors found
             logger.warning("Using fallback: No errors detected")
             return {

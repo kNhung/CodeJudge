@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, List
 from .llm_client import LLMClient, LLMFactory
 from .binary_assessor import BinaryAssessor
 from .taxonomy_assessor import TaxonomyAssessor
+from .prompts import SYSTEM_PROMPT_TAXONOMY_ASSESSMENT
 from ..scoring.scorer import Scorer
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,8 @@ class IntegratedAssessor:
     def __init__(
         self,
         llm_client: LLMClient = None,
-        run_both_assessments: bool = True
+        run_both_assessments: bool = True,
+        taxonomy_system_prompt: str = SYSTEM_PROMPT_TAXONOMY_ASSESSMENT,
     ):
         """
         Khởi tạo Integrated Assessor
@@ -35,12 +37,16 @@ class IntegratedAssessor:
             run_both_assessments: Chạy cả Binary và Taxonomy
                                  (True = luôn chạy cả hai)
                                  (False = nếu Binary là No, bỏ Taxonomy)
+            taxonomy_system_prompt: System prompt cho taxonomy assessor
         """
         self.llm_client = llm_client or LLMFactory.create()
         self.run_both_assessments = run_both_assessments
         
         self.binary_assessor = BinaryAssessor(self.llm_client)
-        self.taxonomy_assessor = TaxonomyAssessor(self.llm_client)
+        self.taxonomy_assessor = TaxonomyAssessor(
+            self.llm_client,
+            system_prompt=taxonomy_system_prompt,
+        )
     
     def assess(
         self,
@@ -144,6 +150,26 @@ class IntegratedAssessor:
                     taxonomy_result["final_score"]
                 )
             }
+        }
+
+        # Include raw LLM outputs for auditing/debugging
+        result["raw"] = {
+            "binary": {
+                "analysis": binary_result.get("analysis"),
+                "summary": binary_result.get("summary"),
+            },
+            "taxonomy": taxonomy_result.get("raw_llm_response"),
+        }
+
+        # Include per-step latencies if available
+        result["timings"] = {
+            "binary": binary_result.get("usage", {}).get("latency_seconds") if isinstance(binary_result.get("usage"), dict) else None,
+            "taxonomy": taxonomy_result.get("usage", {}).get("latency_seconds") if isinstance(taxonomy_result.get("usage"), dict) else None,
+        }
+        # Include full raw usage objects for auditing
+        result["llm_raw_usage"] = {
+            "binary": binary_result.get("usage", {}),
+            "taxonomy": taxonomy_result.get("usage", {}),
         }
 
         binary_usage_total = None

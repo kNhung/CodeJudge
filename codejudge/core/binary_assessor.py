@@ -8,6 +8,8 @@ import logging
 from typing import Dict, Any, Tuple, List, Optional
 from .llm_client import LLMClient, LLMFactory
 from .prompts import PromptTemplates, SYSTEM_PROMPT_BINARY_ASSESSMENT
+import time
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -63,18 +65,38 @@ class BinaryAssessor:
         logger.info(f"Problem: {problem_statement[:100]}...")
         
         # Bước 1: Phân tích (Analyze)
+        t0 = time.time()
+        t0_iso = datetime.utcnow().isoformat() + "Z"
         analysis = self._analyze_step(problem_statement, student_code, language)
-        analyze_usage = self.llm_client.get_last_usage()
-        logger.info(f"Analysis completed")
-        
+        t1 = time.time()
+        t1_iso = datetime.utcnow().isoformat() + "Z"
+        analyze_usage = self.llm_client.get_last_usage() or {}
+        analyze_latency = round(t1 - t0, 6)
+        logger.info(f"Analysis completed in {analyze_latency}s")
+
         # Bước 2: Tóm tắt (Summarize)
+        t0 = time.time()
+        t0s_iso = datetime.utcnow().isoformat() + "Z"
         result = self._summarize_step(analysis)
-        summarize_usage = self.llm_client.get_last_usage()
+        t1 = time.time()
+        t1s_iso = datetime.utcnow().isoformat() + "Z"
+        summarize_usage = self.llm_client.get_last_usage() or {}
+        summarize_latency = round(t1 - t0, 6)
+        logger.info(f"Summarize completed in {summarize_latency}s")
 
         result["usage"] = {
             "analyze": analyze_usage,
             "summarize": summarize_usage,
             "total": self._sum_usages([analyze_usage, summarize_usage]),
+            "latency_seconds": {"analyze": analyze_latency, "summarize": summarize_latency},
+            "timestamps": {
+                "analyze": {"started_at": t0_iso, "finished_at": t1_iso},
+                "summarize": {"started_at": t0s_iso, "finished_at": t1s_iso},
+            },
+            "raw_usages": {
+                "analyze": analyze_usage,
+                "summarize": summarize_usage,
+            },
         }
         logger.info(f"Result: {result}")
         

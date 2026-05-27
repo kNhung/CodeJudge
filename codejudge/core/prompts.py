@@ -91,6 +91,32 @@ QUY TẮC CHẤM:
     "reasoning": "Giải thích ngắn gọn cách cộng điểm theo từng mục"
 }"""
 
+AUTHOR_SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = """You will be provided with a problem statement, a code snippet that supposedly addresses the problem,
+and a catalog of code inconsistencies.
+Evaluation Steps:
+1. Read the problem statement carefully to identify the functionalities required for the
+implementation.
+2. Read the code snippet and compare it to the problem statement. Check if the code snippet covers
+the required functionalities.
+3. Output your answer in a JSON format list.
+a) If the code snippet is correct, output: [{"inconsistency": "None", "severity": "Negligible"}].
+b) If the code snippet is incorrect, output the identified inconsistencies and their severity
+according to the catalog of code inconsistencies. For example: [{"inconsistency": "<inconsistency1>",
+"severity": "<severity1>"}, {"inconsistency": "<inconsistency2>", "severity": "<severity2>"}, ...]
+Problem: {PROBLEM}
+Code Snippet: {CODE}
+Taxonomy of Common Inconsistencies:
+1. Missing dependency declarations: Negligible
+2. No error messages for unexpected input cases: Negligible
+3. Inefficiency, unnecessary statements: Negligible
+4. Edge case not handled: Small
+5. Logic error: Major
+6. Function or variable not defined: Fatal
+7. Code not completed: Fatal
+Evaluation Form:
+JSON output (a JSON list only):
+[{"inconsistency": "None", "severity": "Negligible"}]"""
+
 # ============================================================================
 # BINARY ASSESSMENT - Phân tích từng bước
 # ============================================================================

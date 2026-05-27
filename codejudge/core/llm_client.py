@@ -8,10 +8,12 @@ import json
 import re
 import time
 import random
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from abc import ABC, abstractmethod
 import logging
 from pathlib import Path
+from huggingface_hub import InferenceClient, login
+login(token=os.getenv("HUGGINGFACE_API_KEY", ""))
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -527,6 +529,260 @@ class GeminiClient(LLMClient):
 
 
 # ============================================================================
+# HUGGING FACE INFERENCE CLIENT
+# ============================================================================
+class HuggingFaceClient(LLMClient):
+    """Client cho Hugging Face Inference API (dùng model host trên HF, không cần tải xuống)
+
+    Requires env var `HUGGINGFACE_API_KEY` or pass `api_key` in kwargs.
+    """
+
+    def __init__(self, model_name: str = "meta-llama/Meta-Llama-3-8B-Instruct", api_key: Optional[str] = None, timeout: int = 300):
+        super().__init__(model_name)
+        self.api_key = api_key or os.getenv("HUGGINGFACE_API_KEY")
+        if not self.api_key:
+            raise ValueError("HUGGINGFACE_API_KEY not found in environment")
+
+        try:
+            import requests
+            self.requests = requests
+        except ImportError:
+            raise ImportError("requests package not installed. Run: pip install requests")
+
+        self.base_url = os.getenv("HUGGINGFACE_BASE_URL", "https://router.huggingface.co/hf-inference/models").rstrip("/")
+        self.timeout = int(os.getenv("HUGGINGFACE_TIMEOUT", str(timeout)))
+
+        # Prefer the official huggingface_hub InferenceClient when available.
+        self._use_hf_hub = False
+        self._tokenizer = None
+        try:
+            from huggingface_hub import InferenceClient
+            self.hf_client = InferenceClient(token=self.api_key)
+            self._use_hf_hub = True
+        except Exception:
+            # Fallback to requests + router endpoint
+            try:
+                import requests
+                self.requests = requests
+            except ImportError:
+                raise ImportError("Neither huggingface_hub nor requests is installed. Run: pip install huggingface_hub requests")
+
+            self.base_url = os.getenv("HUGGINGFACE_BASE_URL", "https://router.huggingface.co/hf-inference/models").rstrip("/")
+            self.timeout = int(os.getenv("HUGGINGFACE_TIMEOUT", str(timeout)))
+
+    def _extract_usage_from_response(self, resp: Any) -> Optional[Dict[str, Any]]:
+        """Extract Hugging Face usage metadata if the backend returns it."""
+        usage = None
+
+        if isinstance(resp, dict):
+            usage = resp.get("usage")
+        else:
+            usage = getattr(resp, "usage", None)
+
+        if usage is None:
+            return None
+
+        if not isinstance(usage, dict):
+            usage = {
+                "prompt_tokens": getattr(usage, "prompt_tokens", None),
+                "completion_tokens": getattr(usage, "completion_tokens", None),
+                "total_tokens": getattr(usage, "total_tokens", None),
+                "input_tokens": getattr(usage, "input_tokens", None),
+                "output_tokens": getattr(usage, "output_tokens", None),
+            }
+
+        input_tokens = (
+            usage.get("prompt_tokens")
+            if usage.get("prompt_tokens") is not None
+            else usage.get("input_tokens")
+        )
+        output_tokens = (
+            usage.get("completion_tokens")
+            if usage.get("completion_tokens") is not None
+            else usage.get("output_tokens")
+        )
+        total_tokens = usage.get("total_tokens")
+
+        if total_tokens is None and input_tokens is not None and output_tokens is not None:
+            total_tokens = int(input_tokens) + int(output_tokens)
+
+        self._set_last_usage(
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            total_tokens=total_tokens,
+            raw_usage={
+                **usage,
+                "source": "hf_response",
+            },
+        )
+
+        return usage
+
+    def _get_tokenizer(self):
+        """Load a tokenizer for local token counting when the backend does not return usage."""
+        if self._tokenizer is not None:
+            return self._tokenizer
+
+        try:
+            from transformers import AutoTokenizer
+            self._tokenizer = AutoTokenizer.from_pretrained(self.model_name, token=self.api_key, use_fast=True)
+        except Exception as e:
+            logger.warning(f"Could not load tokenizer for Hugging Face token estimation: {e}")
+            self._tokenizer = None
+
+        return self._tokenizer
+
+    def _estimate_usage(self, prompt_text: str, completion_text: str, messages: Optional[List[Dict[str, str]]] = None) -> None:
+        """Estimate token usage from tokenizer when the backend does not return usage metadata."""
+        tokenizer = self._get_tokenizer()
+        if tokenizer is None:
+            return
+
+        prompt_tokens = None
+        try:
+            if messages and hasattr(tokenizer, "apply_chat_template"):
+                prompt_tokens = len(
+                    tokenizer.apply_chat_template(
+                        messages,
+                        tokenize=True,
+                        add_generation_prompt=True,
+                    )
+                )
+            else:
+                prompt_tokens = len(tokenizer.encode(prompt_text, add_special_tokens=False))
+        except Exception as e:
+            logger.warning(f"Could not estimate Hugging Face prompt tokens: {e}")
+
+        output_tokens = None
+        try:
+            output_tokens = len(tokenizer.encode(completion_text or "", add_special_tokens=False))
+        except Exception as e:
+            logger.warning(f"Could not estimate Hugging Face completion tokens: {e}")
+
+        total_tokens = None
+        if prompt_tokens is not None and output_tokens is not None:
+            total_tokens = prompt_tokens + output_tokens
+
+        if prompt_tokens is not None or output_tokens is not None:
+            self._set_last_usage(
+                input_tokens=prompt_tokens,
+                output_tokens=output_tokens,
+                total_tokens=total_tokens,
+                raw_usage={
+                    "estimated": True,
+                    "source": "estimated",
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": output_tokens,
+                    "total_tokens": total_tokens,
+                },
+            )
+
+    def call(self, system_prompt: str, user_prompt: str, format_json: bool = False) -> str:
+        """Call Hugging Face Inference API for text generation."""
+        self._clear_last_usage()
+
+        # If huggingface_hub is available, use InferenceClient (recommended by docs)
+        if self._use_hf_hub:
+            try:
+                # Prepare messages as chat-compatible structure used by Llama chat models
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ]
+
+                # Use chat completions API when available
+                if hasattr(self.hf_client, "chat") and hasattr(self.hf_client.chat, "completions"):
+                    resp = self.hf_client.chat.completions.create(
+                        model=self.model_name,
+                        messages=messages,
+                        max_tokens=1024,
+                        temperature=float(self.temperature),
+                    )
+                    # resp format follows the recipe: resp.choices[0].message.content
+                    try:
+                        text = resp.choices[0].message.content
+                    except Exception:
+                        # Fallback: stringify
+                        text = str(resp)
+
+                    if self._extract_usage_from_response(resp) is None:
+                        prompt_text = f"{system_prompt}\n\n{user_prompt}"
+                        self._estimate_usage(prompt_text, text, messages=messages)
+
+                else:
+                    # Fallback to generic text generation endpoint
+                    prompt = f"{system_prompt}\n\n{user_prompt}"
+                    resp = self.hf_client.text_generation.create(
+                        model=self.model_name,
+                        inputs=prompt,
+                        max_new_tokens=1024,
+                        temperature=float(self.temperature),
+                    )
+                    try:
+                        # resp may be a dict or list
+                        if isinstance(resp, dict) and resp.get("generated_text"):
+                            text = resp.get("generated_text")
+                        elif isinstance(resp, list) and resp and isinstance(resp[0], dict) and resp[0].get("generated_text"):
+                            text = resp[0]["generated_text"]
+                        else:
+                            text = str(resp)
+                    except Exception:
+                        text = str(resp)
+
+                    if self._extract_usage_from_response(resp) is None:
+                        self._estimate_usage(prompt, text)
+
+                if self.last_usage is None:
+                    self._set_last_usage(None, None, None, raw_usage={"response_preview": text[:200], "source": "unavailable"})
+                return text
+
+            except Exception as e:
+                raise RuntimeError(f"Hugging Face InferenceClient request failed: {e}") from e
+
+        # Otherwise fallback to HTTP router as before
+        prompt = f"{system_prompt}\n\n{user_prompt}"
+        url = f"{self.base_url}/{self.model_name}"
+        headers = {"Authorization": f"Bearer {self.api_key}", "Accept": "application/json"}
+
+        payload = {
+            "inputs": prompt,
+            "parameters": {
+                "temperature": float(self.temperature),
+                "max_new_tokens": 1024,
+            },
+        }
+
+        try:
+            resp = self.requests.post(url, headers=headers, json=payload, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
+
+            self._extract_usage_from_response(data)
+
+            # Try common response formats
+            if isinstance(data, dict) and "generated_text" in data:
+                text = data["generated_text"]
+            elif isinstance(data, list) and data and isinstance(data[0], dict) and "generated_text" in data[0]:
+                text = data[0]["generated_text"]
+            elif isinstance(data, dict) and data.get("error"):
+                raise RuntimeError(f"Hugging Face error: {data.get('error')}")
+            else:
+                text = str(data)
+
+            if self._extract_usage_from_response(data) is None:
+                self._estimate_usage(prompt, text)
+
+            if self.last_usage is None:
+                self._set_last_usage(None, None, None, raw_usage={"response_preview": text[:200], "source": "unavailable"})
+            return text
+
+        except self.requests.exceptions.HTTPError as e:
+            raise RuntimeError(f"Hugging Face API HTTP error: {e}") from e
+        except Exception as e:
+            raise RuntimeError(f"Hugging Face API request failed: {e}") from e
+
+
+# ============================================================================
 # LLM FACTORY
 # ============================================================================
 
@@ -538,6 +794,7 @@ class LLMFactory:
         "anthropic": AnthropicClient,
         "local": LocalLLMClient,
         "gemini": GeminiClient,
+        "huggingface": HuggingFaceClient,
     }
     
     @staticmethod
