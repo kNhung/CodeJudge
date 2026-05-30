@@ -23,20 +23,23 @@ def load_model(model, root_path="./model"):
     if "CodeLlama" in pure_model_name:
         repo_id = f"codellama/{pure_model_name}"
         local_subdir = f"codellama/{base_name}-hf"
-    elif "Meta-Llama-3" in pure_model_name:
+    elif "Meta-Llama-3" in pure_model_name or pure_model_name.startswith("Llama-3"):
         repo_id = f"meta-llama/{pure_model_name}"
         local_subdir = f"llama3/{base_name}-hf"
-    elif pure_model_name.startswith("gpt") or pure_model_name.startswith("gemini"):
-        model_cache[model] = (None, None)
-        return None, None
     else:
         repo_id = model
         local_subdir = pure_model_name
 
     model_path = os.path.join(root_path, local_subdir)
-    
+    is_gemini = "gemini" in pure_model_name.lower()
+
     # Cơ chế tự tìm model trên Kaggle Input
     if not os.path.exists(model_path):
+        if is_gemini:
+            print(f">>> Gemini local model '{pure_model_name}' không tìm thấy; sử dụng Gemini client thay thế.")
+            model_cache[model] = (None, None)
+            return None, None
+
         found_in_kaggle = False
         for search_root in ['/kaggle/input', '/kaggle/working']:
             for r, dirs, _ in os.walk(search_root):
@@ -44,16 +47,18 @@ def load_model(model, root_path="./model"):
                     model_path = os.path.join(r, pure_model_name)
                     found_in_kaggle = True
                     break
-            if found_in_kaggle: break
-        
+            if found_in_kaggle:
+                break
+
         if not found_in_kaggle:
             print(f">>> 🌐 Tải {repo_id} từ Hugging Face Hub...")
             model_path = repo_id
 
     print(f">>> 🚀 Đang khởi tạo model từ: {model_path}")
+    auth_token = os.environ.get("HUGGINGFACE_TOKEN")
 
     try:
-        tokenizer = AutoTokenizer.from_pretrained(model_path, token=True)
+        tokenizer = AutoTokenizer.from_pretrained(model_path, use_auth_token=auth_token)
         dtype = torch.bfloat16 if "Llama-3" in pure_model_name else torch.float16
         
         pipeline = transformers.pipeline(
@@ -62,7 +67,7 @@ def load_model(model, root_path="./model"):
             torch_dtype=dtype,
             device_map="auto",
             return_full_text=False,
-            token=True
+            use_auth_token=auth_token,
         )
         
         if "Llama-3" in pure_model_name:

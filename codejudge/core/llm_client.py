@@ -1,3 +1,4 @@
+import os
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
 
@@ -13,12 +14,14 @@ class GeminiClient:
             bnb_4bit_compute_dtype=torch.float16
         )
 
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, token=True)
+        auth_token = os.environ.get("HUGGINGFACE_TOKEN")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=auth_token)
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
             quantization_config=bnb_config,
             device_map="auto",
-            token=True
+            torch_dtype=torch.float16,
+            use_auth_token=auth_token,
         )
         
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)

@@ -59,10 +59,12 @@ cd evaluation/model
 bash convert.sh
 ```
 
+For local Qwen and Gemini models, place the downloaded Hugging Face model under the repo or provide the HF model ID/path when running `--model`.
+
 ## 🚀 Run CodeJudge
 Please refer to sample scripts under sample_scripts folder for every dataset ([HumanEval-X](evaluation/humaneval/sample_scripts/), [CoNaLa](evaluation/conala/sample_scripts/), [APPS](evaluation/apps/sample_scripts/), [BigCodeBench](evaluation/bigcodebench/sample_scripts/)).
 
-You can choose models from: `gpt-3.5-turbo-1106`, `CodeLlama-34b-Instruct`, `Meta-Llama-3-8B-Instruct`, and `Meta-Llama-3-70B-Instruct`.
+You can choose models from: `gpt-3.5-turbo-1106`, `Gemini-2.5-flash`, `Qwen2.5-Coder-7B-Instruct`, `CodeLlama-34b-Instruct`, `Meta-Llama-3-8B-Instruct`, and `Meta-Llama-3-70B-Instruct`.
 
 For exmaple, you can run HumanEval-X test by:
 ```bash

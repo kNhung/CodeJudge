@@ -69,19 +69,18 @@ def form_filling(
                     item["content"] = item["content"].replace(placeholder_tag, str(text)).strip()
 
     # 1. Xử lý mô hình API
-    if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo"):
+    lower_model = model.lower()
+    if lower_model.startswith("gpt-4") or lower_model.startswith("gpt-3.5-turbo"):
         return openai_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
-    elif "gemini" in model.lower():
+    elif "gemini" in lower_model:
         return gemini_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
 
-    # 2. Xử lý mô hình Local (CodeLlama hoặc Llama 3)
-    # Tự động điều chỉnh do_sample để tránh lỗi khi temperature = 0
-    do_sample = temperature > 0 #
-    
-    # Kiểm tra tên model linh hoạt hơn (dùng 'in' thay vì 'startswith')
-    if "CodeLlama" in model: #
+    # 2. Xử lý mô hình Local (CodeLlama, Qwen hoặc Llama 3)
+    do_sample = temperature > 0
+
+    if "codellama" in lower_model or "qwen" in lower_model:
         formatted_prompt = code_llama_prompt(message)
-    elif "Meta-Llama-3" in model: #
+    elif "meta-llama-3" in lower_model or "llama-3" in lower_model:
         formatted_prompt = llama3_prompt(message)
     else:
         raise Exception(f"Invalid model name: {model}")
