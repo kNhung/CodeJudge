@@ -5,6 +5,9 @@ Hệ thống chấm điểm code tự động cho bài tập lập trình
 Dựa trên paper: CodeJudge - Auto-Grading Code Assignments
 """
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from codejudge.core import (
     IntegratedAssessor,
     BinaryAssessor,

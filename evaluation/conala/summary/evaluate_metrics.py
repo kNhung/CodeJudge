@@ -52,7 +52,7 @@ def calculate_metrics(group_records):
     }
 
 def main():
-    file_path = r'C:\\Users\\ADMIN\\Downloads\\CodeJudge\\evaluation\\conala\\summary\\260423_1556_meta-llama-Meta-Llama-3-8B-Instruct_all.jsonl'
+    file_path = r'C:\\Users\\ADMIN\\Downloads\\CodeJudge\\evaluation\\conala\\output\\260511_1850_meta-llama-Meta-Llama-3-8B-Instruct_all.jsonl'
     output_path = 'metrics_result.json'  # Tên file đầu ra bạn muốn lưu
     records = []
     

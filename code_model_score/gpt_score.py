@@ -1,6 +1,6 @@
 import copy
 import re
-from .utils import openai_request, gemini_request
+from .utils import openai_request, gemini_request, llm_request
 
 def code_llama_prompt(message):
     if len(message) == 1:
@@ -68,28 +68,26 @@ def form_filling(
                 if placeholder_tag in item["content"]:
                     item["content"] = item["content"].replace(placeholder_tag, str(text)).strip()
 
-    # 1. Xử lý mô hình API
-    if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo"):
-        return openai_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
-    elif "gemini" in model.lower():
-        return gemini_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
+    # 1. Xử lý các mô hình API (OpenAI / Gemini / Qwen ...)
+    # Nếu là một trong các API chat, chuyển sang llm_request chung
+    lower = model.lower()
+    if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo") or "gemini" in lower or "qwen" in lower or lower.startswith("gpt-"):
+        return llm_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
 
     # 2. Xử lý mô hình Local (CodeLlama hoặc Llama 3)
-    # Tự động điều chỉnh do_sample để tránh lỗi khi temperature = 0
-    do_sample = temperature > 0 #
-    
-    # Kiểm tra tên model linh hoạt hơn (dùng 'in' thay vì 'startswith')
-    if "CodeLlama" in model: #
+    do_sample = temperature > 0
+
+    if "CodeLlama" in model:
         formatted_prompt = code_llama_prompt(message)
-    elif "Meta-Llama-3" in model: #
+    elif "Meta-Llama-3" in model:
         formatted_prompt = llama3_prompt(message)
     else:
         raise Exception(f"Invalid model name: {model}")
 
     return pipeline(
         formatted_prompt,
-        do_sample=do_sample, #
-        temperature=temperature if do_sample else None, #
+        do_sample=do_sample,
+        temperature=temperature if do_sample else None,
         top_p=0.9 if do_sample else None,
         num_return_sequences=1,
         eos_token_id=terminators,

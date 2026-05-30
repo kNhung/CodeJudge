@@ -110,12 +110,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", type=Path, default=DEFAULT_JSON,
                         help="Path to the CoNaLa dataset JSON file (default: evaluation/conala/conala.json)")
-    parser.add_argument("--source", type=str, default="codex",
+    parser.add_argument("--source", type=str, default="all",
                         help="Which source field to evaluate (default: codex). Use 'all' to score all candidate fields.")
     parser.add_argument("--provider", type=str, default="local",
                         help="LLM provider name")
     parser.add_argument("--model", type=str, default="meta-llama/Meta-Llama-3-8B-Instruct",
                         help="Model name to score with")
+    parser.add_argument("--api-key", type=str, default=None,
+                        help="API key for cloud providers (e.g., GOOGLE_API_KEY for Gemini)")
     parser.add_argument("--output", type=Path, default=None,
                         help="Output JSONL file. If omitted, auto-generate one under evaluation/conala/output")
     parser.add_argument("--limit", type=int, default=0,
@@ -147,7 +149,12 @@ def main() -> None:
     assessor = None
     llm_client = None
     if not args.dry_run:
-        llm_client = LLMFactory.create(provider=args.provider, model_name=args.model, use_cache=True)
+        llm_client = LLMFactory.create(
+            provider=args.provider, 
+            model_name=args.model, 
+            use_cache=True,
+            api_key=args.api_key
+        )
     
     if args.dry_run:
         print("📋 Dry run mode: no LLM calls will be made")

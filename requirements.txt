@@ -1,9 +1,44 @@
+
+# --- Core AI/ML Libs ---
+accelerate
+transformers
+datasets
+huggingface-hub
+scikit-learn
+scipy
+numpy
+pandas
+matplotlib
+seaborn
+tqdm
+
+# --- CodeJudge Specifics ---
+# Các thư viện đặc thù để đánh giá code
+human_eval
+javalang
+tree-sitter
+code_bert_score
+rouge_score
+sacrebleu
+sacremoses
+nltk
+fuzzywuzzy
+
+# --- Utilities ---
+editdistance  # Bản mới nhất
+fire
+jsonlines
+pyarrow
+
 # CodeJudge Core Requirements
 # Các thư viện cần thiết cho Core Engine
 
 # LLM Providers
 openai>=1.0.0              # OpenAI API (for GPT-4, GPT-3.5-turbo)
 anthropic>=0.7.0           # Anthropic API (for Claude)
+# Use the newer Google GenAI client; the older google-generativeai is deprecated.
+google-genai>=0.1.0        # Google Gemini / GenAI client (preferred)
+# google-generativeai>=0.3.0  # (deprecated) older Gemini client, kept for reference
 requests>=2.31.0           # HTTP requests for local LLM
 
 # Configuration
@@ -19,3 +54,9 @@ loguru>=0.7.0              # Better logging
 
 # Optional: For performance
 pydantic>=2.0.0            # Data validation
+
+# Optional vendor SDKs
+# Qwen SDK: package name depends on provider. Install the vendor-specific Qwen SDK if you plan
+# to use Qwen models (e.g. `pip install <qwen-sdk-package>`). Leave commented here to avoid
+# failing installs when the package name is unknown.
+# qwen-sdk>=0.0.1

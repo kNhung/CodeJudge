@@ -1,5 +1,3 @@
-import openai
-from openai import OpenAI
 import json
 import re
 import time
@@ -9,12 +7,41 @@ from transformers import AutoTokenizer
 import transformers
 import torch
 
+
+def is_running_on_kaggle():
+    return os.path.exists('/kaggle') or os.environ.get('KAGGLE_KERNEL_RUN_TYPE') is not None
+
 model_cache = {}
 
-def load_model(model, root_path="./model"):
+def get_kaggle_env():
+    """Get environment-specific paths and settings for Kaggle/local."""
+    if is_running_on_kaggle():
+        return {
+            "cache_dir": "/kaggle/working/hf_cache",
+            "model_root": "/kaggle/working/model",
+            "offload_folder": "/kaggle/working/offload",
+        }
+    else:
+        return {
+            "cache_dir": os.path.expanduser("~/.cache/huggingface"),
+            "model_root": "./model",
+            "offload_folder": None,
+        }
+
+
+def load_model(model, root_path=None, cache_dir=None, offload_folder=None):
     if model in model_cache:
         print(f">>> Loading {model} from cache.")
         return model_cache[model]
+
+    # Determine environment paths
+    env_paths = get_kaggle_env()
+    if root_path is None:
+        root_path = env_paths["model_root"]
+    if cache_dir is None:
+        cache_dir = env_paths["cache_dir"]
+    if offload_folder is None:
+        offload_folder = env_paths["offload_folder"]
 
     # Nhận diện tên mô hình linh hoạt
     pure_model_name = model.split('/')[-1]
@@ -52,17 +79,34 @@ def load_model(model, root_path="./model"):
 
     print(f">>> 🚀 Đang khởi tạo model từ: {model_path}")
 
+    auth_token = os.environ.get("HUGGINGFACE_TOKEN")
     try:
-        tokenizer = AutoTokenizer.from_pretrained(model_path, token=True)
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_path,
+            use_auth_token=auth_token,
+            cache_dir=cache_dir,
+            trust_remote_code=False
+        )
         dtype = torch.bfloat16 if "Llama-3" in pure_model_name else torch.float16
+        
+        # Prepare pipeline kwargs
+        pipeline_kwargs = {
+            "torch_dtype": dtype,
+            "device_map": "auto",
+            "return_full_text": False,
+        }
+        if auth_token:
+            pipeline_kwargs["use_auth_token"] = auth_token
+        
+        # Add offload settings for low-memory environments
+        if offload_folder:
+            os.makedirs(offload_folder, exist_ok=True)
+            pipeline_kwargs["offload_folder"] = offload_folder
         
         pipeline = transformers.pipeline(
             "text-generation",
             model=model_path,
-            torch_dtype=dtype,
-            device_map="auto",
-            return_full_text=False,
-            token=True
+            **pipeline_kwargs
         )
         
         if "Llama-3" in pure_model_name:
@@ -130,11 +174,17 @@ def answer_to_score(answer, return_type):
     return -1
 
 def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+    try:
+        from openai import OpenAI
+    except Exception:
+        raise ImportError("openai SDK not installed. Install with: pip install openai")
+
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     for i in range(5):
         try:
             return client.chat.completions.create(model=model, messages=message, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop).choices[0].message.content
-        except: time.sleep(1)
+        except Exception:
+            time.sleep(1)
     return ""
 
 def gemini_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
@@ -142,3 +192,29 @@ def gemini_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop
     client = GeminiClient(model_name=model)
     prompt = "".join([f"{m['role']}: {m['content']}\n" for m in message]) if isinstance(message, list) else message
     return client.generate(prompt, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop)
+
+
+def qwen_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+    """Adapter for Qwen-like providers. Requires an optional QwenClient in codejudge.core.llm_client.
+    Falls back to raising ImportError with guidance if SDK not installed."""
+    try:
+        from codejudge.core.llm_client import QwenClient
+    except Exception as e:
+        raise ImportError("Qwen client not available. Install Qwen SDK or add QwenClient to codejudge.core.llm_client")
+
+    client = QwenClient(model_name=model)
+    prompt = "".join([f"{m['role']}: {m['content']}\n" for m in message]) if isinstance(message, list) else message
+    return client.generate(prompt, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop)
+
+
+def llm_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+    """Unified entrypoint for remote/chat LLMs (OpenAI, Gemini, Qwen).
+    Keeps existing openai_request and gemini_request behavior and dispatches to qwen_request when model name indicates Qwen.
+    """
+    lower = model.lower()
+    if "gemini" in lower:
+        return gemini_request(message=message, model=model, temperature=temperature, top_p=top_p, max_tokens=max_tokens, stop=stop)
+    if "qwen" in lower:
+        return qwen_request(message=message, model=model, temperature=temperature, top_p=top_p, max_tokens=max_tokens, stop=stop)
+    # Default: assume OpenAI-compatible
+    return openai_request(message=message, model=model, temperature=temperature, top_p=top_p, max_tokens=max_tokens, stop=stop)
