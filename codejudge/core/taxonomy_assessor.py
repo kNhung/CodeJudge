@@ -64,8 +64,8 @@ class TaxonomyAssessor:
         self.penalty_map = {
             "Negligible": 0.0,    # Không trừ
             "Small": -0.5,        # Lỗi logic bộ phận
-            "Major": -1.0,        # Lỗi logic phần lớn
-            "Fatal": -1.5,        # Lỗi cú pháp/crash
+            "Major": -5.0,        # Lỗi logic phần lớn
+            "Fatal": -10.0,       # Lỗi cú pháp/crash
         }
     
     def assess(
@@ -149,8 +149,21 @@ class TaxonomyAssessor:
         result["score_breakdown"] = score_breakdown
 
         if has_breakdown:
-            final_score = self._sum_score_breakdown(score_breakdown)
+            # 1. Lấy tổng điểm cộng từ rubric
+            base_score = self._sum_score_breakdown(score_breakdown)
+            
+            # 2. Tính tổng điểm phạt từ danh sách lỗi
+            total_penalty = 0.0
+            for err in flat_errors:
+                err_type = err.get("type", "Negligible")
+                if err_type in self.error_taxonomy:
+                    total_penalty += self.error_taxonomy[err_type].get("penalty", 0.0)
+            
+            # 3. Tính điểm cuối cùng: Cấn trừ lỗi và chặn dưới ở mức 0.0
+            final_score = round(max(0.0, base_score + total_penalty), 4) # total_penalty mang dấu âm
+            
             result["quality_score"] = final_score
+            result["total_penalty"] = total_penalty
         else:
             fallback_score = self._coerce_score_10(result.get("quality_score"))
             if fallback_score is not None:

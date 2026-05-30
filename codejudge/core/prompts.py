@@ -56,8 +56,8 @@ NHÓM 2 - PHÁT HIỆN LỖI CÚ PHÁP/RUNTIME (Để hệ thống Python tính 
 Tìm và phân loại các lỗi theo mức độ:
 - Negligible: Thiếu import, style nhỏ → Không trừ
 - Small: Lỗi logic bộ phận → -0.5
-- Major: Lỗi logic phần lớn → -1.0
-- Fatal: Sai cú pháp làm code crash → -1.5
+- Major: Lỗi logic phần lớn → -5.0
+- Fatal: Sai cú pháp làm code crash → -10.0
 
 QUY TẮC CHẤM:
 - Cộng điểm cho tư duy/ý tưởng dựa trên 4 tiêu chí trên

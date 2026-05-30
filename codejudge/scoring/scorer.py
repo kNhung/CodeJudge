@@ -134,15 +134,28 @@ class Scorer:
             ScoringResult với các thông tin chi tiết
         """
         if score_breakdown is not None:
+            # 1. Tính tổng điểm cộng
             normalized = self._normalize_additive_breakdown(score_breakdown)
-            final_score = max(0.0, min(self.base_score, round(sum(normalized.values()), 4)))
-            reasoning = self._generate_additive_reasoning(normalized, final_score)
+            base_score_sum = round(sum(normalized.values()), 4)
+            
+            # 2. Tính penalty từ các lỗi (nếu có)
+            errors = errors or []
+            computed_penalty_breakdown = self._calculate_penalties(errors)
+            total_penalty = sum(computed_penalty_breakdown.values())
+            
+            # 3. Tính điểm cuối cùng
+            final_score = max(0.0, min(self.base_score, base_score_sum + total_penalty))
+            
+            # 4. Cập nhật reasoning để hiển thị rõ việc bị trừ điểm
+            reasoning = self._generate_additive_reasoning(normalized, base_score_sum)
+            if total_penalty < 0:
+                reasoning += f" | Bị trừ {abs(total_penalty)} điểm do lỗi. Điểm cuối: {final_score}"
 
             return ScoringResult(
                 base_score=self.base_score,
                 final_score=final_score,
-                penalty_breakdown=normalized,
-                total_penalty=0.0,
+                penalty_breakdown=computed_penalty_breakdown, 
+                total_penalty=total_penalty,
                 reasoning=reasoning,
             )
 

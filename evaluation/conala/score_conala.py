@@ -17,7 +17,7 @@ from codejudge.core import BinaryAssessor, IntegratedAssessor, LLMFactory, Taxon
 
 CONALA_ROOT = Path(__file__).resolve().parent
 DEFAULT_JSON = CONALA_ROOT / "conala.json"
-CANDIDATE_FIELDS = ["baseline", "tranx-annot", "best-tranx", "best-tranx-rerank", "codex", "snippet"]
+CANDIDATE_FIELDS = ["baseline", "tranx-annot", "best-tranx", "best-tranx-rerank", "codex"]
 
 # ... (Các hàm build_default_output_path, load_examples, normalize_code giữ nguyên)
 def build_default_output_path(model_name: str, source: str) -> Path:
@@ -124,7 +124,7 @@ def main() -> None:
                         help="Only process first N examples")
     parser.add_argument("--start", type=int, default=0,
                         help="Start index in dataset examples")
-    parser.add_argument("--mode", type=str, default="integrated", 
+    parser.add_argument("--mode", type=str, default="taxonomy", 
                         choices=["integrated", "taxonomy"],
                         help="integrated: Binary + Taxonomy (recommended), taxonomy: detailed legacy output")
     parser.add_argument("--use-examples", action="store_true", default=False,
