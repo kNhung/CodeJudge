@@ -81,8 +81,85 @@ def evaluate_jsonl_file(file_path):
     print("Kendall | Pearson | Spearman | Length")
     print_number(kendalltau, pearsonr, spearmanr, len(references))
 
+def evaluate_json_file(file_path):
+    """Đánh giá file JSON (không phải JSONL)"""
+    print(f"Đang đánh giá file JSON: {file_path}")
+    
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"Lỗi đọc file: {e}")
+        return
+    
+    data_list = data.get("data", [])
+    if not data_list:
+        print("Lỗi: Không tìm thấy 'data' trong file JSON!")
+        return
+    
+    references = []
+    predictions = []
+
+    # Xử lý tính toán dựa trên dữ liệu thu thập được
+    for item in data_list:
+        if not isinstance(item, dict) or "grade" not in item or "code_gpt_score" not in item:
+            continue
+            
+        ref_row = []
+        pred_row = []
+        
+        for case in conala_test_cases:
+            if case in item["grade"] and case in item["code_gpt_score"]:
+                try:
+                    ref_val = float(item["grade"][case])
+                    pred_val = float(item["code_gpt_score"][case]["code_gpt_score"])
+                    ref_row.append(ref_val)
+                    pred_row.append(pred_val)
+                except (ValueError, TypeError, KeyError):
+                    pass
+            
+        # Đảm bảo list hợp lệ trước khi đưa vào tính toán
+        if ref_row and pred_row and len(ref_row) == len(pred_row):
+            references.append(ref_row)
+            predictions.append(pred_row)
+
+    if not references:
+        print("Lỗi: Không tìm thấy dữ liệu đánh giá hợp lệ trong file!")
+        return
+
+    # Tính toán các chỉ số thống kê
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        kendalltau_vals = [stats.kendalltau(ref, pred).statistic for ref, pred in zip(references, predictions)]
+        pearsonr_vals = [stats.pearsonr(ref, pred).statistic for ref, pred in zip(references, predictions)]
+        spearmanr_vals = [stats.spearmanr(ref, pred).statistic for ref, pred in zip(references, predictions)]
+        
+        kendalltau = nanmean(kendalltau_vals)
+        pearsonr = nanmean(pearsonr_vals)
+        spearmanr = nanmean(spearmanr_vals)
+
+    print("\n" + "="*80)
+    print("KẾT QUẢ ĐÁNH GIÁ PERFORMANCE")
+    print("="*80)
+    print(f"Số lượng mẫu đánh giá: {len(references)}")
+    print(f"\nKendall Tau    | Pearson r  | Spearman r")
+    print_number(kendalltau, pearsonr, spearmanr)
+    print("\n" + "-"*80)
+    print("CHI TIẾT THỐNG KÊ:")
+    print("-"*80)
+    print(f"Kendall Tau:   {kendalltau:.6f} (min: {min(kendalltau_vals):.6f}, max: {max(kendalltau_vals):.6f})")
+    print(f"Pearson r:     {pearsonr:.6f} (min: {min(pearsonr_vals):.6f}, max: {max(pearsonr_vals):.6f})")
+    print(f"Spearman r:    {spearmanr:.6f} (min: {min(spearmanr_vals):.6f}, max: {max(spearmanr_vals):.6f})")
+    print("="*80 + "\n")
+
 if __name__ == "__main__":
-    # Điền đường dẫn tới file jsonl bạn vừa đưa
-    # Nếu chạy script cùng thư mục với file, bạn chỉ cần để tên file như bên dưới
-    file_name = r"C:\Users\ADMIN\Downloads\CodeJudge\evaluation\conala\output\260511_1850_meta-llama-Meta-Llama-3-8B-Instruct_all.jsonl"
-    evaluate_jsonl_file(file_name)
+    # Đánh giá file JSON
+    json_file = r"C:\Users\ADMIN\Downloads\CodeJudge\evaluation\conala\summary\Meta-Llama-3-8B-Instruct-1-4-0.01-sample-0.json"
+    evaluate_json_file(json_file)
+    
+    print("\n" + "#"*80)
+    print("# Để đánh giá file JSONL, bạn có thể dùng lệnh bên dưới:")
+    print("#"*80)
+    # Hoặc đánh giá file JSONL
+    # jsonl_file = r"C:\Users\ADMIN\Downloads\CodeJudge\evaluation\conala\output\260511_1850_meta-llama-Meta-Llama-3-8B-Instruct_all.jsonl"
+    # evaluate_jsonl_file(jsonl_file)
