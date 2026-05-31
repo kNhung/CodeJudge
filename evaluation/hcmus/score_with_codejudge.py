@@ -503,13 +503,27 @@ def main() -> None:
             if args.resume and row_id and row_id in processed_ids:
                 continue
 
-            items = evaluate_row(
-                row=row,
-                assessor=assessor,
-                mode=args.mode,
-                dry_run=args.dry_run,
-                scoring_mode=args.scoring_mode,
-            )
+            try:
+                items = evaluate_row(
+                    row=row,
+                    assessor=assessor,
+                    mode=args.mode,
+                    dry_run=args.dry_run,
+                    scoring_mode=args.scoring_mode,
+                )
+            except RuntimeError as e:
+                message = str(e)
+                if args.provider == "huggingface" and (
+                    "402 Payment Required" in message
+                    or "depleted your monthly included credits" in message
+                    or "Payment Required" in message
+                ):
+                    print("Hugging Face quota exhausted. Stopping cleanly so you can resume later.")
+                    print(f"Last row id={row_id}")
+                    print(f"Error: {message}")
+                    break
+                raise
+
             for item in items:
                 # Add run-level metadata
                 item["model"] = args.model
