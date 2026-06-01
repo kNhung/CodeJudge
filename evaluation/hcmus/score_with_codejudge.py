@@ -258,7 +258,9 @@ def evaluate_row(
 
     if scoring_mode == "whole_exam":
         full_problem_statement = problem_text
-
+        # collect question headings so outputs can map scores/comments to question names
+        questions = split_questions(problem_text)
+        question_names = [q.splitlines()[0].strip() for q in questions]
         code_parts = []
         for idx, code_file in enumerate(code_files, start=1):
             code_text = code_file.read_text(encoding="utf-8", errors="ignore")
@@ -270,6 +272,7 @@ def evaluate_row(
 
         item: Dict[str, object] = {
             "id": row_id,
+            "example_index": int(row_id) if str(row_id).isdigit() else row_id,
             "student_id": row.get("student_id", ""),
             "problem_id": problem_id,
             "expect_grade": row.get("expect_grade", ""),
@@ -278,6 +281,8 @@ def evaluate_row(
             "scoring_mode": scoring_mode,
             "num_code_files": len(code_files),
             "code_files": [p.name for p in code_files],
+            "results": [],
+            "question_names": question_names,
         }
 
         if dry_run:
@@ -297,6 +302,13 @@ def evaluate_row(
         )
         item["runtime_seconds"] = round(time.perf_counter() - started_at, 6)
         item["result"] = assessment_result
+        item["results"] = [
+            {
+                "source": "whole_exam",
+                "grade_reference": row.get("expect_grade", ""),
+                "result": assessment_result,
+            }
+        ]
         results.append(item)
         return results
 
@@ -309,6 +321,8 @@ def evaluate_row(
         code_text = code_file.read_text(encoding="utf-8", errors="ignore")
         question_text = questions[idx - 1]
         question_max = parse_question_max(question_text)
+        # human-friendly short question name (heading first line)
+        question_name = question_text.splitlines()[0].strip()
 
         item: Dict[str, object] = {
             "id": row_id,
@@ -316,6 +330,7 @@ def evaluate_row(
             "problem_id": problem_id,
             "expect_grade": row.get("expect_grade", ""),
             "question_index": idx,
+            "question_name": question_name,
             "code_file": code_file.name,
             "language": language,
             "question_max": question_max,
@@ -326,6 +341,7 @@ def evaluate_row(
         if dry_run:
             item["status"] = "dry_run"
             item["question_preview"] = question_text[:120]
+            item["question_name"] = question_name
             results.append(item)
             per_question_results.append(item)
             continue
@@ -343,6 +359,7 @@ def evaluate_row(
         )
         item["runtime_seconds"] = round(time.perf_counter() - started_at, 6)
         item["result"] = assessment_result
+        item["question_name"] = question_name
         results.append(item)
         per_question_results.append(item)
 
@@ -398,6 +415,7 @@ def evaluate_row(
                 {
                     "question_index": item.get("question_index"),
                     "question_max": item.get("question_max"),
+                    "question_name": item.get("question_name"),
                     "score_on_10": (
                         item.get("result", {}).get("summary", {}).get("score")
                         if isinstance(item.get("result"), dict)
