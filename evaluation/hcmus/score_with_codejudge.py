@@ -492,10 +492,7 @@ def main() -> None:
     if not args.dry_run:
         # Import assessors lazily to avoid heavy ML deps during dry-run
         from codejudge.core import BinaryAssessor, IntegratedAssessor, LLMFactory, TaxonomyAssessor  # noqa: E402
-        kwargs = {}
-        if args.provider == "local" and args.base_url:
-            kwargs["base_url"] = args.base_url
-        llm_client = LLMFactory.create(provider=args.provider, model_name=args.model, **kwargs)
+        llm_client = LLMFactory.create(provider=args.provider, model_name=args.model)
         # taxonomy_system_prompt already resolved above
         if args.mode == "binary":
             assessor = BinaryAssessor(llm_client=llm_client)
