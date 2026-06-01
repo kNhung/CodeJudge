@@ -22,13 +22,17 @@ conala_test_cases = [
     "codex",
 ]
 
+EVALUATION_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def read_data(model, temperature, file_name, compare_prompt=None, analyze_prompt=None):
-    with open("./data/conala/conala.json") as f:
+    data_path = os.path.join(EVALUATION_ROOT, "data", "conala", "conala.json")
+    with open(data_path) as f:
         data = json.load(f)
 
-    if os.path.exists(f"./output/conala/{file_name}"):
-        with open(f"./output/conala/{file_name}") as f:
+    output_path = os.path.join(EVALUATION_ROOT, "output", "conala", file_name)
+    if os.path.exists(output_path):
+        with open(output_path) as f:
             out = json.load(f)
     else:
         if analyze_prompt is not None:
@@ -125,6 +129,7 @@ def dual_step_workflow(
     temperature,
     file_name,
     return_type,
+    limit,
 ):
     data, out = read_data(
         model,
@@ -133,6 +138,12 @@ def dual_step_workflow(
         analyze_prompt=analyze_prompt,
         compare_prompt=compare_prompt,
     )
+    if len(out["data"]) == len(data):
+        return
+
+    if limit is not None:
+        data = data[:limit]
+
     if len(out["data"]) == len(data):
         return
 
@@ -261,6 +272,24 @@ def main():
     start_index = args.start_index
     limit = args.limit
 
+    if step not in (1, 2):
+        raise ValueError("--step must be 1 or 2")
+
+    if step == 1:
+        if compare_prompt_index < 0 or compare_prompt_index >= len(single_step_prompt):
+            raise IndexError(
+                f"--compare_prompt must be between 0 and {len(single_step_prompt) - 1} for step 1"
+            )
+    else:
+        if analyze_prompt_index < 0 or analyze_prompt_index >= len(dual_step_prompt["analyze_prompt"]):
+            raise IndexError(
+                f"--analyze_prompt must be between 0 and {len(dual_step_prompt['analyze_prompt']) - 1} for step 2"
+            )
+        if compare_prompt_index < 0 or compare_prompt_index >= len(dual_step_prompt["compare_prompt"]):
+            raise IndexError(
+                f"--compare_prompt must be between 0 and {len(dual_step_prompt['compare_prompt']) - 1} for step 2"
+            )
+
     router(
         model,
         step,
@@ -275,4 +304,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
