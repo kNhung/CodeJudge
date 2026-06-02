@@ -56,8 +56,7 @@ def form_filling(
     terminators,
     pipeline,
     temperature,
-    info=None,
-    max_tokens=2000,
+    info=None
 ):
     message = copy.deepcopy(prompt)
     if info is not None:
@@ -72,7 +71,7 @@ def form_filling(
     # Nếu là một trong các API chat, chuyển sang llm_request chung
     lower = model.lower()
     if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo") or "gemini" in lower or "qwen" in lower or lower.startswith("gpt-"):
-        return llm_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
+        return llm_request(message=message, model=model, temperature=temperature)
 
     # 2. Xử lý mô hình Local (CodeLlama hoặc Llama 3)
     do_sample = temperature > 0
@@ -91,6 +90,5 @@ def form_filling(
         top_p=0.9 if do_sample else None,
         num_return_sequences=1,
         eos_token_id=terminators,
-        max_new_tokens=max_tokens,
         pad_token_id=pipeline.tokenizer.eos_token_id,
     )[0]["generated_text"].strip()

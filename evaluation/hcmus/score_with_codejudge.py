@@ -226,7 +226,85 @@ def run_assessment(
     if mode == "intergrated":
         assess_kwargs["question_max"] = question_max
 
-    return assessor.assess(**assess_kwargs)
+    # Gọi Assessor gốc để lấy dữ liệu kết quả từ Gemini
+    result = assessor.assess(**assess_kwargs)
+    print(f"======Raw result from assessor: {result}")
+
+    if not isinstance(result, dict):
+        result = {"raw_response": str(result)}
+
+    # 1. Khởi tạo khung JSON sạch gồm đúng 4 trường con tiêu chuẩn của hệ thống
+    normalized = {
+        "quality_score": 0.0,
+        "score_breakdown": {"idea": 0.0, "flow": 0.0, "correctness": 0.0, "clarity": 0.0},
+        "errors": result.get("errors") if isinstance(result.get("errors"), list) else [],
+        "reasoning": "Không có nhận xét chi tiết từ mô hình."
+    }
+
+    raw_text = result.get("raw_response", "")
+
+    # 2. KIỂM TRA VÀ CỨU DỮ LIỆU THEO PHONG CÁCH TIẾNG ANH CỦA GEMINI
+    if raw_text and "Adherence to requirements" in raw_text:
+        import re
+        
+        # Quét tìm điểm số của 5 tiêu chí tiếng Anh từ chuỗi thô của Gemini
+        corr_m = re.search(r'"Correctness"\s*:\s*([0-9.]+)', raw_text)
+        adhe_m = re.search(r'"Adherence to requirements"\s*:\s*([0-9.]+)', raw_text)
+        effi_m = re.search(r'"Efficiency"\s*:\s*([0-9.]+)', raw_text)
+        styl_m = re.search(r'"Code Style/Readability"\s*:\s*([0-9.]+)', raw_text)
+        robu_m = re.search(r'"Robustness/Error Handling"\s*:\s*([0-9.]+)', raw_text)
+
+        # Trích xuất giá trị số float (thang điểm 10 của Gemini)
+        c_val = float(corr_m.group(1)) if corr_m else 0.0
+        a_val = float(adhe_m.group(1)) if adhe_m else 0.0
+        e_val = float(effi_m.group(1)) if effi_m else 0.0
+        s_val = float(styl_m.group(1)) if styl_m else 0.0
+        r_val = float(robu_m.group(1)) if robu_m else 0.0
+
+        # Quy đổi và tỷ lệ hóa sang cấu trúc 4 trường hệ thống (Thang điểm chuẩn: idea/3, flow/2, correctness/2, clarity/1)
+        normalized["score_breakdown"]["idea"] = round((a_val / 10.0) * 3.0, 2)
+        normalized["score_breakdown"]["flow"] = round((e_val / 10.0) * 2.0, 2)
+        normalized["score_breakdown"]["correctness"] = round(((c_val + r_val) / 20.0) * 2.0, 2)
+        normalized["score_breakdown"]["clarity"] = round((s_val / 10.0) * 1.0, 2)
+
+        # Tính toán lại tổng điểm chất lượng trên thang điểm 10
+        normalized["quality_score"] = round(sum(normalized["score_breakdown"].values()), 2)
+
+        # TỰ ĐỘNG BIÊN SOẠN REASONING TIẾNG VIỆT TỪ ĐIỂM SỐ GỐC CỦA GEMINI
+        comment = f"Mô hình đã đánh giá mã nguồn dựa trên các tiêu chí chuẩn. "
+        comment += f"Độ chính xác thuật toán (Correctness) đạt {c_val}/10. Mức độ bám sát yêu cầu đề bài đạt {a_val}/10. "
+        comment += f"Hiệu năng và luồng xử lý (Efficiency) đạt {e_val}/10. Khả năng xử lý ngoại lệ biên (Robustness) đạt {r_val}/10. "
+        comment += f"Trình bày và phong cách viết code đạt {s_val}/10."
+        normalized["reasoning"] = comment
+
+    else:
+        # 3. Phương án Fallback thông thường nếu cấu trúc trả về đúng chuẩn cũ
+        if "quality_score" in result and result["quality_score"] is not None:
+            normalized["quality_score"] = float(result["quality_score"])
+        elif "final_score" in result and result["final_score"] is not None:
+            normalized["quality_score"] = float(result["final_score"])
+
+        if "reasoning" in result and result["reasoning"] and result["reasoning"] != "LLM response could not be parsed":
+            normalized["reasoning"] = str(result["reasoning"])
+
+        if isinstance(result.get("score_breakdown"), dict) and result["score_breakdown"]:
+            for k in normalized["score_breakdown"].keys():
+                if k in result["score_breakdown"] and result["score_breakdown"][k] is not None:
+                    try:
+                        normalized["score_breakdown"][k] = float(result["score_breakdown"][k])
+                    except (ValueError, TypeError):
+                        pass
+
+    # 4. Đồng bộ hóa các khóa bổ trợ để ghi file .jsonl hoàn chỉnh
+    normalized["final_score"] = normalized["quality_score"]
+    qmax_val = float(question_max) if question_max is not None else 10.0
+    normalized["summary"] = {
+        "score": normalized["quality_score"],
+        "score_scaled": round((normalized["quality_score"] / 10.0) * qmax_val, 4)
+    }
+
+    return normalized
+    
 
 
 def evaluate_row(
@@ -238,7 +316,7 @@ def evaluate_row(
 ) -> List[Dict[str, object]]:
     row_id = row["id"].strip()
     problem_id = row["problem_id"].strip()
-    language = row["language"].strip() or "C++"
+    language = row["language"].strip()
 
     student_dir = DATA_CODE_DIR / row_id
     problem_path = get_problem_path(problem_id)
@@ -440,7 +518,6 @@ def main() -> None:
     parser.add_argument("--csv", type=Path, default=DEFAULT_CSV, help="Path to hcmus_dataset.csv")
     parser.add_argument("--provider", type=str, default="openai", help="LLM provider")
     parser.add_argument("--model", type=str, default="gpt-4", help="Model name")
-    parser.add_argument("--api-key", type=str, default=None, help="API key for cloud providers")
     parser.add_argument("--output", type=Path, default=None, help="Output JSONL file")
     parser.add_argument("--run-name", type=str, default=None, help="Optional run name to include in output filename")
     parser.add_argument(

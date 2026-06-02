@@ -252,8 +252,7 @@ from code_model_score.utils import openai_request
 response = openai_request(
     message=[{"role": "user", "content": "Your prompt"}],
     model="gpt-4",
-    temperature=0.1,
-    max_tokens=2000
+    temperature=0.1
 )
 ```
 
@@ -275,8 +274,7 @@ from code_model_score.utils import gemini_request
 response = gemini_request(
     message=[{"role": "user", "content": "Your prompt"}],
     model="gemini-2.5-flash",
-    temperature=0.1,
-    max_tokens=2000
+    temperature=0.1
 )
 ```
 
@@ -303,8 +301,7 @@ from code_model_score.utils import qwen_request
 response = qwen_request(
     message=[{"role": "user", "content": "Your prompt"}],
     model="qwen-turbo",
-    temperature=0.1,
-    max_tokens=2000
+    temperature=0.1
 )
 ```
 
@@ -313,7 +310,7 @@ response = qwen_request(
 from codejudge.core.llm_client import QwenClient
 
 client = QwenClient(model_name="Qwen/Qwen2-7B")
-response = client.generate(prompt="Your prompt", max_tokens=2000)
+response = client.generate(prompt="Your prompt")
 ```
 
 **Cost:** Remote API ~¥0.0002 per 1K tokens (~$0.00003)
@@ -425,7 +422,7 @@ clients = {
 # All clients have compatible .generate() method
 for provider, client in clients.items():
     try:
-        result = client.generate("Explain this code: x = [1,2,3]", max_tokens=100)
+        result = client.generate("Explain this code: x = [1,2,3]")
         print(f"{provider}: {result[:100]}")
     except Exception as e:
         print(f"{provider} failed: {e}")

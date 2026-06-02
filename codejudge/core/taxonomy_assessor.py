@@ -133,6 +133,8 @@ class TaxonomyAssessor:
             user_prompt=user_prompt,
             format_json=True
         )
+
+        print(f"LLM Response: {llm_response}")  # Log response (cắt ngắn nếu quá dài)
         
         # Parse response
         result = self._parse_llm_response(llm_response)
@@ -300,7 +302,7 @@ class TaxonomyAssessor:
                 "quality_score": None,
                 "score_breakdown": {},
                 "reasoning": "LLM response could not be parsed",
-                "raw_response": response[:500]
+                "raw_response": response
             }
 
     def _normalize_score_breakdown(self, score_breakdown: Any) -> Tuple[Dict[str, float], bool]:

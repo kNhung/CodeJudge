@@ -55,16 +55,14 @@ class LLMClient:
         self.model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)
 
-    def generate(self, prompt, max_tokens=2000, temperature=0.01, top_p=0.9, stop=None):
+    def generate(self, prompt, temperature=0.01, top_p=0.9, stop=None):
         """Hàm generate cơ bản cho utils.py"""
         try:
             do_sample = temperature > 0
             outputs = self.pipe(
                 prompt,
-                max_new_tokens=max_tokens,
                 temperature=temperature if do_sample else None,
-                do_sample=do_sample,
-                return_full_text=False 
+                do_sample=do_sample
             )
             return outputs[0]['generated_text'].strip()
         except Exception as e:
@@ -143,7 +141,7 @@ class GeminiClient:
                 generation_config={
                     "temperature": 0.01,  # Thấp để JSON ổn định
                     "top_p": 0.95,
-                    "max_output_tokens": 2000,
+                    # "max_output_tokens": 2000,
                 }
             )
             
@@ -158,7 +156,7 @@ class GeminiClient:
             logger.error(f"Gemini API error: {e}")
             raise
 
-    def generate(self, prompt, max_tokens=2000, temperature=0.01, top_p=0.9, stop=None):
+    def generate(self, prompt, temperature=0.01, top_p=0.9, stop=None):
         """Generate method cho compatibility"""
         return self.call(
             system_prompt="",
@@ -253,14 +251,14 @@ class QwenClient:
         self.client = None
         logger.info(f"✓ Qwen local model ({model_name}) initialized")
 
-    def generate(self, prompt, max_tokens=2000, temperature=0.01, top_p=0.9, stop=None):
+    def generate(self, prompt, temperature=0.01, top_p=0.9, stop=None):
         """Generate text via remote API or local model."""
         if self.is_remote:
-            return self._generate_remote(prompt, max_tokens, temperature, top_p, stop)
+            return self._generate_remote(prompt, temperature, top_p, stop)
         else:
-            return self._generate_local(prompt, max_tokens, temperature, top_p, stop)
+            return self._generate_local(prompt, temperature, top_p, stop)
     
-    def _generate_remote(self, prompt, max_tokens, temperature, top_p, stop):
+    def _generate_remote(self, prompt, temperature, top_p, stop):
         """Generate via DashScope API."""
         if self.client is None:
             raise RuntimeError("Qwen remote client not initialized")
@@ -268,7 +266,6 @@ class QwenClient:
             response = self.client.call(
                 model=self.model_name,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=max_tokens,
                 temperature=temperature,
                 top_p=top_p
             )
@@ -280,7 +277,7 @@ class QwenClient:
             logger.error(f"Qwen remote API error: {e}")
             raise
     
-    def _generate_local(self, prompt, max_tokens, temperature, top_p, stop):
+    def _generate_local(self, prompt, temperature, top_p, stop):
         """Generate via local Qwen model."""
         if not hasattr(self, 'pipe'):
             raise RuntimeError("Qwen local model not initialized")
@@ -288,7 +285,6 @@ class QwenClient:
             do_sample = temperature > 0
             outputs = self.pipe(
                 prompt,
-                max_new_tokens=max_tokens,
                 temperature=temperature if do_sample else None,
                 top_p=top_p if do_sample else None,
                 do_sample=do_sample,
@@ -317,15 +313,15 @@ class OpenAIClient:
         self.use_cache = use_cache
         self.request_cache = {}
 
-    def generate(self, prompt, max_tokens=2000, temperature=0.0, top_p=1.0, stop=None):
+    def generate(self, prompt, temperature=0.0, top_p=1.0, stop=None):
         # Accept either chat-format messages (list of dicts) or a single string prompt
         try:
             if isinstance(prompt, list):
-                resp = self.client.chat.completions.create(model=self.model_name, messages=prompt, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop)
+                resp = self.client.chat.completions.create(model=self.model_name, messages=prompt, temperature=temperature, top_p=top_p, stop=stop)
                 return resp.choices[0].message.content
             else:
                 # Fallback: use completions endpoint
-                resp = self.client.responses.create(model=self.model_name, input=prompt, max_tokens=max_tokens)
+                resp = self.client.responses.create(model=self.model_name, input=prompt)
                 # SDK response shapes differ; try common access
                 if hasattr(resp, 'output'):
                     # Newer SDK

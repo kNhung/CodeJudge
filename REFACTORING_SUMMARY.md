@@ -121,7 +121,7 @@ from codejudge.core.llm_client import LLMFactory
 client = LLMFactory.create(provider="gemini", model_name="gemini-2.5-flash")
 
 # All clients have compatible interface
-response = client.generate(prompt="...", max_tokens=100)
+response = client.generate(prompt="...")
 ```
 
 ---
@@ -189,7 +189,7 @@ response = form_filling(model="gpt-4", prompt=prompt, ...)
 # Option B: Factory
 from codejudge.core.llm_client import LLMFactory
 client = LLMFactory.create(provider="openai", model_name="gpt-4")
-response = client.generate(prompt="...", max_tokens=100)
+response = client.generate(prompt="...")
 ```
 
 ### Configure Paths

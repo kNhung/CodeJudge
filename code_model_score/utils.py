@@ -173,7 +173,7 @@ def answer_to_score(answer, return_type):
         return process_raw_content(answer, aspect)
     return -1
 
-def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+def openai_request(message, model, temperature=0, top_p=1, stop=None):
     try:
         from openai import OpenAI
     except Exception:
@@ -182,19 +182,19 @@ def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     for i in range(5):
         try:
-            return client.chat.completions.create(model=model, messages=message, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop).choices[0].message.content
+            return client.chat.completions.create(model=model, messages=message, temperature=temperature, top_p=top_p, stop=stop).choices[0].message.content
         except Exception:
             time.sleep(1)
     return ""
 
-def gemini_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+def gemini_request(message, model, temperature=0, top_p=1, stop=None):
     from codejudge.core.llm_client import GeminiClient
     client = GeminiClient(model_name=model)
     prompt = "".join([f"{m['role']}: {m['content']}\n" for m in message]) if isinstance(message, list) else message
-    return client.generate(prompt, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop)
+    return client.generate(prompt, temperature=temperature, top_p=top_p, stop=stop)
 
 
-def qwen_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+def qwen_request(message, model, temperature=0, top_p=1, stop=None):
     """Adapter for Qwen-like providers. Requires an optional QwenClient in codejudge.core.llm_client.
     Falls back to raising ImportError with guidance if SDK not installed."""
     try:
@@ -204,17 +204,17 @@ def qwen_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=N
 
     client = QwenClient(model_name=model)
     prompt = "".join([f"{m['role']}: {m['content']}\n" for m in message]) if isinstance(message, list) else message
-    return client.generate(prompt, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop)
+    return client.generate(prompt, temperature=temperature, top_p=top_p, stop=stop)
 
 
-def llm_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+def llm_request(message, model, temperature=0, top_p=1, stop=None):
     """Unified entrypoint for remote/chat LLMs (OpenAI, Gemini, Qwen).
     Keeps existing openai_request and gemini_request behavior and dispatches to qwen_request when model name indicates Qwen.
     """
     lower = model.lower()
     if "gemini" in lower:
-        return gemini_request(message=message, model=model, temperature=temperature, top_p=top_p, max_tokens=max_tokens, stop=stop)
+        return gemini_request(message=message, model=model, temperature=temperature, top_p=top_p, stop=stop)
     if "qwen" in lower:
-        return qwen_request(message=message, model=model, temperature=temperature, top_p=top_p, max_tokens=max_tokens, stop=stop)
+        return qwen_request(message=message, model=model, temperature=temperature, top_p=top_p, stop=stop)
     # Default: assume OpenAI-compatible
-    return openai_request(message=message, model=model, temperature=temperature, top_p=top_p, max_tokens=max_tokens, stop=stop)
+    return openai_request(message=message, model=model, temperature=temperature, top_p=top_p, stop=stop)

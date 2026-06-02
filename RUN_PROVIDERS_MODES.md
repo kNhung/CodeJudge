@@ -85,7 +85,7 @@ print(client.generate("Viết 1 câu mô tả về LLM"))
 - `cache_dir` — thư mục cache Hugging Face
 - `offload_folder` — nơi lưu tạm trọng số offload
 - `trust_remote_code` — đặt `False` trên Kaggle để an toàn
-- `temperature`, `top_p`, `max_tokens` — tham số sinh văn bản
+- `temperature`, `top_p` — tham số sinh văn bản
 
 Ví dụ truyền tham số vào `load_model`:
 ```python
@@ -144,7 +144,7 @@ python quickstart.py 7    # LLMFactory example
 python - <<'PY'
 from codejudge.core.llm_client import LLMFactory
 client = LLMFactory.create(provider='openai', model_name='gpt-4')
-print(client.generate('Hello world', max_tokens=20))
+print(client.generate('Hello world'))
 PY
 ```
 
