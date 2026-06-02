@@ -1,11 +1,87 @@
 {
-  "quality_score": 8.5,
-  "score_breakdown": {
-    "Correctness": 3.5,
-    "Readability": 1.8,
-    "Efficiency": 1.7,
-    "Adherence to Requirements": 0.8,
-    "Robustness": 0.7
-  },
-  "feedback": "Tổng quan, sinh viên đã cung cấp các giải pháp phần lớn là chính xác. Các bài 2, 3 và 4 được triển khai tốt. Đặc biệt, giải pháp cho bài 3 là một cách diễn giải hợp lý cho một đề bài mơ hồ, và nó nhất quán với các ví dụ được cung cấp.\n\n**Bài 1 (3đ):**\n*   **Logic chính:** Hàm `sumOdd` tính tổng các số chẵn là đúng. (1.5/1.5 điểm)\n*   **Kiểm tra đầu vào:** Vòng lặp `do-while (a < 0 || b < 0)` không được yêu cầu và thực tế đã hạn chế không chính xác các đầu vào hợp lệ (ví dụ: số âm). Đề bài chỉ yêu cầu `a, b` là số nguyên và `a <= b`, không yêu cầu `a, b` phải dương. Ngoài ra, điều kiện `a <= b` không được kiểm tra. (-1.0 điểm)\n*   **Tên hàm:** Tên hàm `sumOdd` (tổng số lẻ) nhưng lại tính tổng số chẵn gây nhầm lẫn. (-0.25 điểm)\n*   **Định dạng đầu ra:** Đầu ra `Sum = X` khác với định dạng ví dụ `X`. (-0.25 điểm)\n*   **Tổng điểm Bài 1:** 1.5/3.0\n\n**Bài 2 (3đ):**\n*   **Logic chính:** Giải pháp hoàn toàn chính xác, bao gồm việc sử dụng `long int` cho `sqrOfN` để xử lý các trường hợp tràn số tiềm ẩn. (2.5/2.5 điểm)\n*   **Kiểm tra đầu vào:** Kiểm tra `n > 0` là chính xác theo yêu cầu. (0.5/0.5 điểm)\n*   **Tổng điểm Bài 2:** 3.0/3.0\n\n**Bài 3 (2đ):**\n*   **Logic chính:** Đề bài có phần mơ hồ về \"xóa con số bất kì\". Tuy nhiên, cách tiếp cận của sinh viên là tìm số đối xứng lớn nhất bằng cách xóa *tất cả các lần xuất hiện* của *một chữ số cụ thể* (từ 0 đến 9) hoặc không xóa gì cả. Cách diễn giải này nhất quán với các ví dụ được cung cấp. Hàm `isPalin` và `countDigit` hoạt động chính xác. (1.5/1.5 điểm)\n*   **Kiểm tra đầu vào:** Kiểm tra `1000 <= n <= 9999` là chính xác. (0.5/0.5 điểm)\n*   **Tổng điểm Bài 3:** 2.0/2.0\n\n**Bài 4 (2đ):**\n*   **Logic chính:** Giải pháp hoàn toàn chính xác theo định nghĩa số bạn bè. Hàm `sumOfDivisor` tính tổng các ước số riêng của một số là đúng. (1.5/1.5 điểm)\n*   **Kiểm tra đầu vào:** Kiểm tra `a > 0` và `b > 0` là chính xác. (0.5/0.5 điểm)\n*   **Hiệu quả:** Hàm `sumOfDivisor` có độ phức tạp O(N), có thể được tối ưu hóa thành O(sqrt(N)). Tuy nhiên, đối với các ràng buộc điển hình của bài toán cơ bản, O(N) thường được chấp nhận. Không trừ điểm đáng kể cho vấn đề này. (Không trừ điểm)\n*   **Tổng điểm Bài 4:** 2.0/2.0\n\n**Tổng điểm cuối cùng:** 1.5 (Bài 1) + 3.0 (Bài 2) + 2.0 (Bài 3) + 2.0 (Bài 4) = 8.5/10."
+    "Bai01.cpp": {
+        "quality_score": 7.5,
+        "score_breakdown": {
+            "idea": 3.0,
+            "flow": 2.0,
+            "correctness": 2.0,
+            "clarity": 1.0
+        },
+        "strengths": [
+            "Ý tưởng thuật toán tính tổng các số chẵn trong khoảng đã cho là chính xác.",
+            "Cấu trúc chương trình rõ ràng, tách bạch hàm tính tổng và hàm main xử lý nhập/xuất.",
+            "Code dễ đọc, đặt tên biến và hàm hợp lý."
+        ],
+        "errors": [
+            {
+                "type": "Small",
+                "description": "Input validation restricts `a` và `b` phải là số không âm, trong khi đề bài chỉ yêu cầu `a <= b` và không giới hạn `a, b` là số nguyên dương. Điều này có thể loại bỏ các trường hợp đầu vào hợp lệ (ví dụ: `a = -5, b = 2`).",
+                "code_snippet": "do\n    {\n        cin >> a >> b;\n    } while (a < 0 || b < 0);",
+                "fix_suggestion": "Xóa bỏ vòng lặp `do-while` nếu không có yêu cầu cụ thể về dấu của `a, b`, hoặc thay đổi điều kiện kiểm tra chỉ để đảm bảo `a <= b`."
+            }
+        ],
+        "reasoning": "idea=3.0 (ý tưởng tính tổng số chẵn đúng), flow=2.0 (luồng xử lý rõ ràng), correctness=2.0 (kết quả đúng với giả định đầu vào không âm), clarity=1.0 (dễ đọc). Lỗi: Small -0.5 điểm do input validation quá chặt so với đề bài."
+    },
+    "Bai02.cpp": {
+        "quality_score": 8.0,
+        "score_breakdown": {
+            "idea": 3.0,
+            "flow": 2.0,
+            "correctness": 2.0,
+            "clarity": 1.0
+        },
+        "strengths": [
+            "Ý tưởng thuật toán kiểm tra số Automorphic chính xác và hiệu quả bằng cách sử dụng phép toán modulo.",
+            "Sử dụng `long int` cho bình phương của `n` (`sqrOfN`) giúp tránh tràn số cho các giá trị `n` lớn.",
+            "Cấu trúc chương trình rõ ràng, tách bạch các hàm chức năng (`countDigit`, `isAutomorphic`).",
+            "Code dễ đọc, đặt tên biến và hàm hợp lý."
+        ],
+        "errors": [],
+        "reasoning": "idea=3.0 (ý tưởng đúng và bám sát yêu cầu), flow=2.0 (luồng xử lý rõ ràng, thứ tự hợp lý), correctness=2.0 (kết quả đúng ổn định cho cả case cơ bản và biên), clarity=1.0 (dễ đọc, đặt tên hợp lý). Không có lỗi."
+    },
+    "Bai03.cpp": {
+        "quality_score": 0.0,
+        "score_breakdown": {
+            "idea": 1.0,
+            "flow": 1.0,
+            "correctness": 0.0,
+            "clarity": 0.5
+        },
+        "strengths": [
+            "Hiểu được khái niệm số đối xứng và có hàm kiểm tra `isPalin` đúng.",
+            "Cấu trúc chương trình có phân chia hàm rõ ràng."
+        ],
+        "errors": [
+            {
+                "type": "Major",
+                "description": "Hàm `deleteDigit` chỉ xóa *tất cả các lần xuất hiện* của một chữ số cụ thể (ví dụ: xóa tất cả số '3' trong `1231`). Điều này không đúng với yêu cầu 'xóa con số bất kì' (có thể chỉ xóa một chữ số '3' để tạo `121`, hoặc một chữ số '2' để tạo `131`). Do đó, thuật toán không tìm được tất cả các số đối xứng có thể tạo ra và không đảm bảo tìm được số lớn nhất.",
+                "code_snippet": "int deleteDigit(int n, int i)\n{\n    int result = 0, remain = 1;\n    while (n != 0)\n    {\n        if (n % 10 != i) // i gonna be digit num\n        {\n            result += (n % 10) * remain;\n            remain = remain * 10;\n        }\n        n /= 10;\n    }\n    return result;\n}",
+                "fix_suggestion": "Để tìm số đối xứng lớn nhất bằng cách xóa 'con số bất kì', cần xem xét tất cả các tổ hợp con của các chữ số trong số `n` (tức là các subsequence). Một cách tiếp cận là chuyển số `n` thành chuỗi, sau đó tạo ra tất cả các chuỗi con bằng cách xóa các ký tự, chuyển lại thành số và kiểm tra tính đối xứng. Hoặc, sử dụng đệ quy/backtracking để thử xóa từng chữ số ở các vị trí khác nhau."
+            },
+            {
+                "type": "Small",
+                "description": "Chương trình không kiểm tra xem số `n` ban đầu có phải là số đối xứng hay không. Nếu `n` đã là số đối xứng và là số lớn nhất có thể, chương trình sẽ bỏ qua trường hợp này.",
+                "code_snippet": "int largestPalin(int n)\n{\n    int largest = 0;\n    for (int i = 0; i <= 9; i++)\n    {\n        int temp = deleteDigit(n, i);\n        if (isPalin(temp) == true && temp > largest)\n        {\n            largest = temp;\n        }\n    }\n    if (largest == 0)\n        return -1;\n    return largest;\n}",
+                "fix_suggestion": "Trước khi vòng lặp, kiểm tra `if (isPalin(n)) largest = n;` để bao gồm trường hợp `n` đã là số đối xứng. Sau đó, trong vòng lặp, so sánh `temp` với `largest` hiện tại."
+            }
+        ],
+        "reasoning": "idea=1.0 (ý tưởng giải bài còn sơ khai và chưa đúng trọng tâm do cách xóa chữ số sai), flow=1.0 (luồng cơ bản có nhưng chưa chặt chẽ do lỗi logic), correctness=0.0 (kết quả sai phần lớn do lỗi thuật toán chính), clarity=0.5 (tạm đọc được nhưng còn rối ở phần logic xóa chữ số). Lỗi: Major -5.0 điểm do sai logic chính của việc xóa chữ số; Small -0.5 điểm do không xét trường hợp `n` ban đầu là số đối xứng. Tổng penalty -5.5 điểm, dẫn đến điểm cuối cùng là 0.0."
+    },
+    "Bai04.cpp": {
+        "quality_score": 8.0,
+        "score_breakdown": {
+            "idea": 3.0,
+            "flow": 2.0,
+            "correctness": 2.0,
+            "clarity": 1.0
+        },
+        "strengths": [
+            "Ý tưởng thuật toán kiểm tra số bạn bè chính xác theo định nghĩa của đề bài.",
+            "Hàm `sumOfDivisor` được viết riêng biệt và tính tổng các ước số đúng (không tính bản thân số đó).",
+            "Cấu trúc chương trình rõ ràng, tách bạch các hàm chức năng (`sumOfDivisor`, `isFriend`).",
+            "Code dễ đọc, đặt tên biến và hàm hợp lý."
+        ],
+        "errors": [],
+        "reasoning": "idea=3.0 (ý tưởng đúng và bám sát yêu cầu), flow=2.0 (luồng xử lý rõ ràng, thứ tự hợp lý), correctness=2.0 (kết quả đúng ổn định cho cả case cơ bản và biên), clarity=1.0 (dễ đọc, đặt tên hợp lý). Không có lỗi."
+    }
 }

@@ -561,19 +561,6 @@ def main() -> None:
 
     rows = load_rows(args.csv)
 
-    # Resolve taxonomy system prompt early if possible (deferred import)
-    taxonomy_system_prompt = None
-    try:
-        from codejudge.core.prompts import (
-            AUTHOR_SYSTEM_PROMPT_TAXONOMY_ASSESSMENT,
-            SYSTEM_PROMPT_TAXONOMY_ASSESSMENT,
-        )
-        taxonomy_system_prompt = (
-            AUTHOR_SYSTEM_PROMPT_TAXONOMY_ASSESSMENT if args.taxonomy_prompt == "author" else SYSTEM_PROMPT_TAXONOMY_ASSESSMENT
-        )
-    except Exception:
-        taxonomy_system_prompt = None
-
     if args.start < 0:
         raise ValueError("--start must be >= 0")
 
@@ -592,17 +579,12 @@ def main() -> None:
         if args.mode == "binary":
             assessor = BinaryAssessor(llm_client=llm_client)
         elif args.mode == "taxonomy":
-            assessor = TaxonomyAssessor(llm_client=llm_client, system_prompt=taxonomy_system_prompt)
+            assessor = TaxonomyAssessor(llm_client=llm_client)
         else:
             assessor = IntegratedAssessor(
                 llm_client=llm_client,
                 run_both_assessments=True,
             )
-            # adapt to current IntegratedAssessor API by setting taxonomy prompt on the instance
-            try:
-                assessor.taxonomy_assessor.system_prompt = taxonomy_system_prompt
-            except Exception:
-                pass
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     written = 0
@@ -640,9 +622,9 @@ def main() -> None:
                 item["provider"] = args.provider
                 item["taxonomy_prompt"] = args.taxonomy_prompt
                 # include a small preview of the system prompt for auditing
-                item["system_prompt_preview"] = (
-                    taxonomy_system_prompt[:500] if isinstance(taxonomy_system_prompt, str) else None
-                )
+                # item["system_prompt_preview"] = (
+                #     taxonomy_system_prompt[:500] if isinstance(taxonomy_system_prompt, str) else None
+                # )
 
                 if args.save_metadata and "result" in item and isinstance(item["result"], dict):
                     attach_metadata(item, item["result"])

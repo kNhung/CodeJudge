@@ -71,7 +71,7 @@ class LLMClient:
 
     def call(self, system_prompt, user_prompt, format_json=False):
         """Hàm call mà Binary/Taxonomy Assessor đang yêu cầu"""
-        
+
         # Tạo cache key
         if self.use_cache:
             cache_key = hashlib.md5(
@@ -136,12 +136,12 @@ class GeminiClient:
             # Gemini không cần format chat template đặc biệt
             full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
             
+            print(f"🚀 Calling Gemini API with prompt:\n{full_prompt}") 
             response = self.model.generate_content(
                 full_prompt,
                 generation_config={
                     "temperature": 0.01,  # Thấp để JSON ổn định
-                    "top_p": 0.95,
-                    # "max_output_tokens": 2000,
+                    "top_p": 0.95
                 }
             )
             

@@ -8,7 +8,7 @@ import re
 import logging
 from typing import Dict, Any, List, Optional, Tuple
 from .llm_client import LLMClient, LLMFactory
-from .prompts import PromptTemplates, SYSTEM_PROMPT_TAXONOMY_ASSESSMENT, ERROR_TAXONOMY
+from .prompts import *
 
 logger = logging.getLogger(__name__)
 

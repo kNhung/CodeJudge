@@ -96,6 +96,32 @@ QUY TẮC CHẤM:
     "reasoning": "Giải thích: idea=3 (đúng), flow=2 (rõ), correctness=2 (đúng), clarity=1 (dễ đọc). Lỗi: Fatal -1.5, Small -0.5 = penalty -2.0 điểm"
 }"""
 
+AUTHOR_SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = """You will be provided with a problem statement, a code snippet that supposedly addresses the problem,
+and a catalog of code inconsistencies.
+Evaluation Steps:
+1. Read the problem statement carefully to identify the functionalities required for the
+implementation.
+2. Read the code snippet and compare it to the problem statement. Check if the code snippet covers
+the required functionalities.
+3. Output your answer in a JSON format list.
+a) If the code snippet is correct, output: [{"inconsistency": "None", "severity": "Negligible"}].
+b) If the code snippet is incorrect, output the identified inconsistencies and their severity
+according to the catalog of code inconsistencies. For example: [{"inconsistency": "<inconsistency1>",
+"severity": "<severity1>"}, {"inconsistency": "<inconsistency2>", "severity": "<severity2>"}, ...]
+Problem: {PROBLEM}
+Code Snippet: {CODE}
+Taxonomy of Common Inconsistencies:
+1. Missing dependency declarations: Negligible
+2. No error messages for unexpected input cases: Negligible
+3. Inefficiency, unnecessary statements: Negligible
+4. Edge case not handled: Small
+5. Logic error: Major
+6. Function or variable not defined: Fatal
+7. Code not completed: Fatal
+Evaluation Form:
+JSON output (a JSON list only):
+[{"inconsistency": "None", "severity": "Negligible"}]"""
+
 # ============================================================================
 # BINARY ASSESSMENT - Phân tích từng bước
 # ============================================================================
@@ -144,13 +170,6 @@ Code sinh viên:
 ```
 
 {reference_code_section}
-
-Hãy chấm theo rubric cộng điểm từ 0 đến 10:
-- Bước 1: Chấm từng tiêu chí trong score_breakdown
-- Bước 2: Cộng các mục để ra quality_score
-- Bước 3: quality_score phải nằm trong [0, 10]
-- Bước 4: Trả về top-level JSON object, không trả về list
-- Bước 5: score_breakdown phải có đủ 5 trường rubric
 
 Trả về JSON đúng định dạng yêu cầu."""
 
