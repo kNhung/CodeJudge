@@ -132,9 +132,7 @@ class TaxonomyAssessor:
             system_prompt=self.system_prompt,
             user_prompt=user_prompt,
             format_json=True
-        )
-
-        print(f"LLM Response: {llm_response}")  
+        ) 
         
         # Parse response
         result = self._parse_llm_response(llm_response)
