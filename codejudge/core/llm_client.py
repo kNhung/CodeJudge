@@ -136,7 +136,6 @@ class GeminiClient:
             # Gemini không cần format chat template đặc biệt
             full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
             
-            print(f"🚀 Calling Gemini API with prompt:\n{full_prompt}") 
             response = self.model.generate_content(
                 full_prompt,
                 generation_config={

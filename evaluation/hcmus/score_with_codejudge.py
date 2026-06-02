@@ -207,6 +207,34 @@ def load_processed_ids(output_file: Path) -> set[str]:
     return processed_ids
 
 
+# def run_assessment(
+#     assessor: object,
+#     mode: str,
+#     problem_statement: str,
+#     student_code: str,
+#     language: str,
+#     question_max: Optional[float] = None,
+# ) -> Dict[str, Any]:
+#     assess_kwargs: Dict[str, Any] = {
+#         "problem_statement": problem_statement,
+#         "student_code": student_code,
+#         "language": language,
+#     }
+
+#     if mode in {"taxonomy", "intergrated"}:
+#         assess_kwargs["reference_code"] = None
+#     if mode == "intergrated":
+#         assess_kwargs["question_max"] = question_max
+
+#     # Gọi Assessor gốc để lấy dữ liệu kết quả từ Gemini
+#     result = assessor.assess(**assess_kwargs)
+#     print(f"======Raw result from assessor: {result}")
+
+#     if not isinstance(result, dict):
+#         result = {"raw_response": str(result)}
+
+#     return result
+
 def run_assessment(
     assessor: object,
     mode: str,
@@ -215,9 +243,22 @@ def run_assessment(
     language: str,
     question_max: Optional[float] = None,
 ) -> Dict[str, Any]:
+    
+    # 1. Chuẩn hóa format submission trước khi gửi cho Gemini
+    # Thay vì để [Submission 1 - Bai01.cpp], ta đổi thành [Submission 1] hoặc [submission_1]
+    # để cấu trúc JSON trả về của Gemini khớp với hàm _extract_submission_scores của hệ thống
+    corrected_student_code = student_code
+    for idx in range(1, 10):
+        # Tạo ánh xạ để ép Gemini trả về key là submission_1, submission_2...
+        corrected_student_code = re.sub(
+            rf"\[Submission {idx} - Bai\d+\.cpp\]", 
+            f"[submission_{idx}]", 
+            corrected_student_code
+        )
+
     assess_kwargs: Dict[str, Any] = {
         "problem_statement": problem_statement,
-        "student_code": student_code,
+        "student_code": corrected_student_code,
         "language": language,
     }
 
@@ -226,85 +267,44 @@ def run_assessment(
     if mode == "intergrated":
         assess_kwargs["question_max"] = question_max
 
-    # Gọi Assessor gốc để lấy dữ liệu kết quả từ Gemini
+    # 2. Gọi Assessor gốc để hệ thống tự động chạy toàn bộ quy trình parse và scale điểm
     result = assessor.assess(**assess_kwargs)
     print(f"======Raw result from assessor: {result}")
 
     if not isinstance(result, dict):
         result = {"raw_response": str(result)}
 
-    # 1. Khởi tạo khung JSON sạch gồm đúng 4 trường con tiêu chuẩn của hệ thống
-    normalized = {
-        "quality_score": 0.0,
-        "score_breakdown": {"idea": 0.0, "flow": 0.0, "correctness": 0.0, "clarity": 0.0},
-        "errors": result.get("errors") if isinstance(result.get("errors"), list) else [],
-        "reasoning": "Không có nhận xét chi tiết từ mô hình."
-    }
+    # 3. Đổi ngược tên key từ 'submission_i' về lại 'Bai0i.cpp' để giữ nguyên cấu trúc bạn muốn
+    # Trích xuất danh sách file thực tế từ student_code gốc để map lại tên
+    cpp_names = re.findall(r"Bai\d+\.cpp", student_code)
+    if cpp_names:
+        for idx, name in enumerate(cpp_names, start=1):
+            sub_key = f"submission_{idx}"
+            if sub_key in result:
+                # Đẩy điểm đã được hệ thống tự động scale vào cho bạn dễ đọc
+                if "exam_aggregation" in result and idx <= len(result["exam_aggregation"]["details"]):
+                    detail = result["exam_aggregation"]["details"][idx - 1]
+                    result[sub_key]["question_max"] = detail["question_max"]
+                    result[sub_key]["score_scaled"] = detail["scaled_score"]
+                
+                # Đổi tên key về lại BaiXX.cpp
+                result[name] = result.pop(sub_key)
 
-    raw_text = result.get("raw_response", "")
-
-    # 2. KIỂM TRA VÀ CỨU DỮ LIỆU THEO PHONG CÁCH TIẾNG ANH CỦA GEMINI
-    if raw_text and "Adherence to requirements" in raw_text:
-        import re
-        
-        # Quét tìm điểm số của 5 tiêu chí tiếng Anh từ chuỗi thô của Gemini
-        corr_m = re.search(r'"Correctness"\s*:\s*([0-9.]+)', raw_text)
-        adhe_m = re.search(r'"Adherence to requirements"\s*:\s*([0-9.]+)', raw_text)
-        effi_m = re.search(r'"Efficiency"\s*:\s*([0-9.]+)', raw_text)
-        styl_m = re.search(r'"Code Style/Readability"\s*:\s*([0-9.]+)', raw_text)
-        robu_m = re.search(r'"Robustness/Error Handling"\s*:\s*([0-9.]+)', raw_text)
-
-        # Trích xuất giá trị số float (thang điểm 10 của Gemini)
-        c_val = float(corr_m.group(1)) if corr_m else 0.0
-        a_val = float(adhe_m.group(1)) if adhe_m else 0.0
-        e_val = float(effi_m.group(1)) if effi_m else 0.0
-        s_val = float(styl_m.group(1)) if styl_m else 0.0
-        r_val = float(robu_m.group(1)) if robu_m else 0.0
-
-        # Quy đổi và tỷ lệ hóa sang cấu trúc 4 trường hệ thống (Thang điểm chuẩn: idea/3, flow/2, correctness/2, clarity/1)
-        normalized["score_breakdown"]["idea"] = round((a_val / 10.0) * 3.0, 2)
-        normalized["score_breakdown"]["flow"] = round((e_val / 10.0) * 2.0, 2)
-        normalized["score_breakdown"]["correctness"] = round(((c_val + r_val) / 20.0) * 2.0, 2)
-        normalized["score_breakdown"]["clarity"] = round((s_val / 10.0) * 1.0, 2)
-
-        # Tính toán lại tổng điểm chất lượng trên thang điểm 10
-        normalized["quality_score"] = round(sum(normalized["score_breakdown"].values()), 2)
-
-        # TỰ ĐỘNG BIÊN SOẠN REASONING TIẾNG VIỆT TỪ ĐIỂM SỐ GỐC CỦA GEMINI
-        comment = f"Mô hình đã đánh giá mã nguồn dựa trên các tiêu chí chuẩn. "
-        comment += f"Độ chính xác thuật toán (Correctness) đạt {c_val}/10. Mức độ bám sát yêu cầu đề bài đạt {a_val}/10. "
-        comment += f"Hiệu năng và luồng xử lý (Efficiency) đạt {e_val}/10. Khả năng xử lý ngoại lệ biên (Robustness) đạt {r_val}/10. "
-        comment += f"Trình bày và phong cách viết code đạt {s_val}/10."
-        normalized["reasoning"] = comment
-
+    # 4. Thêm trường điểm tổng ở cấp cao nhất để đối chiếu với expect_grade trong dataset
+    if "exam_aggregation" in result:
+        result["exam_total_predicted_score"] = result["exam_aggregation"].get("total_score", 0.0)
     else:
-        # 3. Phương án Fallback thông thường nếu cấu trúc trả về đúng chuẩn cũ
-        if "quality_score" in result and result["quality_score"] is not None:
-            normalized["quality_score"] = float(result["quality_score"])
-        elif "final_score" in result and result["final_score"] is not None:
-            normalized["quality_score"] = float(result["final_score"])
-
-        if "reasoning" in result and result["reasoning"] and result["reasoning"] != "LLM response could not be parsed":
-            normalized["reasoning"] = str(result["reasoning"])
-
-        if isinstance(result.get("score_breakdown"), dict) and result["score_breakdown"]:
-            for k in normalized["score_breakdown"].keys():
-                if k in result["score_breakdown"] and result["score_breakdown"][k] is not None:
-                    try:
-                        normalized["score_breakdown"][k] = float(result["score_breakdown"][k])
-                    except (ValueError, TypeError):
-                        pass
-
-    # 4. Đồng bộ hóa các khóa bổ trợ để ghi file .jsonl hoàn chỉnh
-    normalized["final_score"] = normalized["quality_score"]
-    qmax_val = float(question_max) if question_max is not None else 10.0
-    normalized["summary"] = {
-        "score": normalized["quality_score"],
-        "score_scaled": round((normalized["quality_score"] / 10.0) * qmax_val, 4)
-    }
-
-    return normalized
-    
+        result["exam_total_predicted_score"] = result.get("quality_score") or result.get("final_score") or 0.0
+  
+    if "usage" in result and isinstance(result["usage"], dict):
+        u = result["usage"]
+        # Nếu dính cấu trúc đếm token của Google, ta ánh xạ sang tên trường chuẩn hệ thống mong muốn
+        if "prompt_token_count" in u:
+            u["input_tokens"] = u.get("prompt_token_count", 0)
+            u["output_tokens"] = u.get("candidates_token_count", 0)
+            u["total_tokens"] = u.get("total_token_count", 0)
+            
+    return result
 
 
 def evaluate_row(
@@ -379,15 +379,16 @@ def evaluate_row(
             language=language,
         )
         item["runtime_seconds"] = round(time.perf_counter() - started_at, 6)
+
         item["result"] = assessment_result
         item["results"] = [
             {
                 "source": "whole_exam",
-                "grade_reference": row.get("expect_grade", ""),
-                "result": assessment_result,
+                "grade_reference": row.get("expect_grade", "")
             }
         ]
         results.append(item)
+
         return results
 
     questions = split_questions(problem_text)

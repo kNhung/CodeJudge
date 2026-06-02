@@ -1,3 +1,4 @@
+```json
 {
     "Bai01.cpp": {
         "quality_score": 7.5,
@@ -85,3 +86,4 @@
         "reasoning": "idea=3.0 (ý tưởng đúng và bám sát yêu cầu), flow=2.0 (luồng xử lý rõ ràng, thứ tự hợp lý), correctness=2.0 (kết quả đúng ổn định cho cả case cơ bản và biên), clarity=1.0 (dễ đọc, đặt tên hợp lý). Không có lỗi."
     }
 }
+```

@@ -134,7 +134,7 @@ class TaxonomyAssessor:
             format_json=True
         )
 
-        print(f"LLM Response: {llm_response}")  # Log response (cắt ngắn nếu quá dài)
+        print(f"LLM Response: {llm_response}")  
         
         # Parse response
         result = self._parse_llm_response(llm_response)
