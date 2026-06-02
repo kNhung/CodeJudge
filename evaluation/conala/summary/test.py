@@ -154,7 +154,7 @@ def evaluate_json_file(file_path):
 
 if __name__ == "__main__":
     # Đánh giá file JSON
-    json_file = r"C:\Users\ADMIN\Downloads\CodeJudge\evaluation\conala\summary\Meta-Llama-3-8B-Instruct-1-4-0.01-sample-0.json"
+    json_file = r"C:\Users\ADMIN\Downloads\CodeJudge\evaluation\conala\summary\260531_0951_Qwen-Qwen2.5-Coder-7B-Instruct_all.jsonl"
     evaluate_json_file(json_file)
     
     print("\n" + "#"*80)

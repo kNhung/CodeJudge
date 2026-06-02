@@ -143,7 +143,7 @@ class GeminiClient:
                 generation_config={
                     "temperature": 0.01,  # Thấp để JSON ổn định
                     "top_p": 0.95,
-                    "max_output_tokens": 2000,
+                    # "max_output_tokens": 2000,
                 }
             )
             

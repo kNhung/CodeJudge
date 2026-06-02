@@ -48,16 +48,14 @@ class TaxonomyAssessor:
         self.num_examples = num_examples
         # NHÓM 1: Cộng điểm (Tư duy, không bao gồm cú pháp)
         self.additive_rubric_max = {
-            "idea": 3.0,
-            "flow": 2.0,
-            "correctness": 2.0,
-            "clarity": 1.0,
+            "idea": 4.0,
+            "flow": 3.0,
+            "correctness": 3.0,
         }
         self.additive_rubric_keys = [
             "idea",
             "flow",
             "correctness",
-            "clarity",
         ]
         
         # NHÓM 2: Trừ điểm (Dựa trên lỗi phát hiện)
@@ -86,12 +84,11 @@ class TaxonomyAssessor:
         
         Returns:
             {
-                "quality_score": 8.0,
+                "quality_score": 10.0,
                 "score_breakdown": {
-                    "idea": 3.0,
-                    "flow": 2.0,
-                    "correctness": 2.0,
-                    "clarity": 1.0
+                    "idea": 4.0,
+                    "flow": 3.0,
+                    "correctness": 3.0
                 },
                 "errors": [
                     {"type": "Fatal", "description": "...", "code_snippet": "...", "fix_suggestion": "..."}
@@ -103,7 +100,7 @@ class TaxonomyAssessor:
                     "Fatal": -1.5
                 },
                 "total_penalty": -2.0,
-                "final_score": 6.0
+                "final_score": 8.0
             }
         """
         logger.info("=== Taxonomy Assessment ===")
@@ -309,7 +306,7 @@ class TaxonomyAssessor:
         if not isinstance(score_breakdown, dict):
             return normalized, False
 
-        # Chỉ xem breakdown là hợp lệ khi có đủ 5 tiêu chí additive.
+        # Chỉ xem breakdown là hợp lệ khi có đủ 3 tiêu chí additive.
         if not all(key in score_breakdown for key in self.additive_rubric_keys):
             return normalized, False
 
@@ -439,20 +436,16 @@ class TaxonomyAssessor:
 
         if not errors:
             return {
-                "idea": 3.0,
-                "flow": 2.0,
-                "syntax_execution": 2.0,
-                "correctness": 2.0,
-                "clarity": 1.0,
+                "idea": 4.0,
+                "flow": 3.0,
+                "correctness": 3.0,
             }
 
         # Mặc định cho bài có lỗi nhưng vẫn có ý tưởng cơ bản.
         breakdown = {
-            "idea": 2.0,
-            "flow": 1.5,
-            "syntax_execution": 1.5,
-            "correctness": 1.5,
-            "clarity": 0.5,
+            "idea": 3.0,
+            "flow": 2.0,
+            "correctness": 2.0,
         }
 
         for error in errors:
@@ -462,7 +455,6 @@ class TaxonomyAssessor:
 
             if "fatal" in text:
                 breakdown["correctness"] = 0.0
-                breakdown["syntax_execution"] = min(breakdown["syntax_execution"], 0.5)
 
             if "logic" in text or "major" in text:
                 breakdown["correctness"] -= 1.0
@@ -473,10 +465,7 @@ class TaxonomyAssessor:
                 breakdown["correctness"] -= 0.5
 
             if "syntax" in text or "runtime" in text or "compile" in text:
-                breakdown["syntax_execution"] -= 1.0
-
-            if "style" in text or "efficiency" in text or "clarity" in text:
-                breakdown["clarity"] -= 0.5
+                breakdown["correctness"] -= 1.0
 
         for key, max_score in self.additive_rubric_max.items():
             breakdown[key] = max(0.0, min(max_score, round(breakdown[key], 4)))
