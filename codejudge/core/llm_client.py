@@ -238,7 +238,7 @@ class QwenClient:
         )
         
         model_kwargs = {
-            "use_auth_token": hf_token,
+            "token": hf_token,
             "quantization_config": bnb_config,
             "device_map": "auto",
             "trust_remote_code": True,
