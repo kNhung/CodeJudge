@@ -95,11 +95,9 @@ class Scorer:
         """
         self.base_score = base_score
         self.additive_rubric_max = {
-            "idea": 3.0,
-            "flow": 2.0,
-            "syntax_execution": 2.0,
-            "correctness": 2.0,
-            "clarity": 1.0,
+            "idea": 4.0,
+            "flow": 3.0,
+            "correctness": 3.0
         }
     
     def calculate_score(

@@ -48,16 +48,14 @@ class TaxonomyAssessor:
         self.num_examples = num_examples
         # NHÓM 1: Cộng điểm (Tư duy, không bao gồm cú pháp)
         self.additive_rubric_max = {
-            "idea": 3.0,
-            "flow": 2.0,
-            "correctness": 2.0,
-            "clarity": 1.0,
+            "idea": 4.0,
+            "flow": 3.0,
+            "correctness": 3.0
         }
         self.additive_rubric_keys = [
             "idea",
             "flow",
-            "correctness",
-            "clarity",
+            "correctness"
         ]
         
         # NHÓM 2: Trừ điểm (Dựa trên lỗi phát hiện)

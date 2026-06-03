@@ -318,7 +318,6 @@ class QwenClient:
             f"<|im_start|>user\n{user_prompt}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
-        print(f"======Full Prompt to Qwen======\n{full_prompt}\n==========================")
 
         response = self.generate(full_prompt, temperature=0.01)
 
