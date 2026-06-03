@@ -90,7 +90,7 @@ class LLMClient:
         )
         # Giảm temperature xuống thấp nhất để có kết quả JSON ổn định
         response = self.generate(full_prompt, temperature=0.01)
-        
+        print(f"======Raw Response from LLMClient======\n{response}\n==========================")
         # Lưu vào cache
         if self.use_cache:
             self.request_cache[cache_key] = response
