@@ -83,7 +83,7 @@ def load_model(model, root_path=None, cache_dir=None, offload_folder=None):
     try:
         tokenizer = AutoTokenizer.from_pretrained(
             model_path,
-            use_auth_token=auth_token,
+            token=auth_token,
             cache_dir=cache_dir,
             trust_remote_code=False
         )
@@ -96,7 +96,7 @@ def load_model(model, root_path=None, cache_dir=None, offload_folder=None):
             "return_full_text": False,
         }
         if auth_token:
-            pipeline_kwargs["use_auth_token"] = auth_token
+            pipeline_kwargs["token"] = auth_token
         
         # Add offload settings for low-memory environments
         if offload_folder:

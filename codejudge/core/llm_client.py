@@ -44,14 +44,14 @@ class LLMClient:
         # Use trust_remote_code only when not in a restrictive environment
         trust_remote = not is_running_on_kaggle()
         hf_token = os.environ.get("HUGGINGFACE_TOKEN")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=hf_token)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_token)
         model_kwargs = {
             "quantization_config": bnb_config,
             "device_map": "auto",
             "trust_remote_code": trust_remote,
         }
         if hf_token:
-            model_kwargs["use_auth_token"] = hf_token
+            model_kwargs["token"] = hf_token
         self.model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)
 
@@ -234,7 +234,7 @@ class QwenClient:
             model_name,
             trust_remote_code=True,  # Qwen models often use custom code
             cache_dir=cache_dir,
-            use_auth_token=hf_token
+            token=hf_token
         )
         
         model_kwargs = {
