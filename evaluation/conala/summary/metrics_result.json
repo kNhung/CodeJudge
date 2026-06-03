@@ -1,14 +1,14 @@
 {
   "all": {
-    "samples": 472,
+    "samples": 370,
     "grade_scale": 4.0,
-    "average_true_grade": 1.3703,
-    "average_predicted_scaled": 1.3991,
-    "mae": 0.7018,
-    "rmse": 0.9057,
-    "pearson": 0.4272,
-    "spearman": 0.4253,
-    "kendalltau": 0.3084,
-    "exact_match_rate": 0.0212
+    "average_true_grade": 1.3697,
+    "average_predicted_scaled": 0.5794,
+    "mae": 0.9828,
+    "rmse": 1.2463,
+    "pearson": 0.3343,
+    "spearman": 0.3149,
+    "kendalltau": 0.2376,
+    "exact_match_rate": 0.0514
   }
 }

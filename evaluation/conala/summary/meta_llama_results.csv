@@ -1,0 +1,7 @@
+case,kendall,pearson,spearman,n
+baseline,nan,nan,nan,472
+tranx-annot,nan,nan,nan,472
+best-tranx,nan,nan,nan,472
+best-tranx-rerank,nan,nan,nan,472
+codex,nan,nan,nan,472
+MEAN,nan,nan,nan,5
