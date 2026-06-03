@@ -287,13 +287,21 @@ class QwenClient:
             raise RuntimeError("Qwen local model not initialized")
         try:
             do_sample = temperature > 0
+
+            input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids
+            input_length = input_ids.shape[1]
+
+            # Lấy cấu hình max_position_embeddings từ model, nếu không tìm thấy thì fallback về 8192
+            max_ctx = getattr(self.model.config, "max_position_embeddings", 8192)
+            dynamic_max_new_tokens = max(512, max_ctx - input_length - 10)
+            
             outputs = self.pipe(
                 prompt,
                 temperature=temperature if do_sample else None,
                 top_p=top_p if do_sample else None,
                 do_sample=do_sample,
                 return_full_text=False,
-                max_new_tokens=None,
+                max_new_tokens=dynamic_max_new_tokens,
                 max_length=None
             )
             return outputs[0]['generated_text'].strip()
@@ -304,7 +312,12 @@ class QwenClient:
     def call(self, system_prompt, user_prompt, format_json=False):
         """Hàm call bổ trợ để TaxonomyAssessor có thể gọi được"""
         # Format gộp cả system prompt và user prompt theo chuẩn chat để Qwen sinh dữ liệu tốt nhất
-        full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
+        # full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
+        full_prompt = (
+            f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
+            f"<|im_start|>user\n{user_prompt}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
+        )
         print(f"======Full Prompt to Qwen======\n{full_prompt}\n==========================")
 
         response = self.generate(full_prompt, temperature=0.01)
