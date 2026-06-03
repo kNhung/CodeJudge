@@ -299,6 +299,12 @@ class QwenClient:
             logger.error(f"Qwen local generation error: {e}")
             raise
 
+    def call(self, system_prompt, user_prompt, format_json=False):
+        """Hàm call bổ trợ để TaxonomyAssessor có thể gọi được"""
+        # Format gộp cả system prompt và user prompt theo chuẩn chat để Qwen sinh dữ liệu tốt nhất
+        full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
+        return self.generate(full_prompt, temperature=0.01)
+
 
 class OpenAIClient:
     """Thin wrapper around OpenAI-compatible client using the official OpenAI SDK (openai).
