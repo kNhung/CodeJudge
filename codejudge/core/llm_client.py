@@ -305,7 +305,12 @@ class QwenClient:
         """Hàm call bổ trợ để TaxonomyAssessor có thể gọi được"""
         # Format gộp cả system prompt và user prompt theo chuẩn chat để Qwen sinh dữ liệu tốt nhất
         full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
-        return self.generate(full_prompt, temperature=0.01)
+        print(f"======Full Prompt to Qwen======\n{full_prompt}\n==========================")
+
+        response = self.generate(full_prompt, temperature=0.01)
+
+        print(f"======Raw Response from Qwen======\n{response}\n==========================")
+        return response
 
 
 class OpenAIClient:
