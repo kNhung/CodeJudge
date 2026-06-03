@@ -1,7 +1,3 @@
-/evaluation/model/codellama
-/evaluation/model/llama3
-/evaluation/model/codellama/CodeLlama-*
-/evaluation/model/llama3/Meta-Llama-3-*
 __pycache__/
 *.gz
 test/
@@ -17,7 +13,7 @@ humaneval-*
 .env
 
 # Ignore generated result/output files and folders
-**/output/**
+
 /data/**/results/
 /data/**/test_cases/
 /**/results/
