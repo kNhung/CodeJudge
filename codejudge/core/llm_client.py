@@ -212,8 +212,13 @@ class QwenClient:
     
     def _init_local_model(self, model_name, cache_dir, offload_folder):
         """Initialize local Qwen model via transformers."""
-        if cache_dir is None or offload_folder is None:
-            cache_dir, offload_folder = get_kaggle_paths()
+        # if cache_dir is None or offload_folder is None:
+        #     cache_dir, offload_folder = get_kaggle_paths()
+
+        if cache_dir is None:
+            cache_dir = "/kaggle/working/hf_cache"
+        if offload_folder is None:
+            offload_folder = "/kaggle/working/offload"
         
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
