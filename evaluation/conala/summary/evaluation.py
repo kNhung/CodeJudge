@@ -102,5 +102,5 @@ def evaluate_jsonl_file(file_path):
 
 if __name__ == "__main__":
     # Điền tên file JSONL cần đánh giá vào đây
-    file_name = "Qwen.jsonl"
+    file_name = "260602_1839_Qwen-Qwen2.5-Coder-7B-Instruct_all.jsonl"
     evaluate_jsonl_file(file_name)
