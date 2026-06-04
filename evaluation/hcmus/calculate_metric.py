@@ -93,6 +93,6 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Nối với thư mục output/kaggle/
-    TARGET_FILE = os.path.join(current_dir, "output", "kaggle", "260603_taxonomy_qwen_2.5_coder_7b_instruct.jsonl")
-    
+    # TARGET_FILE = os.path.join(current_dir, "output", "report_8", "260604_taxonomy_gemini_2.5_flash.jsonl")
+    TARGET_FILE = os.path.join(current_dir, "output", "260604_taxonomy_gemini_2.5_flash.jsonl")
     analyze_model_performance(TARGET_FILE)
