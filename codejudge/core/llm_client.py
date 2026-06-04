@@ -88,7 +88,7 @@ class LLMClient:
             f"<|start_header_id|>user<|end_header_id|>\n\n{user_prompt}<|eot_id|>"
             f"<|start_header_id|>assistant<|end_header_id|>\n\n"
         )
-        print(f"🚀 [LLMClient] Sending prompt to LLM:\n{full_prompt}\n{'-'*50}")
+        # print(f"🚀 [LLMClient] Sending prompt to LLM:\n{full_prompt}\n{'-'*50}")
         # Giảm temperature xuống thấp nhất để có kết quả JSON ổn định
         response = self.generate(full_prompt, temperature=0.01)
         print(f"======Raw Response from LLMClient======\n{response}\n==========================")
