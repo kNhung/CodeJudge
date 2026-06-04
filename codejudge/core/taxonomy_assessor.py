@@ -71,133 +71,230 @@ class TaxonomyAssessor:
         problem_statement: str,
         student_code: str,
         reference_code: Optional[str] = None,
-        language: str = "Python"
+        language: str = "Python",
+        **kwargs
     ) -> Dict[str, Any]:
-        """
-        Chấm điểm chi tiết code
-        
-        Args:
-            problem_statement: Đề bài
-            student_code: Code của sinh viên
-            reference_code: Code mẫu (tùy chọn, giúp xác định lỗi tốt hơn)
-            language: Ngôn ngữ lập trình của bài làm
-        
-        Returns:
-            {
-                "quality_score": 8.0,
-                "score_breakdown": {
-                    "idea": 3.0,
-                    "flow": 2.0,
-                    "correctness": 2.0,
-                    "clarity": 1.0
-                },
-                "errors": [
-                    {"type": "Fatal", "description": "...", "code_snippet": "...", "fix_suggestion": "..."}
-                ],
-                "penalty_breakdown": {
-                    "Negligible": 0,
-                    "Small": -0.5,
-                    "Major": 0,
-                    "Fatal": -1.5
-                },
-                "total_penalty": -2.0,
-                "final_score": 6.0
-            }
-        """
         logger.info("=== Taxonomy Assessment ===")
-        logger.info(f"Problem: {problem_statement[:100]}...")
         
-        # Gửi prompt yêu cầu LLM chấm điểm
+        # 1. Khởi tạo prompt phẳng nguyên bản của tác giả
         if self.use_examples:
             user_prompt = PromptTemplates.format_taxonomy_with_examples(
-                problem_statement=problem_statement,
-                student_code=student_code,
-                reference_code=reference_code,
-                language=language,
-                include_examples=True,
-                num_examples=self.num_examples
+                problem_statement=problem_statement, student_code=student_code,
+                reference_code=reference_code, language=language,
+                include_examples=True, num_examples=self.num_examples
             )
         else:
             user_prompt = PromptTemplates.format_taxonomy(
-                problem_statement=problem_statement,
-                student_code=student_code,
-                reference_code=reference_code,
-                language=language,
+                problem_statement=problem_statement, student_code=student_code,
+                reference_code=reference_code, language=language
             )
         
-        # Gọi LLM
+        # 2. Gọi LLM API
         llm_response = self.llm_client.call(
-            system_prompt=self.system_prompt,
-            user_prompt=user_prompt,
-            format_json=True
-        ) 
-        
-        # Parse response
-        result = self._parse_llm_response(llm_response)
-
-        # Normalize nested error payloads (e.g. per-submission lists)
-        flat_errors = self._flatten_errors(result.get("errors", []))
-        result["errors"] = flat_errors
-        
-        # Ưu tiên mode cộng điểm: score_breakdown -> quality_score.
-        # Chỉ fallback penalty taxonomy khi không có dữ liệu cộng điểm.
-        score_breakdown, has_breakdown = self._normalize_score_breakdown(
-            result.get("score_breakdown")
+            system_prompt=self.system_prompt, user_prompt=user_prompt, format_json=True
         )
-        result["score_breakdown"] = score_breakdown
-
-        if has_breakdown:
-            # 1. Lấy tổng điểm cộng từ rubric
-            base_score = self._sum_score_breakdown(score_breakdown)
+        print(f"=======LLM Raw Response:\n{llm_response}\n==========")
+        
+        # 3. Trích xuất mảng JSON lỗi của tác giả cực kỳ an toàn bằng Regex
+        author_errors = []
+        try:
+            if "```json" in llm_response:
+                llm_response = llm_response.split("```json")[1].split("```")[0].strip()
+            elif "```" in llm_response:
+                llm_response = llm_response.split("```")[1].split("```")[0].strip()
             
-            # 2. Tính tổng điểm phạt từ danh sách lỗi
-            total_penalty = 0.0
-            for err in flat_errors:
-                err_type = err.get("type", "Negligible")
-                if err_type in self.error_taxonomy:
-                    total_penalty += self.error_taxonomy[err_type].get("penalty", 0.0)
-            
-            # 3. Tính điểm cuối cùng: Cấn trừ lỗi và chặn dưới ở mức 0.0
-            final_score = round(max(0.0, base_score + total_penalty), 4) # total_penalty mang dấu âm
-            
-            result["quality_score"] = final_score
-            result["total_penalty"] = total_penalty
-        else:
-            fallback_score = self._coerce_score_10(result.get("quality_score"))
-            if fallback_score is not None:
-                final_score = fallback_score
-                result["quality_score"] = fallback_score
+            # Tìm kiếm block dấu ngoặc vuông [...] chứa mảng lỗi của tác giả
+            match = re.search(r"\[\s*\{.*\}\s*\]", llm_response, re.DOTALL)
+            if match:
+                author_errors = json.loads(match.group(0))
             else:
-                inferred_breakdown = self._infer_additive_breakdown_from_errors(flat_errors)
-                if inferred_breakdown is not None:
-                    result["score_breakdown"] = inferred_breakdown
-                    final_score = self._sum_score_breakdown(inferred_breakdown)
-                    result["quality_score"] = final_score
-                elif self._has_typed_errors(flat_errors):
-                    final_score = self._calculate_final_score(flat_errors)
-                    result["quality_score"] = final_score
-                else:
-                    final_score = 0.0
-                    result["quality_score"] = 0.0
+                author_errors = json.loads(llm_response)
+        except Exception as e:
+            print(f"⚠️ Lỗi parse JSON mảng phẳng: {e}")
+            author_errors = []
 
-            if result.get("reasoning") == "Parsed from list response" and result.get("score_breakdown"):
-                result["reasoning"] = (
-                    "LLM returned list format. Converted to additive rubric score via fallback mapping from errors."
-                )
+        if isinstance(author_errors, dict):
+            author_errors = author_errors.get("errors") or author_errors.get("inconsistencies") or []
+        if not isinstance(author_errors, list):
+            author_errors = []
 
-        # Nếu response có nhiều submission_* và đề có điểm tối đa từng câu,
-        # tính điểm cuối cùng theo tổng điểm quy đổi từng câu.
-        exam_aggregation = self._aggregate_exam_score(result, problem_statement)
-        if exam_aggregation is not None:
-            final_score = exam_aggregation["total_score"]
-            result["quality_score"] = final_score
-            result["exam_aggregation"] = exam_aggregation
-
-        result["final_score"] = final_score
+        # 4. Duyệt toàn bộ mảng lỗi, map danh mục và tính tổng điểm phạt trực tiếp
+        codejudge_errors = []
+        total_penalty = 0.0
         
-        logger.info(f"Final Score: {final_score}")
+        # Áp cấu trúc điểm phạt quy định
+        mapping_penalty = {"Fatal": -10.0, "Major": -5.0, "Small": -0.5, "Negligible": 0.0}
+
+        for item in author_errors:
+            if isinstance(item, dict):
+                description = item.get("inconsistency") or item.get("description", "")
+                raw_severity = str(item.get("severity", "Small")).strip()
+                
+                # Chuẩn hóa chuỗi severity từ prompt tác giả
+                severity = "Small"
+                if "Fatal" in raw_severity or "not defined" in raw_severity or "completed" in raw_severity:
+                    severity = "Fatal"
+                elif "Major" in raw_severity or "Logic error" in raw_severity:
+                    severity = "Major"
+                elif "Small" in raw_severity or "Edge case" in raw_severity:
+                    severity = "Small"
+                elif "Negligible" in raw_severity or "Inefficiency" in raw_severity or "dependency" in raw_severity:
+                    severity = "Negligible"
+
+                total_penalty += mapping_penalty[severity]
+                
+                codejudge_errors.append({
+                    "type": severity,
+                    "description": description,
+                    "code_snippet": item.get("code_snippet", "N/A"),
+                    "fix_suggestion": item.get("fix_suggestion") or item.get("suggestion", "N/A")
+                })
+
+        # 5. Điểm số thực tế của câu trên thang 10 (chặn dưới ở mức 0.0)
+        final_score_on_10 = round(max(0.0, 10.0 + total_penalty), 4)
+        logger.info(f"   ✓ Câu lẻ đạt điểm: {final_score_on_10}/10.0 (Tổng phạt: {total_penalty})")
+
+        # 6. Trả ra object SẠCH SẼ, KHÔNG chứa các trường thừa
+        return {
+            "quality_score": final_score_on_10,
+            "errors": codejudge_errors,
+            "reasoning": "Processed cleanly via author flat taxonomy prompt."
+        }
+
+            
+    # def assess(
+    #     self,
+    #     problem_statement: str,
+    #     student_code: str,
+    #     reference_code: Optional[str] = None,
+    #     language: str = "Python"
+    # ) -> Dict[str, Any]:
+    #     """
+    #     Chấm điểm chi tiết code
         
-        return result
+    #     Args:
+    #         problem_statement: Đề bài
+    #         student_code: Code của sinh viên
+    #         reference_code: Code mẫu (tùy chọn, giúp xác định lỗi tốt hơn)
+    #         language: Ngôn ngữ lập trình của bài làm
+        
+    #     Returns:
+    #         {
+    #             "quality_score": 8.0,
+    #             "score_breakdown": {
+    #                 "idea": 3.0,
+    #                 "flow": 2.0,
+    #                 "correctness": 2.0,
+    #                 "clarity": 1.0
+    #             },
+    #             "errors": [
+    #                 {"type": "Fatal", "description": "...", "code_snippet": "...", "fix_suggestion": "..."}
+    #             ],
+    #             "penalty_breakdown": {
+    #                 "Negligible": 0,
+    #                 "Small": -0.5,
+    #                 "Major": 0,
+    #                 "Fatal": -1.5
+    #             },
+    #             "total_penalty": -2.0,
+    #             "final_score": 6.0
+    #         }
+    #     """
+    #     logger.info("=== Taxonomy Assessment ===")
+    #     logger.info(f"Problem: {problem_statement[:100]}...")
+        
+    #     # Gửi prompt yêu cầu LLM chấm điểm
+    #     if self.use_examples:
+    #         user_prompt = PromptTemplates.format_taxonomy_with_examples(
+    #             problem_statement=problem_statement,
+    #             student_code=student_code,
+    #             reference_code=reference_code,
+    #             language=language,
+    #             include_examples=True,
+    #             num_examples=self.num_examples
+    #         )
+    #     else:
+    #         user_prompt = PromptTemplates.format_taxonomy(
+    #             problem_statement=problem_statement,
+    #             student_code=student_code,
+    #             reference_code=reference_code,
+    #             language=language,
+    #         )
+        
+    #     # Gọi LLM
+    #     llm_response = self.llm_client.call(
+    #         system_prompt=self.system_prompt,
+    #         user_prompt=user_prompt,
+    #         format_json=True
+    #     ) 
+    #     print(f"=======LLM Raw Response:\n{llm_response}\n==========")
+        
+    #     # Parse response
+    #     result = self._parse_llm_response(llm_response)
+
+    #     # Normalize nested error payloads (e.g. per-submission lists)
+    #     flat_errors = self._flatten_errors(result.get("errors", []))
+    #     result["errors"] = flat_errors
+        
+    #     # Ưu tiên mode cộng điểm: score_breakdown -> quality_score.
+    #     # Chỉ fallback penalty taxonomy khi không có dữ liệu cộng điểm.
+    #     score_breakdown, has_breakdown = self._normalize_score_breakdown(
+    #         result.get("score_breakdown")
+    #     )
+    #     result["score_breakdown"] = score_breakdown
+
+    #     if has_breakdown:
+    #         # 1. Lấy tổng điểm cộng từ rubric
+    #         base_score = self._sum_score_breakdown(score_breakdown)
+            
+    #         # 2. Tính tổng điểm phạt từ danh sách lỗi
+    #         total_penalty = 0.0
+    #         for err in flat_errors:
+    #             err_type = err.get("type", "Negligible")
+    #             if err_type in self.error_taxonomy:
+    #                 total_penalty += self.error_taxonomy[err_type].get("penalty", 0.0)
+            
+    #         # 3. Tính điểm cuối cùng: Cấn trừ lỗi và chặn dưới ở mức 0.0
+    #         final_score = round(max(0.0, base_score + total_penalty), 4) # total_penalty mang dấu âm
+            
+    #         result["quality_score"] = final_score
+    #         result["total_penalty"] = total_penalty
+    #     else:
+    #         fallback_score = self._coerce_score_10(result.get("quality_score"))
+    #         if fallback_score is not None:
+    #             final_score = fallback_score
+    #             result["quality_score"] = fallback_score
+    #         else:
+    #             inferred_breakdown = self._infer_additive_breakdown_from_errors(flat_errors)
+    #             if inferred_breakdown is not None:
+    #                 result["score_breakdown"] = inferred_breakdown
+    #                 final_score = self._sum_score_breakdown(inferred_breakdown)
+    #                 result["quality_score"] = final_score
+    #             elif self._has_typed_errors(flat_errors):
+    #                 final_score = self._calculate_final_score(flat_errors)
+    #                 result["quality_score"] = final_score
+    #             else:
+    #                 final_score = 0.0
+    #                 result["quality_score"] = 0.0
+
+    #         if result.get("reasoning") == "Parsed from list response" and result.get("score_breakdown"):
+    #             result["reasoning"] = (
+    #                 "LLM returned list format. Converted to additive rubric score via fallback mapping from errors."
+    #             )
+
+    #     # Nếu response có nhiều submission_* và đề có điểm tối đa từng câu,
+    #     # tính điểm cuối cùng theo tổng điểm quy đổi từng câu.
+    #     exam_aggregation = self._aggregate_exam_score(result, problem_statement)
+    #     if exam_aggregation is not None:
+    #         final_score = exam_aggregation["total_score"]
+    #         result["quality_score"] = final_score
+    #         result["exam_aggregation"] = exam_aggregation
+
+    #     result["final_score"] = final_score
+        
+    #     logger.info(f"Final Score: {final_score}")
+        
+    #     return result
     
     def _parse_llm_response(self, response: str) -> Dict[str, Any]:
         """

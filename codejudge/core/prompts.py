@@ -22,102 +22,104 @@ QUAN TRỌNG:
 
 Lưu ý: Chỉ trả lời "Yes" nếu logic cơ bản hoàn toàn đúng theo đề bài."""
 
-SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = """Bạn là giảng viên chấm code theo hướng khuyến khích: bắt đầu từ 0 và cộng điểm dần theo phần làm đúng.
+SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = ""
 
-MỤC TIÊU:
-- Chấm công bằng cho bài làm sinh viên, ưu tiên ghi nhận phần đúng.
-- NHÓM 1 - CỘNG ĐIỂM (Tư duy & Thuật toán): Đánh giá logic, idea, flow, correctness
-- NHÓM 2 - TRỪ ĐIỂM (Lỗi cú pháp): Tìm lỗi syntax/runtime và phân loại mức độ
-- Điểm cuối cùng = Tổng cộng điểm - Tổng penalty = final_score trong [0, 10]
+# SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = """Bạn là giảng viên chấm code theo hướng khuyến khích: bắt đầu từ 0 và cộng điểm dần theo phần làm đúng.
 
-NHÓM 1 - RUBRIC CỘNG ĐIỂM (Tư duy, không bao gồm cú pháp):
-1) Hiểu đề & ý tưởng giải bài (0-4 điểm)
-- 0.0: Lệch đề hoàn toàn hoặc không có ý tưởng khả dụng
-- 1.0: Có ý tưởng sơ khai nhưng chưa đúng trọng tâm
-- 2.0: Ý tưởng đúng một phần, có thể giải được một số trường hợp
-- 3.0: Ý tưởng đúng và bám sát yêu cầu chính của đề nhưng còn thiếu chi tiết
-- 4.0: Ý tưởng đúng và bám sát yêu cầu chính xác
+# MỤC TIÊU:
+# - Chấm công bằng cho bài làm sinh viên, ưu tiên ghi nhận phần đúng.
+# - NHÓM 1 - CỘNG ĐIỂM (Tư duy & Thuật toán): Đánh giá logic, idea, flow, correctness
+# - NHÓM 2 - TRỪ ĐIỂM (Lỗi cú pháp): Tìm lỗi syntax/runtime và phân loại mức độ
+# - Điểm cuối cùng = Tổng cộng điểm - Tổng penalty = final_score trong [0, 10]
 
-2) Luồng xử lý & cấu trúc chương trình (0-3 điểm)
-- 0.0: Luồng rời rạc, thiếu bước quan trọng
-- 1.0: Luồng cơ bản có nhưng còn thiếu/chưa chặt chẽ
-- 2.0: Luồng hợp lý nhưng chưa rõ ràng hoàn toàn
-- 3.0: Luồng rất rõ ràng, thứ tự xử lý hợp lý
+# NHÓM 1 - RUBRIC CỘNG ĐIỂM (Tư duy, không bao gồm cú pháp):
+# 1) Hiểu đề & ý tưởng giải bài (0-4 điểm)
+# - 0.0: Lệch đề hoàn toàn hoặc không có ý tưởng khả dụng
+# - 1.0: Có ý tưởng sơ khai nhưng chưa đúng trọng tâm
+# - 2.0: Ý tưởng đúng một phần, có thể giải được một số trường hợp
+# - 3.0: Ý tưởng đúng và bám sát yêu cầu chính của đề nhưng còn thiếu chi tiết
+# - 4.0: Ý tưởng đúng và bám sát yêu cầu chính xác
 
-3) Tính đúng của kết quả (core cases + edge cases) (0-3 điểm)
-- 0.0: Kết quả sai phần lớn
-- 1.0: Đúng một số case cơ bản nhưng còn thiếu nhiều trường hợp
-- 2.0: Đúng các case cơ bản và nhiều case biên nhưng còn sót một vài edge case
-- 3.0: Logic bao phủ tốt core cases và edge cases quan trọng
+# 2) Luồng xử lý & cấu trúc chương trình (0-3 điểm)
+# - 0.0: Luồng rời rạc, thiếu bước quan trọng
+# - 1.0: Luồng cơ bản có nhưng còn thiếu/chưa chặt chẽ
+# - 2.0: Luồng hợp lý nhưng chưa rõ ràng hoàn toàn
+# - 3.0: Luồng rất rõ ràng, thứ tự xử lý hợp lý
 
-NHÓM 2 - PHÁT HIỆN LỖI CÚ PHÁP/RUNTIME (Để hệ thống Python tính penalty):
-Tìm và phân loại các lỗi theo mức độ:
-- Negligible: Thiếu import, style nhỏ → Không trừ
-- Small: Lỗi logic bộ phận → -0.5
-- Major: Lỗi logic phần lớn → -5.0
-- Fatal: Sai cú pháp làm code crash → -10.0
+# 3) Tính đúng của kết quả (core cases + edge cases) (0-3 điểm)
+# - 0.0: Kết quả sai phần lớn
+# - 1.0: Đúng một số case cơ bản nhưng còn thiếu nhiều trường hợp
+# - 2.0: Đúng các case cơ bản và nhiều case biên nhưng còn sót một vài edge case
+# - 3.0: Logic bao phủ tốt core cases và edge cases quan trọng
 
-QUY TẮC CHẤM:
-- Cộng điểm cho tư duy/ý tưởng dựa trên 3 tiêu chí trên
-- Nếu có phần đúng thì cộng điểm cho phần đó
-- Không phạt nặng style/comment nếu không ảnh hưởng tính đúng
-- Khi chưa chắc, chọn mức điểm bảo toàn công sức của sinh viên
-- BẮT BUỘC: Top-level JSON phải là object, KHÔNG được là array/list
-- BẮT BUỘC: score_breakdown phải có đủ 3 khóa: idea, flow, correctness
+# NHÓM 2 - PHÁT HIỆN LỖI CÚ PHÁP/RUNTIME (Để hệ thống Python tính penalty):
+# Tìm và phân loại các lỗi theo mức độ:
+# - Negligible: Thiếu import, style nhỏ → Không trừ
+# - Small: Lỗi logic bộ phận → -0.5
+# - Major: Lỗi logic phần lớn → -5.0
+# - Fatal: Sai cú pháp làm code crash → -10.0
 
-ĐỊNH DẠNG OUTPUT (BẮT BUỘC JSON):
-{
-    "quality_score": 10.0,
-    "score_breakdown": {
-        "idea": 4.0,
-        "flow": 3.0,
-        "correctness": 3.0
-    },
-    "strengths": [
-        "Ý tưởng thuật toán đúng và rõ ràng"
-    ],
-    "errors": [
-        {
-            "type": "Fatal",
-            "description": "Lỗi cú pháp làm code crash",
-            "code_snippet": "đoạn liên quan",
-            "fix_suggestion": "hướng sửa"
-        },
-        {
-            "type": "Small",
-            "description": "Lỗi logic bộ phận",
-            "code_snippet": "đoạn liên quan",
-            "fix_suggestion": "hướng sửa"
-        }
-    ],
-    "reasoning": "Giải thích: idea=4 (đúng), flow=3 (rõ), correctness=3 (đúng). Lỗi: Fatal -10.0, Small -0.5 = penalty -10.5 điểm"
-}"""
+# QUY TẮC CHẤM:
+# - Cộng điểm cho tư duy/ý tưởng dựa trên 3 tiêu chí trên
+# - Nếu có phần đúng thì cộng điểm cho phần đó
+# - Không phạt nặng style/comment nếu không ảnh hưởng tính đúng
+# - Khi chưa chắc, chọn mức điểm bảo toàn công sức của sinh viên
+# - BẮT BUỘC: Top-level JSON phải là object, KHÔNG được là array/list
+# - BẮT BUỘC: score_breakdown phải có đủ 3 khóa: idea, flow, correctness
 
-AUTHOR_SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = """You will be provided with a problem statement, a code snippet that supposedly addresses the problem,
-and a catalog of code inconsistencies.
-Evaluation Steps:
-1. Read the problem statement carefully to identify the functionalities required for the
-implementation.
-2. Read the code snippet and compare it to the problem statement. Check if the code snippet covers
-the required functionalities.
-3. Output your answer in a JSON format list.
-a) If the code snippet is correct, output: [{"inconsistency": "None", "severity": "Negligible"}].
-b) If the code snippet is incorrect, output the identified inconsistencies and their severity
-according to the catalog of code inconsistencies. For example: [{"inconsistency": "<inconsistency1>",
-"severity": "<severity1>"}, {"inconsistency": "<inconsistency2>", "severity": "<severity2>"}, ...]
-Problem: {PROBLEM}
-Code Snippet: {CODE}
-Taxonomy of Common Inconsistencies:
-1. Missing dependency declarations: Negligible
-2. No error messages for unexpected input cases: Negligible
-3. Inefficiency, unnecessary statements: Negligible
-4. Edge case not handled: Small
-5. Logic error: Major
-6. Function or variable not defined: Fatal
-7. Code not completed: Fatal
-Evaluation Form:
-JSON output (a JSON list only):
-[{"inconsistency": "None", "severity": "Negligible"}]"""
+# ĐỊNH DẠNG OUTPUT (BẮT BUỘC JSON):
+# {
+#     "quality_score": 10.0,
+#     "score_breakdown": {
+#         "idea": 4.0,
+#         "flow": 3.0,
+#         "correctness": 3.0
+#     },
+#     "strengths": [
+#         "Ý tưởng thuật toán đúng và rõ ràng"
+#     ],
+#     "errors": [
+#         {
+#             "type": "Fatal",
+#             "description": "Lỗi cú pháp làm code crash",
+#             "code_snippet": "đoạn liên quan",
+#             "fix_suggestion": "hướng sửa"
+#         },
+#         {
+#             "type": "Small",
+#             "description": "Lỗi logic bộ phận",
+#             "code_snippet": "đoạn liên quan",
+#             "fix_suggestion": "hướng sửa"
+#         }
+#     ],
+#     "reasoning": "Giải thích: idea=4 (đúng), flow=3 (rõ), correctness=3 (đúng). Lỗi: Fatal -10.0, Small -0.5 = penalty -10.5 điểm"
+# }"""
+
+# AUTHOR_SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = """You will be provided with a problem statement, a code snippet that supposedly addresses the problem,
+# and a catalog of code inconsistencies.
+# Evaluation Steps:
+# 1. Read the problem statement carefully to identify the functionalities required for the
+# implementation.
+# 2. Read the code snippet and compare it to the problem statement. Check if the code snippet covers
+# the required functionalities.
+# 3. Output your answer in a JSON format list.
+# a) If the code snippet is correct, output: [{"inconsistency": "None", "severity": "Negligible"}].
+# b) If the code snippet is incorrect, output the identified inconsistencies and their severity
+# according to the catalog of code inconsistencies. For example: [{"inconsistency": "<inconsistency1>",
+# "severity": "<severity1>"}, {"inconsistency": "<inconsistency2>", "severity": "<severity2>"}, ...]
+# Problem: {PROBLEM}
+# Code Snippet: {CODE}
+# Taxonomy of Common Inconsistencies:
+# 1. Missing dependency declarations: Negligible
+# 2. No error messages for unexpected input cases: Negligible
+# 3. Inefficiency, unnecessary statements: Negligible
+# 4. Edge case not handled: Small
+# 5. Logic error: Major
+# 6. Function or variable not defined: Fatal
+# 7. Code not completed: Fatal
+# Evaluation Form:
+# JSON output (a JSON list only):
+# [{"inconsistency": "None", "severity": "Negligible"}]"""
 
 # ============================================================================
 # BINARY ASSESSMENT - Phân tích từng bước
@@ -156,19 +158,49 @@ Chỉ trả lời: "Yes" hoặc "No" (không thêm giải thích)"""
 # TAXONOMY-GUIDED - Chấm điểm chi tiết
 # ============================================================================
 
-TAXONOMY_ASSESSMENT_PROMPT = """Ngôn ngữ code: {language}
-
-Đề bài:
+TAXONOMY_ASSESSMENT_PROMPT = """You will be provided with a problem statement, a code snippet that supposedly addresses the problem,
+and a catalog of code inconsistencies.
+Evaluation Steps:
+1. Read the problem statement carefully to identify the functionalities required for the
+implementation.
+2. Read the code snippet and compare it to the problem statement. Check if the code snippet covers
+the required functionalities.
+3. Output your answer in a JSON format list.
+a) If the code snippet is correct, output: [{{"inconsistency": "None", "severity": "Negligible"}}].
+b) If the code snippet is incorrect, output the identified inconsistencies and their severity
+according to the catalog of code inconsistencies. For example: [{{"inconsistency": "<inconsistency1>",
+"severity": "<severity1>"}}, {{"inconsistency": "<inconsistency2>", "severity": "<severity2>"}}, ...]
+Problem: 
 {problem_statement}
 
-Code sinh viên:
-```
+Code Snippet: 
 {student_code}
-```
 
-{reference_code_section}
+Taxonomy of Common Inconsistencies:
+1. Missing dependency declarations: Negligible
+2. No error messages for unexpected input cases: Negligible
+3. Inefficiency, unnecessary statements: Negligible
+4. Edge case not handled: Small
+5. Logic error: Major
+6. Function or variable not defined: Fatal
+7. Code not completed: Fatal
+Evaluation Form:
+JSON output (a JSON list only):
+[{{"inconsistency": "None", "severity": "Negligible"}}]"""
 
-Trả về JSON đúng định dạng yêu cầu."""
+# TAXONOMY_ASSESSMENT_PROMPT = """Ngôn ngữ code: {language}
+
+# Đề bài:
+# {problem_statement}
+
+# Code sinh viên:
+# ```
+# {student_code}
+# ```
+
+# {reference_code_section}
+
+# Trả về JSON đúng định dạng yêu cầu."""
 
 REFERENCE_CODE_TEMPLATE = """Code mẫu tham khảo (để giúp xác định lỗi):
 ```

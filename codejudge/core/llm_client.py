@@ -88,6 +88,7 @@ class LLMClient:
             f"<|start_header_id|>user<|end_header_id|>\n\n{user_prompt}<|eot_id|>"
             f"<|start_header_id|>assistant<|end_header_id|>\n\n"
         )
+        print(f"🚀 [LLMClient] Sending prompt to LLM:\n{full_prompt}\n{'-'*50}")
         # Giảm temperature xuống thấp nhất để có kết quả JSON ổn định
         response = self.generate(full_prompt, temperature=0.01)
         print(f"======Raw Response from LLMClient======\n{response}\n==========================")
@@ -135,6 +136,7 @@ class GeminiClient:
         try:
             # Gemini không cần format chat template đặc biệt
             full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
+            print(f"🚀 [GeminiClient] Sending prompt to Gemini API:\n{full_prompt}\n{'-'*50}")
             
             response = self.model.generate_content(
                 full_prompt,
@@ -318,7 +320,7 @@ class QwenClient:
             f"<|im_start|>user\n{user_prompt}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
-
+        print(f"🚀 [QwenClient] Sending prompt to Qwen model:\n{full_prompt}\n{'-'*50}")
         response = self.generate(full_prompt, temperature=0.01)
 
         print(f"======Raw Response from Qwen======\n{response}\n==========================")

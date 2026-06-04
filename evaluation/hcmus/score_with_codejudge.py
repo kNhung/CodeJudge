@@ -392,126 +392,73 @@ def evaluate_row(
         return results
 
     questions = split_questions(problem_text)
-    per_question_results: List[Dict[str, object]] = []
+    
+    # Khởi tạo object lớn đại diện cho toàn bộ bài thi của sinh viên (chỉ xuất đúng 1 dòng)
+    exam_item = {
+        "id": row_id,
+        "student_id": row.get("student_id", ""),
+        "problem_id": problem_id,
+        "expect_grade": row.get("expect_grade", ""),
+        "language": language,
+        "mode": mode,
+        "scoring_mode": scoring_mode,
+        "num_code_files": len(code_files),
+    }
 
+    all_flattened_errors = []
+    total_scaled_score = 0.0
+    runtime_sum = 0.0
+
+    # Vòng lặp duyệt qua từng câu hỏi lẻ để chấm điểm chính xác tuyệt đối
     for idx, code_file in enumerate(code_files, start=1):
         if idx > len(questions):
             break
         code_text = code_file.read_text(encoding="utf-8", errors="ignore")
         question_text = questions[idx - 1]
-        question_max = parse_question_max(question_text)
-        # human-friendly short question name (heading first line)
-        question_name = question_text.splitlines()[0].strip()
-
-        item: Dict[str, object] = {
-            "id": row_id,
-            "student_id": row.get("student_id", ""),
-            "problem_id": problem_id,
-            "expect_grade": row.get("expect_grade", ""),
-            "question_index": idx,
-            "question_name": question_name,
-            "code_file": code_file.name,
-            "language": language,
-            "question_max": question_max,
-            "mode": mode,
-            "scoring_mode": scoring_mode,
-        }
+        question_max = parse_question_max(question_text) or 2.5 # Fallback nếu không parse được trọng số
 
         if dry_run:
-            item["status"] = "dry_run"
-            item["question_preview"] = question_text[:120]
-            item["question_name"] = question_name
-            results.append(item)
-            per_question_results.append(item)
             continue
 
         assert assessor is not None
-        problem_statement = question_text
         started_at = time.perf_counter()
-        assessment_result = run_assessment(
-            assessor=assessor,
-            mode=mode,
-            problem_statement=problem_statement,
+        
+        # Gọi Assessor chấm lẻ từng bài thi
+        assessment_result = assessor.assess(
+            problem_statement=question_text,
             student_code=code_text,
-            language=language,
-            question_max=question_max,
+            language=language
         )
-        item["runtime_seconds"] = round(time.perf_counter() - started_at, 6)
-        item["result"] = assessment_result
-        item["question_name"] = question_name
-        results.append(item)
-        per_question_results.append(item)
+        runtime_sum += (time.perf_counter() - started_at)
 
-    # Add one summary line for full exam score when scoring per question.
-    if per_question_results:
-        total_max = 0.0
-        total_scaled = 0.0
-        has_scaled = False
+        # Lấy điểm thô 0-10 của câu lẻ
+        raw_score_on_10 = assessment_result.get("quality_score", 10.0)
+        
+        # 🎯 THỰC HIỆN PHÉP SCALE ĐIỂM TRỰC TIẾP THEO QUESTION_MAX CỦA CÂU ĐÓ
+        scaled_score = round((raw_score_on_10 / 10.0) * question_max, 4)
+        total_scaled_score += scaled_score
 
-        for item in per_question_results:
-            qmax = item.get("question_max")
-            if isinstance(qmax, (int, float)):
-                total_max += float(qmax)
+        # Gom mảng lỗi thô phục vụ làm HintEval, gắn kèm nhãn tên file code để phân biệt
+        sub_errors = assessment_result.get("errors", [])
+        for err in sub_errors:
+            if isinstance(err, dict):
+                err["submission_name"] = code_file.name  # Ví dụ: Bai01.cpp, Bai03.cpp
+                all_flattened_errors.append(err)
 
-            res = item.get("result")
-            if isinstance(res, dict):
-                summary = res.get("summary", {}) if isinstance(res.get("summary"), dict) else {}
-                scaled = summary.get("score_scaled")
-                raw_score = summary.get("score")
-                if isinstance(scaled, (int, float)):
-                    total_scaled += float(scaled)
-                    has_scaled = True
-                elif isinstance(raw_score, (int, float)) and isinstance(qmax, (int, float)):
-                    total_scaled += float(raw_score) / 10.0 * float(qmax)
-                    has_scaled = True
+    if dry_run:
+        exam_item["status"] = "dry_run"
+        return [exam_item]
 
-        summary_item: Dict[str, object] = {
-            "id": row_id,
-            "student_id": row.get("student_id", ""),
-            "problem_id": problem_id,
-            "expect_grade": row.get("expect_grade", ""),
-            "language": language,
-            "mode": mode,
-            "scoring_mode": scoring_mode,
-            "record_type": "exam_summary",
-            "questions_count": len(per_question_results),
-            "max_total_score": round(total_max, 4),
-        }
+    exam_item["runtime_seconds"] = round(runtime_sum, 6)
+    
+    # Đóng gói kết quả đầu ra phẳng và tinh gọn tối đa theo ý Nhung
+    exam_item["result"] = {
+        "exam_total_predicted_score": round(total_scaled_score, 4), # Điểm tổng toàn bài sau scale dồn
+        "errors": all_flattened_errors # Chứa toàn bộ danh sách lỗi thô của các câu phục vụ HintEval
+    }
 
-        if has_scaled:
-            summary_item["predicted_total_score"] = round(total_scaled, 4)
-            if total_max > 0:
-                summary_item["predicted_total_score_ratio"] = round(total_scaled / total_max, 4)
-
-        if not dry_run:
-            summary_item["runtime_seconds"] = round(
-                sum(float(item.get("runtime_seconds", 0.0) or 0.0) for item in per_question_results),
-                6,
-            )
-
-        if not dry_run:
-            summary_item["question_details"] = [
-                {
-                    "question_index": item.get("question_index"),
-                    "question_max": item.get("question_max"),
-                    "question_name": item.get("question_name"),
-                    "score_on_10": (
-                        item.get("result", {}).get("summary", {}).get("score")
-                        if isinstance(item.get("result"), dict)
-                        else None
-                    ),
-                    "score_scaled": (
-                        item.get("result", {}).get("summary", {}).get("score_scaled")
-                        if isinstance(item.get("result"), dict)
-                        else None
-                    ),
-                }
-                for item in per_question_results
-            ]
-
-        results.append(summary_item)
-
-    return results
+    # Trả về mảng chứa duy nhất 1 phần tử để hệ thống ghi đúng 1 dòng duy nhất vào file .jsonl
+    return [exam_item]
 
 
 def main() -> None:
