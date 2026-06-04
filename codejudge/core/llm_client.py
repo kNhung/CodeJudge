@@ -136,7 +136,6 @@ class GeminiClient:
         try:
             # Gemini không cần format chat template đặc biệt
             full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
-            print(f"🚀 [GeminiClient] Sending prompt to Gemini API:\n{full_prompt}\n{'-'*50}")
             
             response = self.model.generate_content(
                 full_prompt,
@@ -320,7 +319,6 @@ class QwenClient:
             f"<|im_start|>user\n{user_prompt}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
-        print(f"🚀 [QwenClient] Sending prompt to Qwen model:\n{full_prompt}\n{'-'*50}")
         response = self.generate(full_prompt, temperature=0.01)
 
         print(f"======Raw Response from Qwen======\n{response}\n==========================")
