@@ -98,20 +98,33 @@ class TaxonomyAssessor:
         # 3. Trích xuất mảng JSON lỗi của tác giả cực kỳ an toàn bằng Regex
         author_errors = []
         try:
+            # 1. Làm sạch block markdown nếu có
             if "```json" in llm_response:
-                llm_response = llm_response.split("```json")[1].split("```")[0].strip()
+                clean_response = llm_response.split("```json")[-1].split("```")[0].strip()
             elif "```" in llm_response:
-                llm_response = llm_response.split("```")[1].split("```")[0].strip()
-            
-            # Tìm kiếm block dấu ngoặc vuông [...] chứa mảng lỗi của tác giả
-            match = re.search(r"\[\s*\{.*\}\s*\]", llm_response, re.DOTALL)
-            if match:
-                author_errors = json.loads(match.group(0))
+                clean_response = llm_response.split("```")[-1].split("```")[0].strip()
             else:
-                author_errors = json.loads(llm_response)
+                clean_response = llm_response.strip()
+            
+            # 2. Thuật toán quét ngược từ dưới lên để tránh lấy nhầm ví dụ trong prompt
+            # Tìm tất cả các cụm dấu ngoặc vuông [...] trong văn bản
+            all_matches = list(re.finditer(r"\[\s*\{.*?\}\s*\]", clean_response, re.DOTALL))
+            
+            if all_matches:
+                # Bốc phần tử CUỐI CÙNG trong danh sách matches (đây mới là câu trả lời thật của Llama)
+                final_json_str = all_matches[-1].group(0)
+                author_errors = json.loads(final_json_str)
+            else:
+                # Fallback cố parse toàn bộ chuỗi sạch nếu không tìm thấy cụm đóng mở
+                author_errors = json.loads(clean_response)
         except Exception as e:
             print(f"⚠️ Lỗi parse JSON mảng phẳng: {e}")
-            author_errors = []
+            try:
+                dict_matches = re.findall(r"\{\s*\"inconsistency\".*?\}", clean_response, re.DOTALL)
+                if dict_matches:
+                    author_errors = [json.loads(m) for m in dict_matches]
+            except Exception:
+                author_errors = []
 
         if isinstance(author_errors, dict):
             author_errors = author_errors.get("errors") or author_errors.get("inconsistencies") or []
