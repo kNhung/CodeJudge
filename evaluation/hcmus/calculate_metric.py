@@ -94,5 +94,5 @@ if __name__ == "__main__":
     
     # Nối với thư mục output/kaggle/
     # TARGET_FILE = os.path.join(current_dir, "output", "report_8", "260604_taxonomy_gemini_2.5_flash.jsonl")
-    TARGET_FILE = os.path.join(current_dir, "output", "260604_taxonomy_gemini_2.5_flash.jsonl")
+    TARGET_FILE = os.path.join(current_dir, "output", "260605_author_taxonomy_gemini_2.5_flash.jsonl")
     analyze_model_performance(TARGET_FILE)
