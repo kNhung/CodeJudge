@@ -115,5 +115,5 @@ def evaluate_file(file_path):
 
 if __name__ == "__main__":
     # Điền đường dẫn file JSON của bạn vào đây để chạy kiểm tra
-    file_name = "Meta-Llama-3-8B-Instruct-2-0-2-0.0-sample-0.json"
+    file_name = "Qwen2.5-Coder-7B-Instruct-2-0-2-0.0-sample-0.json"
     evaluate_file(file_name)

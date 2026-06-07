@@ -51,11 +51,11 @@ NHÓM 1 - RUBRIC CỘNG ĐIỂM (Tư duy, không bao gồm cú pháp):
 - 3.0: Logic bao phủ tốt core cases và edge cases quan trọng
 
 NHÓM 2 - PHÁT HIỆN LỖI CÚ PHÁP/RUNTIME (Để hệ thống Python tính penalty):
-Tìm và phân loại các lỗi theo mức độ:
-- Negligible: Thiếu import, style nhỏ → Không trừ
-- Small: Lỗi logic bộ phận → -0.5
-- Major: Lỗi logic phần lớn → -5.0
-- Fatal: Sai cú pháp làm code crash → -10.0
+Tìm và phân loại các lỗi theo mức độ (Hãy thật bao dung với các lỗi gõ máy typo nhỏ):
+- Negligible: Lỗi style (PEP8), thiếu import, quên dấu ngoặc ở cuối, hoặc viết nhầm toán tử gán "=" thay vì toán tử so sánh "==" trong câu lệnh điều kiện, dùng dấu backtick "`" thay vì dấu nháy đơn/kép. -> Không trừ điểm.
+- Small: Thiếu xử lý biên/edge case, hoặc lỗi khai báo/báo biến thiếu (Undefined variable) nhưng cấu trúc logic xung quanh vẫn đúng. -> Trừ 0.5 điểm.
+- Major: Sai lệch thuật toán lớn, sai cấu trúc vòng lặp hoặc công thức toán học dẫn đến kết quả sai hoàn toàn cho core cases. -> Trừ 5.0 điểm.
+- Fatal: Code hoàn toàn để trống, nộp nhầm file, bài làm hoàn toàn lệch đề hoặc logic chính chưa hề được implement. KHÔNG chuyển các lỗi cú pháp nhỏ (typo) thành Fatal nếu học viên đã có cố gắng viết thuật toán. -> Trừ 10.0 điểm.
 
 QUY TẮC CHẤM:
 - Cộng điểm cho tư duy/ý tưởng dựa trên 3 tiêu chí trên

@@ -134,8 +134,10 @@ class TaxonomyAssessor:
         # Parse response
         result = self._parse_llm_response(llm_response)
 
-        # Normalize nested error payloads (e.g. per-submission lists)
+        # Normalize nested error payloads (e.g. per-submission lists or taxonomy sub-objects)
         flat_errors = self._flatten_errors(result.get("errors", []))
+        if not flat_errors and isinstance(result.get("taxonomy"), dict):
+            flat_errors = self._flatten_errors(result["taxonomy"].get("errors", []))
         result["errors"] = flat_errors
         
         # Ưu tiên mode cộng điểm: score_breakdown -> quality_score.
@@ -149,14 +151,18 @@ class TaxonomyAssessor:
             # 1. Lấy tổng điểm cộng từ rubric
             base_score = self._sum_score_breakdown(score_breakdown)
             
-            # 2. Tính tổng điểm phạt từ danh sách lỗi
+            # 2. Reclassify các lỗi nhỏ từ "Fatal" thành "Negligible"
+            flat_errors = self._reclassify_trivial_errors(flat_errors)
+            result["errors"] = flat_errors
+            
+            # 3. Tính tổng điểm phạt từ danh sách lỗi
             total_penalty = 0.0
             for err in flat_errors:
                 err_type = err.get("type", "Negligible")
                 if err_type in self.error_taxonomy:
                     total_penalty += self.error_taxonomy[err_type].get("penalty", 0.0)
             
-            # 3. Tính điểm cuối cùng: Cấn trừ lỗi và chặn dưới ở mức 0.0
+            # 4. Tính điểm cuối cùng: Cấn trừ lỗi và chặn dưới ở mức 0.0
             final_score = round(max(0.0, base_score + total_penalty), 4) # total_penalty mang dấu âm
             
             result["quality_score"] = final_score
@@ -172,12 +178,15 @@ class TaxonomyAssessor:
                     result["score_breakdown"] = inferred_breakdown
                     final_score = self._sum_score_breakdown(inferred_breakdown)
                     result["quality_score"] = final_score
-                elif self._has_typed_errors(flat_errors):
-                    final_score = self._calculate_final_score(flat_errors)
-                    result["quality_score"] = final_score
                 else:
-                    final_score = 0.0
-                    result["quality_score"] = 0.0
+                    flat_errors = self._reclassify_trivial_errors(flat_errors)
+                    result["errors"] = flat_errors
+                    if self._has_typed_errors(flat_errors):
+                        final_score = self._calculate_final_score(flat_errors)
+                        result["quality_score"] = final_score
+                    else:
+                        final_score = 0.0
+                        result["quality_score"] = 0.0
 
             if result.get("reasoning") == "Parsed from list response" and result.get("score_breakdown"):
                 result["reasoning"] = (
@@ -516,7 +525,92 @@ class TaxonomyAssessor:
             if error.get("type") in self.error_taxonomy:
                 return True
         return False
+    def _reclassify_trivial_errors(self, errors: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Reclassify các lỗi nhỏ từ "Fatal" thành "Small" hoặc "Negligible".
+        
+        Các lỗi được reclassify:
+        1. Ghi "=" hoặc "= =" thay vì "==" trong điều kiện hoặc so sánh.
+        2. Ghi "`" (backtick) thay vì dấu nháy đơn/kép (quote).
+        3. Lỗi khai báo biến, biến chưa định nghĩa (NameError), thiếu import statement.
+        4. Lỗi khoảng trắng phân mảnh trong cú pháp toán tử hoặc Regex (e.g. `(? =`, `\ \ b`, `[ ]`).
+        """
+        reclassified = []
+        
+        for error in errors:
+            err_type = error.get("type", "Negligible")
+            description = (error.get("description") or "").lower()
+            code_snippet = (error.get("code_snippet") or "").lower()
+            
+            # --- PATTERN 1: Lỗi toán tử so sánh vs toán tử gán (=, = =, == =) ---
+            is_assignment_typo = (
+                "= =" in description or 
+                "= =" in code_snippet or 
+                "sử dụng = thay vì ==" in description or
+                "toán tử gán" in description or
+                "comparison" in description and "assignment" in description
+            )
+            if err_type == "Fatal" and (is_assignment_typo or re.search(r"\b(if|while|elif|for)\b[\s\S]*?=\s*[^=]", code_snippet)):
+                error_copy = dict(error)
+                error_copy["type"] = "Negligible"
+                error_copy["original_type"] = "Fatal"
+                error_copy["ignored_reason"] = "Trivial syntax issue: assignment operator used instead of comparison"
+                reclassified.append(error_copy)
+                logger.info(f"⚡ [Bao dung] Đã hạ cấp lỗi gán '=' nhầm thành '==': {description[:100]}...")
+                continue
+            
+            # --- PATTERN 2: Dấu Backtick "`" thay vì dấu nháy chuỗi ---
+            if err_type == "Fatal" and ("`" in description or "`" in code_snippet):
+                if any(kw in description for kw in [
+                    "backtick", "backticks", "ngoặc đơn", "dấu nháy", "quote", "string", "chuỗi", "kí tự"
+                ]) or "`" in code_snippet:
+                    error_copy = dict(error)
+                    error_copy["type"] = "Negligible"
+                    error_copy["original_type"] = "Fatal"
+                    error_copy["ignored_reason"] = "Trivial syntax issue: backtick used instead of string quote"
+                    reclassified.append(error_copy)
+                    logger.info(f"⚡ [Bao dung] Đã hạ cấp lỗi dấu backtick ` thành lỗi không trừ điểm: {description[:100]}...")
+                    continue
+            
+            # --- PATTERN 3: Lỗi báo biến / Chưa định nghĩa (Undefined variable / NameError) ---
+            is_variable_error = any(kw in description for kw in [
+                "variable", "biến", "declare", "khai báo", "undefined", "undeclared", 
+                "not defined", "nameerror", "báo biến", "chưa được import", "chưa định nghĩa"
+            ])
+            if err_type == "Fatal" and is_variable_error:
+                error_copy = dict(error)
+                error_copy["type"] = "Small"
+                error_copy["original_type"] = "Fatal"
+                error_copy["ignored_reason"] = "Downgraded variable declaration/undefined error to Small penalty"
+                reclassified.append(error_copy)
+                logger.info(f"⚡ [Bao dung] Đã hạ cấp lỗi khai báo biến từ Fatal xuống Small (-0.5đ): {description[:100]}...")
+                continue
 
+            # --- PATTERN 4: THẬT SỰ BỎ QUA LỖI KHOẢNG TRẮNG TRONG REGEX/TOKEN ---
+            # Nhận diện các cụm bị phân tách lỗi phổ biến: `(? =`, `? =`, `\ \`, `[ ]` bị phân mảnh
+            has_spacing_issue = any(pattern in code_snippet.replace(" ", "") for pattern in ["(?=", "\\b", "\\d", "\\w"]) or \
+                                any(kw in description for kw in ["khoảng trắng", "space", "whitespace", "spacing", "invalid character"])
+            
+            if err_type == "Fatal" and has_spacing_issue:
+                # Thử nghiệm loại bỏ khoảng trắng nội tại trong các cấu trúc đặc biệt để kiểm tra tính chính xác logic
+                normalized_snippet = re.sub(r'\(\s?\?\s?=\s?', '(?=', code_snippet)  # Sửa `( ? = ` thành `(?=`
+                normalized_snippet = re.sub(r'\\\s?\\', '\\\\', normalized_snippet)  # Sửa `\ \` thành `\\`
+                normalized_snippet = re.sub(r'\\\s?b', '\\b', normalized_snippet)    # Sửa `\ b` thành `\b`
+                
+                # Nếu sau khi dọn khoảng trắng, cấu trúc lõi Regex trở nên hợp lệ/có nghĩa
+                if "(?=" in normalized_snippet or "\\b" in normalized_snippet:
+                    error_copy = dict(error)
+                    error_copy["type"] = "Negligible"  # Chuyển hoàn toàn về Negligible (0đ penalty)
+                    error_copy["original_type"] = "Fatal"
+                    error_copy["ignored_reason"] = "Ignored whitespace fragmentation in token generation / regex pattern"
+                    reclassified.append(error_copy)
+                    logger.info(f"⚡ [Bao dung] Đã xóa bỏ hoàn toàn hình phạt khoảng trắng cho snippet: {code_snippet.strip()}")
+                    continue
+
+            # Giữ nguyên nếu không khớp bộ lọc nào
+            reclassified.append(error)
+        
+        return reclassified
     def _coerce_score_10(self, value: Any) -> Optional[float]:
         """Convert an arbitrary score into [0, 10] float if possible."""
         try:
