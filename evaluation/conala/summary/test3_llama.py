@@ -1,3 +1,4 @@
+import csv
 import json
 import numpy as np
 from scipy import stats
@@ -45,8 +46,11 @@ def evaluate_file(file_path):
     # Khởi tạo ma trận chứa điểm của nhãn gốc (ground truth) và điểm dự đoán của GPT
     references = []  # Lưu điểm từ trường 'grade'
     predictions = [] # Lưu điểm trích xuất từ 'parsed_comparison' bên trong 'code_gpt_score'
+    per_item_metrics = []
 
-    for item in data_entries:
+    print("Sample | Item ID | Kendall | Pearson | Spearman | Length")
+
+    for idx, item in enumerate(data_entries):
         # Kiểm tra sự tồn tại của các trường dữ liệu chấm điểm bắt buộc
         if "grade" not in item or "code_gpt_score" not in item:
             continue
@@ -87,6 +91,26 @@ def evaluate_file(file_path):
             references.append(ref_row)
             predictions.append(pred_row)
 
+            # Tạo item_id thuận tiện để xuất báo cáo từng mẫu
+            item_id = item.get("id") or item.get("example_id") or item.get("problem_id") or f"item_{idx}"
+            if len(ref_row) >= 2:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    kendalltau = stats.kendalltau(ref_row, pred_row).statistic
+                    pearsonr = stats.pearsonr(ref_row, pred_row).statistic
+                    spearmanr = stats.spearmanr(ref_row, pred_row).statistic
+
+                per_item_metrics.append({
+                    "item_id": item_id,
+                    "kendall": kendalltau,
+                    "pearson": pearsonr,
+                    "spearman": spearmanr,
+                    "length": len(ref_row),
+                })
+                print_number(kendalltau, pearsonr, spearmanr, f"{item_id} ({len(ref_row)})")
+            else:
+                print(f"{idx+1} | {item_id} | insufficient data (only {len(ref_row)} matched models)")
+
     if not references:
         print("Lỗi: Không tìm thấy cặp dữ liệu đối sánh hợp lệ ('grade' & 'parsed_comparison') trong file!")
         return
@@ -112,6 +136,31 @@ def evaluate_file(file_path):
     # In kết quả ra màn hình dạng bảng giống test2.py
     print("Kendall | Pearson | Spearman | Length")
     print_number(kendalltau, pearsonr, spearmanr, len(references))
+
+    # Ghi kết quả per-sample ra file CSV nếu có ít nhất một mẫu hợp lệ
+    if per_item_metrics:
+        if file_path.lower().endswith('.jsonl'):
+            csv_path = file_path[:-6] + '_per_sample_metrics.csv'
+        else:
+            csv_path = file_path + '_per_sample_metrics.csv'
+
+        with open(csv_path, 'w', encoding='utf-8', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['item_id', 'kendall', 'pearson', 'spearman', 'length'])
+            for metrics in per_item_metrics:
+                writer.writerow([
+                    metrics['item_id'],
+                    '{:.6f}'.format(metrics['kendall']),
+                    '{:.6f}'.format(metrics['pearson']),
+                    '{:.6f}'.format(metrics['spearman']),
+                    metrics['length'],
+                ])
+            writer.writerow([])
+            writer.writerow(['SUMMARY', '{:.6f}'.format(kendalltau), '{:.6f}'.format(pearsonr), '{:.6f}'.format(spearmanr), len(per_item_metrics)])
+
+        print(f"Kết quả per-sample đã ghi vào file CSV: {csv_path}")
+    else:
+        print("Chú ý: Không có mẫu nào đủ dữ liệu để ghi per-sample CSV.")
 
 if __name__ == "__main__":
     # Điền đường dẫn file JSON của bạn vào đây để chạy kiểm tra
