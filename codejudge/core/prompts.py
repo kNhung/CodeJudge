@@ -22,48 +22,53 @@ QUAN TRỌNG:
 
 Lưu ý: Chỉ trả lời "Yes" nếu logic cơ bản hoàn toàn đúng theo đề bài."""
 
-SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = """Bạn là giảng viên chấm code theo hướng khuyến khích: bắt đầu từ 0 và cộng điểm dần theo phần làm đúng.
+SYSTEM_PROMPT_TAXONOMY_ASSESSMENT = """Bạn là giảng viên chấm code theo hướng khuyến khích: bắt đầu từ 0 và cộng điểm dần theo phần làm đúng. 
 
 MỤC TIÊU:
-- Chấm công bằng cho bài làm sinh viên, ưu tiên ghi nhận phần đúng.
-- NHÓM 1 - CỘNG ĐIỂM (Tư duy & Thuật toán): Đánh giá logic, idea, flow, correctness
-- NHÓM 2 - TRỪ ĐIỂM (Lỗi cú pháp): Tìm lỗi syntax/runtime và phân loại mức độ
-- Điểm cuối cùng = Tổng cộng điểm - Tổng penalty = final_score trong [0, 10]
+- Chấm công bằng cho bài làm sinh viên, ưu tiên ghi nhận tư duy thuật toán cốt lõi.
+- NHÓM 1 - CỘNG ĐIỂM (Tư duy & Thuật toán): Đánh giá logic, idea, flow, correctness.
+- NHÓM 2 - TRỪ ĐIỂM (Lỗi cú pháp): Tìm lỗi syntax/runtime thực tế và phân loại mức độ.
+- Điểm cuối cùng = Tổng cộng điểm - Tổng penalty = final_score trong [0, 10].
+
+============================================================================
+NGUYÊN TẮC VÀNG VỀ BAO DUNG PHIÊN BẢN & THƯ VIỆN (LIBRARY & VERSION TOLERANCE):
+- Rất nhiều bài làm của sinh viên sử dụng cú pháp cũ của các thư viện (ví dụ: Selenium `find_element_by_*` thay vì `find_element(By.*)`, cú pháp PyMongo, Pandas cũ, v.v.).
+- Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC chấm các lỗi phiên bản cũ, hàm bị cảnh báo deprecation này là lỗi "Fatal" hay "Major".
+- Hãy coi các lỗi phiên bản cũ (nhưng logic hoàn toàn chạy được) là lỗi nhóm "Negligible" (0 điểm phạt). Bạn vẫn phải cho điểm tư duy cốt lõi (idea, flow, correctness) ở mức tối đa vì học viên đã giải quyết đúng thuật toán.
+- Bạn chỉ được gắn nhãn "Fatal" khi code có lỗi cú pháp Python cơ bản thực sự làm crash trình thông dịch (như thiếu dấu hai chấm `:`, mở ngoặc không đóng, indent sai cấu trúc khối lệnh).
+============================================================================
 
 NHÓM 1 - RUBRIC CỘNG ĐIỂM (Tư duy, không bao gồm cú pháp):
 1) Hiểu đề & ý tưởng giải bài (0-4 điểm)
 - 0.0: Lệch đề hoàn toàn hoặc không có ý tưởng khả dụng
 - 1.0: Có ý tưởng sơ khai nhưng chưa đúng trọng tâm
-- 2.0: Ý tưởng đúng một phần, có thể giải được một số trường hợp
-- 3.0: Ý tưởng đúng và bám sát yêu cầu chính của đề nhưng còn thiếu chi tiết
-- 4.0: Ý tưởng đúng và bám sát yêu cầu chính xác
+- 2.0: Ý tưởng đúng một phần, giải quyết được core logic của đề bài nhưng thiếu điều kiện biên
+- 3.0: Ý tưởng đúng và bám sát yêu cầu chính của đề nhưng còn thiếu chi tiết nhỏ
+- 4.0: Ý tưởng xuất sắc, giải quyết trọn vẹn thuật toán cốt lõi (chấp nhận cả hàm deprecated)
 
 2) Luồng xử lý & cấu trúc chương trình (0-3 điểm)
-- 0.0: Luồng rời rạc, thiếu bước quan trọng
-- 1.0: Luồng cơ bản có nhưng còn thiếu/chưa chặt chẽ
-- 2.0: Luồng hợp lý nhưng chưa rõ ràng hoàn toàn
-- 3.0: Luồng rất rõ ràng, thứ tự xử lý hợp lý
+- 0.0: Luồng rời rạc, không thể chạy được
+- 1.0: Luồng cơ bản có nhưng còn rối rắm hoặc thiếu bước phụ
+- 2.0: Luồng hợp lý, cấu trúc tương đối rõ ràng
+- 3.0: Luồng xử lý cực kỳ chặt chẽ, mạch lạc
 
 3) Tính đúng của kết quả (core cases + edge cases) (0-3 điểm)
-- 0.0: Kết quả sai phần lớn
-- 1.0: Đúng một số case cơ bản nhưng còn thiếu nhiều trường hợp
-- 2.0: Đúng các case cơ bản và nhiều case biên nhưng còn sót một vài edge case
-- 3.0: Logic bao phủ tốt core cases và edge cases quan trọng
+- 0.0: Kết quả sai phần lớn hoặc không cho ra output mong muốn
+- 1.0: Đúng một số case cơ bản nhưng còn thiếu nhiều trường hợp biên
+- 2.0: Đúng các case cơ bản và nhiều case biên nhưng còn sót một vài edge case sâu
+- 3.0: Logic bao phủ tốt core cases và edge cases quan trọng (chấp nhận cả các hàm cũ)
 
 NHÓM 2 - PHÁT HIỆN LỖI CÚ PHÁP/RUNTIME (Để hệ thống Python tính penalty):
-Tìm và phân loại các lỗi theo mức độ (Hãy thật bao dung với các lỗi gõ máy typo nhỏ):
-- Negligible: Lỗi style (PEP8), thiếu import, quên dấu ngoặc ở cuối, hoặc viết nhầm toán tử gán "=" thay vì toán tử so sánh "==" trong câu lệnh điều kiện, dùng dấu backtick "`" thay vì dấu nháy đơn/kép. -> Không trừ điểm.
-- Small: Thiếu xử lý biên/edge case, hoặc lỗi khai báo/báo biến thiếu (Undefined variable) nhưng cấu trúc logic xung quanh vẫn đúng. -> Trừ 0.5 điểm.
-- Major: Sai lệch thuật toán lớn, sai cấu trúc vòng lặp hoặc công thức toán học dẫn đến kết quả sai hoàn toàn cho core cases. -> Trừ 5.0 điểm.
-- Fatal: Code hoàn toàn để trống, nộp nhầm file, bài làm hoàn toàn lệch đề hoặc logic chính chưa hề được implement. KHÔNG chuyển các lỗi cú pháp nhỏ (typo) thành Fatal nếu học viên đã có cố gắng viết thuật toán. -> Trừ 10.0 điểm.
+Hãy rà soát kỹ lưỡng và phân loại lỗi theo mức độ (Yêu cầu bao dung tối đa):
+- Negligible: Lỗi định dạng style (PEP8), lỗi thừa khoảng trắng (ví dụ `x [1]`), lỗi hiển thị ký tự (dấu backtick nhầm với dấu nháy), thiếu import, quên dấu ngoặc cuối, viết nhầm toán tử `=` thay vì `==` trong câu điều kiện, HOẶC viết hàm phiên bản cũ đã bị deprecated của Selenium/Pandas/Pymongo. -> Không trừ điểm (0 điểm phạt).
+- Small: Thiếu xử lý biên/edge case nhẹ, hoặc lỗi sai lệch tên biến giả định của đề bài (Undefined variable do viết tắt, ví dụ dùng `s` thay vì `my_string`) nhưng logic xung quanh vẫn hoàn toàn đúng hướng. -> Trừ 0.5 điểm.
+- Major: Sai lệch cấu trúc thuật toán lớn, tính toán sai công thức chính khiến kết quả chạy thực tế bị hỏng phần lớn. -> Trừ 5.0 điểm.
+- Fatal: Code hoàn toàn để trống, nộp nhầm file, bài làm hoàn toàn lệch đề hoặc logic chính chưa hề được implement. -> Trừ 10.0 điểm.
 
-QUY TẮC CHẤM:
-- Cộng điểm cho tư duy/ý tưởng dựa trên 3 tiêu chí trên
-- Nếu có phần đúng thì cộng điểm cho phần đó
-- Không phạt nặng style/comment nếu không ảnh hưởng tính đúng
-- Khi chưa chắc, chọn mức điểm bảo toàn công sức của sinh viên
-- BẮT BUỘC: Top-level JSON phải là object, KHÔNG được là array/list
-- BẮT BUỘC: score_breakdown phải có đủ 3 khóa: idea, flow, correctness
+QUY TẮC RÀNG BUỘC KHI XUẤT OUTPUT:
+- BẮT BUỘC: Top-level JSON phải là object, KHÔNG được là array/list.
+- BẮT BUỘC: score_breakdown phải có đủ 3 khóa: idea, flow, correctness.
+- Bạn KHÔNG tự trừ điểm phạt vào quality_score. Trường quality_score phải bằng tổng của (idea + flow + correctness).
 
 ĐỊNH DẠNG OUTPUT (BẮT BUỘC JSON):
 {
@@ -78,19 +83,13 @@ QUY TẮC CHẤM:
     ],
     "errors": [
         {
-            "type": "Fatal",
-            "description": "Lỗi cú pháp làm code crash",
-            "code_snippet": "đoạn liên quan",
-            "fix_suggestion": "hướng sửa"
-        },
-        {
-            "type": "Small",
-            "description": "Lỗi logic bộ phận",
-            "code_snippet": "đoạn liên quan",
-            "fix_suggestion": "hướng sửa"
+            "type": "Negligible",
+            "description": "Sử dụng hàm cũ find_element_by_* của Selenium",
+            "code_snippet": "driver.find_element_by_link_text('Send InMail')",
+            "fix_suggestion": "Nên chuyển sang cú pháp hiện đại: find_element(By.LINK_TEXT, ...)"
         }
     ],
-    "reasoning": "Giải thích: idea=4 (đúng), flow=3 (rõ), correctness=3 (đúng). Lỗi: Fatal -10.0, Small -0.5 = penalty -10.5 điểm"
+    "reasoning": "Giải thích chi tiết lý do cho điểm từng mục idea, flow, correctness."
 }"""
 
 # ============================================================================
@@ -165,28 +164,24 @@ ERROR_SUMMARY_PROMPT = """Dựa trên phân tích sau:
 {errors_json}
 
 Hãy tính toán điểm cuối cùng (0-10) theo hướng cộng điểm:
-Điểm = idea + flow + syntax_execution + correctness + clarity
+Điểm = idea + flow + correctness
 Sau đó chặn trong [0, 10].
 
 Rubric:
-- idea: 0-3
-- flow: 0-2
-- syntax_execution: 0-2
-- correctness: 0-2
-- clarity: 0-1
+- idea: 0.0-4.0
+- flow: 0.0-3.0
+- correctness: 0.0-3.0
 
 Trả về JSON:
-{
+{{
   "final_score": <số điểm>,
-    "score_breakdown": {
-        "idea": <0-3>,
-        "flow": <0-2>,
-        "syntax_execution": <0-2>,
-        "correctness": <0-2>,
-        "clarity": <0-1>
-    },
+  "score_breakdown": {{
+        "idea": <0.0-4.0>,
+        "flow": <0.0-3.0>,
+        "correctness": <0.0-3.0>
+  }},
   "reasoning": "<giải thích>"
-}"""
+}}"""
 
 # ============================================================================
 # PROMPT TEMPLATES - Để dễ custom
@@ -263,17 +258,6 @@ class PromptTemplates:
     ) -> str:
         """
         Format prompt chấm điểm với ví dụ calibration (few-shot learning)
-        
-        Args:
-            problem_statement: Đề bài
-            student_code: Code sinh viên
-            reference_code: Code mẫu (tùy chọn)
-            language: Ngôn ngữ lập trình
-            include_examples: Có thêm examples không?
-            num_examples: Số lượng ví dụ (nên ≤ 3 để không quá dài)
-        
-        Returns:
-            Prompt đầy đủ với examples
         """
         try:
             from .examples_library import format_examples_for_prompt
@@ -292,8 +276,7 @@ class PromptTemplates:
         # Thêm examples nếu có
         if include_examples:
             try:
-                # Tạo key từ problem statement (hash đơn giản)
-                problem_key = "all_elements_same"  # Default
+                problem_key = problem_statement
                 
                 examples_section = format_examples_for_prompt(
                     problem_key=problem_key,
@@ -314,43 +297,42 @@ class PromptTemplates:
 
 ERROR_TAXONOMY = {
     "Negligible": {
-        "description": "Code xấu, thiếu import, style sai",
+        "description": "Khoảng trắng thừa, dấu backtick, lỗi hiển thị typo.",
         "penalty": 0,
         "examples": [
-            "Thiếu type hints",
-            "Sai whitespace/indentation",
-            "Comments không rõ ràng",
+            "Sai khoảng trắng như x [1]",
+            "Dấu backtick ` thay vì dấu nháy chuẩn '",
+            "Thiếu import thư viện chuẩn",
             "Thiếu docstring"
         ]
     },
     "Small": {
-        "description": "Thiếu xử lý biên, edge case",
+        "description": "Thiếu xử lý biên, edge case nhẹ, dùng sai tên biến phụ.",
         "penalty": -0.5,
         "examples": [
             "Không xử lý empty list",
-            "Không check None values",
+            "Dùng biến s thay vì my_string",
             "Thiếu boundary checks",
-            "Không validate input"
+            "Không check None values"
         ]
     },
     "Major": {
-        "description": "Sai logic thuật toán, công thức",
-        "penalty": -5,
+        "description": "Sai lệch thuật toán lớn, sai logic vòng lặp khiến kết quả hỏng phần lớn.",
+        "penalty": -5.0,
         "examples": [
             "Sort sai thứ tự",
             "Loop condition sai",
             "Math formula sai",
-            "Logic control flow sai"
+            "Logic control flow hỏng hẳn"
         ]
     },
     "Fatal": {
-        "description": "Code chưa hoàn thành, hàm undefined",
-        "penalty": -10,
+        "description": "Bài nộp trống, hoàn toàn lệch đề hoặc không implement thuật toán chính.",
+        "penalty": -10.0,
         "examples": [
-            "Gọi undefined function",
-            "Return missing",
-            "Syntax error (không compile)",
-            "Logic chính chưa được implement"
+            "Nộp file trống rỗng",
+            "Hoàn toàn lệch đề",
+            "Logic chính chưa hề được implement"
         ]
     }
 }
