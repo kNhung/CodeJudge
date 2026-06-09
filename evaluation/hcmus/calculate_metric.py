@@ -30,19 +30,16 @@ def analyze_model_performance(file_path):
                     skipped_rows += 1
                     continue
                 
-                # 2. Cơ chế bóc điểm dự đoán ĐỘNG (Xử lý việc lệch cấu trúc giữa các mô hình)
+                # 2. Cơ chế bóc điểm dự đoán ĐỘNG
                 res = data.get("result", {})
                 predicted = None
                 
                 if isinstance(res, dict):
-                    # Thứ tự ưu tiên bóc điểm: Điểm Aggregation > Điểm Final > Điểm Quality
                     predicted = res.get("exam_total_predicted_score") or res.get("final_score") or res.get("quality_score")
                 
-                # Nếu cấu trúc nằm phẳng ở ngoài (tùy thuộc vào model khác)
                 if predicted is None:
                     predicted = data.get("exam_total_predicted_score") or data.get("final_score") or data.get("quality_score")
                 
-                # Nếu quét hết các tầng vẫn không thấy điểm, gán mặc định bằng 0.0 hoặc bỏ qua
                 if predicted is None:
                     predicted = 0.0
                 
@@ -65,34 +62,59 @@ def analyze_model_performance(file_path):
         print("❌ Không thu thập được cặp dữ liệu điểm (Thực tế - Dự đoán) nào hợp lệ.")
         return
 
-    # Tính toán Kendall's Tau và Spearman's R
-    # Kiểm tra tránh trường hợp tất cả các điểm dự đoán bị bằng nhau (hệ số biến thiên bằng 0 gây lỗi NaN)
+    # Mảng numpy để tính toán toán học
+    act_arr = np.array(actual_grades)
+    pred_arr = np.array(predicted_grades)
+
+    # A. Tính toán các chỉ số tương quan (Correlation)
     if len(set(actual_grades)) > 1 and len(set(predicted_grades)) > 1:
         tau, _ = kendalltau(actual_grades, predicted_grades)
-        spearman_r, _ = spearmanr(actual_grades, predicted_grades)
+        score_spearman_r, _ = spearmanr(actual_grades, predicted_grades)
     else:
-        tau, spearman_r = 0.0, 0.0
+        tau, score_spearman_r = 0.0, 0.0
 
-    # Tính toán thời gian chạy trung bình (Avg Time)
+    # 🎯 B. TÍNH TOÁN CÁC CHỈ SỐ ĐỘ LỆCH (DEVIATION METRICS)
+    errors = pred_arr - act_arr                     # Độ lệch từng bài (Dự đoán - Thực tế)
+    mae = np.mean(np.abs(errors))                    # Mean Absolute Error
+    rmse = np.sqrt(np.mean(errors ** 2))             # Root Mean Squared Error
+    mean_bias = np.mean(errors)                      # Mean Bias Error (Sai số hệ thống)
+
+    # C. Tính toán thời gian chạy trung bình (Avg Time)
     avg_time = np.mean(runtime_list) if runtime_list else 0.0
 
-    # ---- IN KẾT QUẢ ĐẸP MẮT ----
-    print("\n" + "="*50)
-    print("🎯 BẢNG TỔNG HỢP METRICS ĐÁNH GIÁ MÔ HÌNH")
-    print("="*50)
-    print(f"🔹 Số lượng mẫu (Samples)       : {num_samples} bài thi")
-    print(f"🔹 Hệ số tương quan Kendall Tau : {tau:.4f}")
-    print(f"🔹 Hệ số tương quan SpearmanR  : {spearman_r:.4f}")
-    print(f"🔹 Thời gian phản hồi trung bình: {avg_time:.3f} giây / bài thi")
+    # ---- IN KẾT QUẢ CHUYÊN NGHIỆP CHO KHÓA LUẬN ----
+    print("\n" + "="*55)
+    print("🎯 BẢNG TỔNG HỢP METRICS ĐÁNH GIÁ TOÀN DIỆN MÔ HÌNH")
+    print("="*55)
+    print(f"🔹 Số lượng mẫu (Samples)         : {num_samples} bài thi")
+    print(f"🔹 Hệ số tương quan Kendall Tau   : {tau:.4f}")
+    print(f"🔹 Hệ số tương quan SpearmanR    : {score_spearman_r:.4f}")
+    print(f"🔹 Sai số tuyệt đối TB (MAE)       : {mae:.4f} (thang điểm 10)")
+    print(f"🔹 Sai số bình phương TB (RMSE)   : {rmse:.4f}")
+    print(f"🔹 Độ lệch hệ thống (Mean Bias)   : {mean_bias:.4f} " + ("🔴 (Chấm quá khắt khe)" if mean_bias < 0 else "🟢 (Chấm quá lỏng tay)"))
+    print(f"🔹 Thời gian phản hồi trung bình  : {avg_time:.3f} giây / bài thi")
     if skipped_rows > 0:
-        print(f"🔸 Số dòng summary bị bỏ qua   : {skipped_rows}")
-    print("="*50 + "\n")
+        print(f"🔸 Số dòng dữ liệu bị bỏ qua     : {skipped_rows}")
+    print("="*55 + "\n")
 
 if __name__ == "__main__":
-    # Lấy thư mục cha của file compute_metric.py (chính là thư mục hcmus)
+    # 1. Định vị chính xác thư mục output/report_8/
     current_dir = os.path.dirname(os.path.abspath(__file__))
+    report_folder = os.path.join(current_dir, "output", "report_8")
     
-    # Nối với thư mục output/kaggle/
-    # TARGET_FILE = os.path.join(current_dir, "output", "report_8", "260604_taxonomy_gemini_2.5_flash.jsonl")
-    TARGET_FILE = os.path.join(current_dir, "output", "260605_author_taxonomy_gemini_2.5_flash.jsonl")
-    analyze_model_performance(TARGET_FILE)
+    print(f"📂 Bắt đầu quét và tính toán tự động trong thư mục: {report_folder}\n")
+    
+    # 2. Tìm tất cả các file có đuôi .jsonl trong thư mục report_8
+    import glob
+    search_pattern = os.path.join(report_folder, "*.jsonl")
+    jsonl_files = glob.glob(search_pattern)
+    
+    if not jsonl_files:
+        print(f"❌ Cảnh báo: Không tìm thấy file dữ liệu .jsonl nào trong thư mục report_8.")
+    else:
+        # Sắp xếp tên file theo thứ tự abc cho đẹp
+        jsonl_files.sort()
+        
+        # 3. Chạy vòng lặp tính metrics cho từng file
+        for file_path in jsonl_files:
+            analyze_model_performance(file_path)
