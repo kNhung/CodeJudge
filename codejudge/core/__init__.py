@@ -28,6 +28,8 @@ from .taxonomy_assessor import (
 
 from .integrated_assessor import IntegratedAssessor
 
+from .multi_agent_assessor import MultiAgentAssessor
+
 from .examples_library import (
     CALIBRATION_EXAMPLES,
     get_calibration_examples,
@@ -55,6 +57,8 @@ __all__ = [
     "TaxonomyAssessor",
     "ErrorClassifier",
     "IntegratedAssessor",
+    "MultiAgentAssessor",
 ]
 
 __version__ = "1.0.0"
+

@@ -1,10 +1,33 @@
+import json
 import torch
 import hashlib
 import logging
 import os
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 logger = logging.getLogger(__name__)
+
+CACHE_FILE = ".codejudge_cache.json"
+
+def load_cache() -> dict:
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_cache(cache: dict):
+    try:
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Failed to save persistent cache: {e}")
 
 
 def is_running_on_kaggle():
@@ -29,7 +52,7 @@ class LLMClient:
         print(f"🚀 [CodeJudge] Đang nạp model: {model_name}")
         self.model_name = model_name
         self.use_cache = use_cache
-        self.request_cache = {}  # Cache LLM requests
+        self.request_cache = load_cache() if use_cache else {}  # Cache LLM requests
         
         # Cấu hình 4-bit để không bị văng khỏi Kaggle
         # Adjust bitsandbytes config based on environment: Kaggle often has limited memory,
@@ -94,6 +117,7 @@ class LLMClient:
         # Lưu vào cache
         if self.use_cache:
             self.request_cache[cache_key] = response
+            save_cache(self.request_cache)
             logger.debug(f"Cached LLM response (cache size: {len(self.request_cache)})")
         
         return response
@@ -111,13 +135,17 @@ class GeminiClient:
         
         # Lấy API key từ parameter hoặc environment
         api_key = api_key or os.getenv("GOOGLE_API_KEY")
+        if api_key:
+            api_key = api_key.strip()
+            
         if not api_key:
             raise ValueError("GOOGLE_API_KEY không được tìm thấy. Set environment variable hoặc truyền api_key parameter")
         
         genai.configure(api_key=api_key)
         self.model_name = model_name
         self.use_cache = use_cache
-        self.request_cache = {}
+        self.request_cache = load_cache() if use_cache else {}
+        self.last_usage = {}
         self.model = genai.GenerativeModel(model_name)
         logger.info(f"✓ Gemini model {model_name} initialized")
 
@@ -130,6 +158,11 @@ class GeminiClient:
             
             if cache_key in self.request_cache:
                 logger.debug(f"✓ Cache hit for Gemini request")
+                self.last_usage = {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0
+                }
                 return self.request_cache[cache_key]
         
         try:
@@ -140,18 +173,53 @@ class GeminiClient:
                 full_prompt,
                 generation_config={
                     "temperature": 0.01,  # Thấp để JSON ổn định
-                    "top_p": 0.95
+                    "top_p": 0.95,
+                    "max_output_tokens": 4096
                 }
             )
             
             result = response.text
             
+            # Save token usage metadata
+            if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                self.last_usage = {
+                    "input_tokens": response.usage_metadata.prompt_token_count,
+                    "output_tokens": response.usage_metadata.candidates_token_count,
+                    "total_tokens": response.usage_metadata.total_token_count
+                }
+            else:
+                self.last_usage = {}
+            
             if self.use_cache:
-                self.request_cache[cache_key] = result
-                logger.debug(f"Cached Gemini response (cache size: {len(self.request_cache)})")
+                is_valid = True
+                if format_json:
+                    try:
+                        import re
+                        response_clean = result.strip()
+                        try:
+                            json.loads(response_clean)
+                        except json.JSONDecodeError:
+                            code_block_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', response_clean, re.IGNORECASE)
+                            if code_block_match:
+                                json.loads(code_block_match.group(1).strip())
+                            else:
+                                greedy_match = re.search(r'(\[[\s\S]*\]|\{[\s\S]*\})', response_clean)
+                                if greedy_match:
+                                    json.loads(greedy_match.group(1).strip())
+                                else:
+                                    raise ValueError()
+                    except Exception:
+                        is_valid = False
+                        logger.warning("Gemini response is not valid JSON, skipping cache save.")
+                
+                if is_valid:
+                    self.request_cache[cache_key] = result
+                    save_cache(self.request_cache)
+                    logger.debug(f"Cached Gemini response (cache size: {len(self.request_cache)})")
             
             return result
         except Exception as e:
+            self.last_usage = {}
             logger.error(f"Gemini API error: {e}")
             raise
 
@@ -174,7 +242,7 @@ class QwenClient:
     def __init__(self, model_name="Qwen/Qwen2-7B", api_key=None, use_cache=True, cache_dir=None, offload_folder=None, **kwargs):
         self.model_name = model_name
         self.use_cache = use_cache
-        self.request_cache = {}
+        self.request_cache = load_cache() if use_cache else {}
         self.is_remote = "qwen-turbo" in model_name.lower() or "qwen-plus" in model_name.lower()
         
         if self.is_remote:
@@ -311,6 +379,15 @@ class QwenClient:
 
     def call(self, system_prompt, user_prompt, format_json=False):
         """Hàm call bổ trợ để TaxonomyAssessor có thể gọi được"""
+        if self.use_cache:
+            cache_key = hashlib.md5(
+                f"{system_prompt}|{user_prompt}".encode()
+            ).hexdigest()
+            
+            if cache_key in self.request_cache:
+                logger.debug(f"✓ Cache hit for Qwen request")
+                return self.request_cache[cache_key]
+
         # Format gộp cả system prompt và user prompt theo chuẩn chat để Qwen sinh dữ liệu tốt nhất
         # full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
         full_prompt = (
@@ -322,31 +399,49 @@ class QwenClient:
         response = self.generate(full_prompt, temperature=0.01)
 
         print(f"======Raw Response from Qwen======\n{response}\n==========================")
+        if self.use_cache:
+            self.request_cache[cache_key] = response
+            save_cache(self.request_cache)
         return response
 
 
 class OpenAIClient:
     """Thin wrapper around OpenAI-compatible client using the official OpenAI SDK (openai).
-    Uses environment variable OPENAI_API_KEY if api_key not supplied.
+    Supports OpenAI-compatible endpoints like OpenRouter.
     """
-    def __init__(self, model_name="gpt-4", api_key=None, use_cache=True, **kwargs):
+    def __init__(self, model_name="gpt-4", api_key=None, use_cache=True, base_url=None, **kwargs):
         try:
             from openai import OpenAI
         except Exception:
             raise ImportError("openai SDK not installed. pip install openai >= 3.0.0")
-        api_key = api_key or os.getenv("OPENAI_API_KEY")
+        
+        # Determine API key based on base_url or defaults
+        if base_url and "openrouter.ai" in base_url:
+            api_key = api_key or os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+        else:
+            api_key = api_key or os.getenv("OPENAI_API_KEY")
+            
+        if api_key:
+            api_key = api_key.strip()
+            
         if not api_key:
-            raise ValueError("OPENAI_API_KEY not found. Set environment variable or pass api_key")
-        self.client = OpenAI(api_key=api_key)
+            raise ValueError("API Key not found. Please set OPENAI_API_KEY or OPENROUTER_API_KEY.")
+            
+        client_kwargs = {"api_key": api_key}
+        if base_url:
+            client_kwargs["base_url"] = base_url
+            
+        self.client = OpenAI(**client_kwargs)
         self.model_name = model_name
         self.use_cache = use_cache
-        self.request_cache = {}
+        self.request_cache = load_cache() if use_cache else {}
+        self.last_usage = {}
 
     def generate(self, prompt, temperature=0.0, top_p=1.0, stop=None):
         # Accept either chat-format messages (list of dicts) or a single string prompt
         try:
             if isinstance(prompt, list):
-                resp = self.client.chat.completions.create(model=self.model_name, messages=prompt, temperature=temperature, top_p=top_p, stop=stop)
+                resp = self.client.chat.completions.create(model=self.model_name, messages=prompt, temperature=temperature, top_p=top_p, stop=stop, timeout=45.0)
                 return resp.choices[0].message.content
             else:
                 # Fallback: use completions endpoint
@@ -360,6 +455,88 @@ class OpenAIClient:
             logger.error(f"OpenAIClient generate error: {e}")
             raise
 
+    def call(self, system_prompt, user_prompt, format_json=False):
+        """Call OpenAI/OpenRouter chat completion endpoint."""
+        # Create cache key
+        if self.use_cache:
+            cache_key = hashlib.md5(
+                f"{system_prompt}|{user_prompt}".encode()
+            ).hexdigest()
+            
+            if cache_key in self.request_cache:
+                logger.debug("✓ Cache hit for OpenAI/OpenRouter request")
+                self.last_usage = {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0
+                }
+                return self.request_cache[cache_key]
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_prompt})
+
+        extra_kwargs = {}
+        if format_json:
+            # Both OpenAI and OpenRouter support json response format
+            extra_kwargs["response_format"] = {"type": "json_object"}
+        
+        # Set a large max_tokens to prevent OpenRouter/OpenAI default truncation (usually 150-256 tokens)
+        extra_kwargs["max_tokens"] = 4096
+
+        try:
+            resp = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=messages,
+                temperature=0.01,
+                timeout=45.0,
+                **extra_kwargs
+            )
+            result = resp.choices[0].message.content
+            
+            # Save token usage metadata
+            if hasattr(resp, 'usage') and resp.usage:
+                self.last_usage = {
+                    "input_tokens": resp.usage.prompt_tokens,
+                    "output_tokens": resp.usage.completion_tokens,
+                    "total_tokens": resp.usage.total_tokens
+                }
+            else:
+                self.last_usage = {}
+            
+            if self.use_cache:
+                is_valid = True
+                if format_json:
+                    try:
+                        import re
+                        response_clean = result.strip()
+                        try:
+                            json.loads(response_clean)
+                        except json.JSONDecodeError:
+                            code_block_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', response_clean, re.IGNORECASE)
+                            if code_block_match:
+                                json.loads(code_block_match.group(1).strip())
+                            else:
+                                greedy_match = re.search(r'(\[[\s\S]*\]|\{[\s\S]*\})', response_clean)
+                                if greedy_match:
+                                    json.loads(greedy_match.group(1).strip())
+                                else:
+                                    raise ValueError()
+                    except Exception:
+                        is_valid = False
+                        logger.warning("OpenAI/OpenRouter response is not valid JSON, skipping cache save.")
+                
+                if is_valid:
+                    self.request_cache[cache_key] = result
+                    save_cache(self.request_cache)
+                
+            return result
+        except Exception as e:
+            self.last_usage = {}
+            logger.error(f"OpenAIClient call error: {e}")
+            raise
+
 class LLMFactory:
     @staticmethod
     def create(provider="local", model_name="meta-llama/Meta-Llama-3-8B-Instruct", use_cache=True, api_key=None, **kwargs):
@@ -367,7 +544,7 @@ class LLMFactory:
         Tạo LLM client dựa trên provider
         
         Args:
-            provider: "local", "gemini", "openai", etc.
+            provider: "local", "gemini", "openai", "openrouter", etc.
             model_name: Tên model
             use_cache: Có dùng cache không
             api_key: API key (nếu cần)
@@ -404,6 +581,16 @@ class LLMFactory:
         if p in ("openai", "gpt", "gpt-api"):
             # Provide a thin OpenAI client wrapper
             return OpenAIClient(model_name=model_name, api_key=api_key, use_cache=use_cache, **kwargs)
+        if p == "openrouter":
+            # API key defaults to environment variable OPENROUTER_API_KEY
+            api_key = api_key or os.getenv("OPENROUTER_API_KEY")
+            return OpenAIClient(
+                model_name=model_name,
+                api_key=api_key,
+                use_cache=use_cache,
+                base_url="https://openrouter.ai/api/v1",
+                **kwargs
+            )
         # Default: local model
         return LLMClient(model_name=model_name, use_cache=use_cache, **kwargs)
 
