@@ -55,7 +55,9 @@ Chạy thử nghiệm script trên dataset thực tế với model `gemini-2.5-f
 conda run -n codejudge 
 python evaluation/hcmus/score_with_multi_agent.py --limit 1 --provider gemini --model gemini-2.5-flash
 ```
-
+```bash
+python evaluation/hcmus/score_with_multi_agent.py --limit 1 --provider openrouter --model gemini-2.5-flash --resume --run-name 260610_1430_multi_agent_gemini-2.5-flash --start 5
+```
 **Bảng phân tích kết quả chấm điểm thực tế:**
 
 | Câu hỏi | Trạng thái biên dịch | Kết quả Factor trích xuất & Đánh giá | Điểm (Thang 10) | Điểm quy đổi | Suggestions |
@@ -69,3 +71,20 @@ python evaluation/hcmus/score_with_multi_agent.py --limit 1 --provider gemini --
 - **Mã sinh viên:** `SV091214`
 - **Điểm tổng dự đoán:** **`3.3 / 10.0đ`** (Câu 1: 1.3đ + Câu 2: 2.0đ + Câu 3: 0.0đ)
 - **Gợi ý tổng hợp:** Gom toàn bộ gợi ý sửa lỗi logic của từng câu hỏi và hiển thị đầy đủ thông tin các lỗi cú pháp biên dịch cần sửa.
+
+---
+
+### 📊 Báo cáo so sánh kết quả đánh giá thực tế (142 mẫu)
+
+Sau khi hoàn tất việc đánh giá toàn bộ 142 mẫu thi thực tế của sinh viên bằng hệ thống **Multi-Agent (Gemini 2.5 Flash)** và đối chiếu với mô hình **Taxonomy** cũ, kết quả các chỉ số độ chính xác thu được như sau:
+
+| Chỉ số / Metric | Mô hình cũ (Taxonomy - 93 mẫu) | Mô hình mới (Multi-Agent - 142 mẫu) | Nhận xét / Đánh giá |
+| :--- | :--- | :--- | :--- |
+| **Số lượng mẫu hợp lệ (Valid)** | 93 bài thi | **140 bài thi** (2 mẫu bị lỗi chấm) | Quy mô tập dữ liệu đánh giá rộng hơn. |
+| **Hệ số tương quan Kendall Tau** | 0.3669 | **0.6116** (+0.2447) | Độ tương quan thứ bậc tăng mạnh, phân loại học lực sinh viên chính xác hơn nhiều. |
+| **Hệ số tương quan SpearmanR** | 0.4588 | **0.8011** (+0.3423) | Đạt ngưỡng tương quan rất mạnh (>0.8), bám sát điểm chấm của giảng viên. |
+| **Sai số tuyệt đối trung bình (MAE)** | 3.6430 | **1.4369** (-2.2061) | Sai số điểm số giảm sâu, độ chính xác tuyệt đối cải thiện vượt bậc. |
+| **Căn sai số bình phương (RMSE)** | 4.3895 | **1.8380** (-2.5515) | Giảm thiểu tối đa các ca chấm lệch điểm quá lớn. |
+| **Độ lệch trung bình (Mean Bias)** | -2.5075 (Chấm quá khắt khe) | **-0.9376** (Chấm tiệm cận giảng viên) | Giảm độ lệch khắt khe từ hơn 2.5 điểm xuống dưới 0.94 điểm. |
+| **Thời gian phản hồi trung bình** | 60.157 giây / bài thi | **13.077 giây / bài thi** (~5x nhanh hơn) | Tiết kiệm chi phí API và tài nguyên nhờ cơ chế Cache thông minh. |
+

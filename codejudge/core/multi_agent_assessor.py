@@ -14,15 +14,17 @@ YÊU CẦU:
 1. Mỗi Factor đại diện cho một chức năng, cấu trúc dữ liệu, hoặc yêu cầu thuật toán cụ thể (Ví dụ: "Định nghĩa cấu trúc struct phù hợp", "Hàm đọc dữ liệu từ file đúng chuẩn", "Xử lý tìm kiếm chính xác", "Xử lý trường hợp biên/rỗng").
 2. Bỏ qua hoàn toàn các yêu cầu về cú pháp (syntax) hay định dạng biên dịch vì lỗi cú pháp sẽ được compiler chấm riêng.
 3. Số lượng các Factor nên dao động từ 2 đến 5 tùy độ phức tạp của câu hỏi.
-4. Trả về kết quả DƯỚI DẠNG MỘT JSON ARRAY chứa các chuỗi factor. KHÔNG được thêm giải thích ngoài JSON.
+4. Trả về kết quả DƯỚI DẠNG MỘT JSON OBJECT chứa một key duy nhất là "factors" có giá trị là mảng các chuỗi factor. KHÔNG được thêm giải thích ngoài JSON.
 5. Các Factor phải tập trung vào kết quả logic/chức năng đầu ra của bài toán. Tuyệt đối KHÔNG áp đặt một phương pháp giải cụ thể (ví dụ: không bắt buộc dùng stack, mảng phụ, đệ quy...) trừ khi đề bài yêu cầu rõ ràng điều đó.
 
 VÍ DỤ OUTPUT CHUẨN:
-[
-  "Định nghĩa struct Pokemon với đầy đủ thuộc tính id, name, speed",
-  "Hàm đọc file ReadFile lưu dữ liệu đúng định dạng",
-  "Hàm tìm kiếm Search trả về kết quả chính xác theo hệ"
-]
+{
+  "factors": [
+    "Định nghĩa struct Pokemon với đầy đủ thuộc tính id, name, speed",
+    "Hàm đọc file ReadFile lưu dữ liệu đúng định dạng",
+    "Hàm tìm kiếm Search trả về kết quả chính xác theo hệ"
+  ]
+}
 """
 
 SYSTEM_PROMPT_FACTOR_GRADER = """Bạn là trợ giảng chấm điểm code lập trình chuyên nghiệp và công bằng.

@@ -165,33 +165,37 @@ class GeminiClient:
                 }
                 return self.request_cache[cache_key]
         
-        try:
-            # Gemini không cần format chat template đặc biệt
-            full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
-            
-            response = self.model.generate_content(
-                full_prompt,
-                generation_config={
-                    "temperature": 0.01,  # Thấp để JSON ổn định
-                    "top_p": 0.95,
-                    "max_output_tokens": 4096
-                }
-            )
-            
-            result = response.text
-            
-            # Save token usage metadata
-            if hasattr(response, 'usage_metadata') and response.usage_metadata:
-                self.last_usage = {
-                    "input_tokens": response.usage_metadata.prompt_token_count,
-                    "output_tokens": response.usage_metadata.candidates_token_count,
-                    "total_tokens": response.usage_metadata.total_token_count
-                }
-            else:
-                self.last_usage = {}
-            
-            if self.use_cache:
-                is_valid = True
+        import time
+        max_retries = 5
+        backoff_factor = 2.0
+        
+        for attempt in range(max_retries):
+            try:
+                # Gemini không cần format chat template đặc biệt
+                full_prompt = f"<system_prompt>{system_prompt}</system_prompt>\n\n{user_prompt}"
+                
+                response = self.model.generate_content(
+                    full_prompt,
+                    generation_config={
+                        "temperature": 0.01,  # Thấp để JSON ổn định
+                        "top_p": 0.95,
+                        "max_output_tokens": 8192
+                    }
+                )
+                
+                result = response.text
+                
+                # Save token usage metadata
+                if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                    self.last_usage = {
+                        "input_tokens": response.usage_metadata.prompt_token_count,
+                        "output_tokens": response.usage_metadata.candidates_token_count,
+                        "total_tokens": response.usage_metadata.total_token_count
+                    }
+                else:
+                    self.last_usage = {}
+                
+                # Validate JSON if format_json is True
                 if format_json:
                     try:
                         import re
@@ -207,21 +211,25 @@ class GeminiClient:
                                 if greedy_match:
                                     json.loads(greedy_match.group(1).strip())
                                 else:
-                                    raise ValueError()
-                    except Exception:
-                        is_valid = False
-                        logger.warning("Gemini response is not valid JSON, skipping cache save.")
+                                    raise ValueError("No JSON block found")
+                    except Exception as json_err:
+                        raise ValueError(f"Invalid JSON returned: {json_err}")
                 
-                if is_valid:
+                if self.use_cache:
                     self.request_cache[cache_key] = result
                     save_cache(self.request_cache)
                     logger.debug(f"Cached Gemini response (cache size: {len(self.request_cache)})")
-            
-            return result
-        except Exception as e:
-            self.last_usage = {}
-            logger.error(f"Gemini API error: {e}")
-            raise
+                
+                return result
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    sleep_time = backoff_factor ** (attempt + 1)
+                    logger.warning(f"Gemini request failed: {e}. Retrying in {sleep_time}s...")
+                    time.sleep(sleep_time)
+                else:
+                    self.last_usage = {}
+                    logger.error(f"Gemini API error after {max_retries} attempts: {e}")
+                    raise
 
     def generate(self, prompt, temperature=0.01, top_p=0.9, stop=None):
         """Generate method cho compatibility"""
@@ -483,30 +491,34 @@ class OpenAIClient:
             extra_kwargs["response_format"] = {"type": "json_object"}
         
         # Set a large max_tokens to prevent OpenRouter/OpenAI default truncation (usually 150-256 tokens)
-        extra_kwargs["max_tokens"] = 4096
+        extra_kwargs["max_tokens"] = 8192
 
-        try:
-            resp = self.client.chat.completions.create(
-                model=self.model_name,
-                messages=messages,
-                temperature=0.01,
-                timeout=45.0,
-                **extra_kwargs
-            )
-            result = resp.choices[0].message.content
-            
-            # Save token usage metadata
-            if hasattr(resp, 'usage') and resp.usage:
-                self.last_usage = {
-                    "input_tokens": resp.usage.prompt_tokens,
-                    "output_tokens": resp.usage.completion_tokens,
-                    "total_tokens": resp.usage.total_tokens
-                }
-            else:
-                self.last_usage = {}
-            
-            if self.use_cache:
-                is_valid = True
+        import time
+        max_retries = 5
+        backoff_factor = 2.0
+        
+        for attempt in range(max_retries):
+            try:
+                resp = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    temperature=0.01,
+                    timeout=45.0,
+                    **extra_kwargs
+                )
+                result = resp.choices[0].message.content
+                
+                # Save token usage metadata
+                if hasattr(resp, 'usage') and resp.usage:
+                    self.last_usage = {
+                        "input_tokens": resp.usage.prompt_tokens,
+                        "output_tokens": resp.usage.completion_tokens,
+                        "total_tokens": resp.usage.total_tokens
+                    }
+                else:
+                    self.last_usage = {}
+                
+                # Validate JSON if format_json is True
                 if format_json:
                     try:
                         import re
@@ -522,20 +534,25 @@ class OpenAIClient:
                                 if greedy_match:
                                     json.loads(greedy_match.group(1).strip())
                                 else:
-                                    raise ValueError()
-                    except Exception:
-                        is_valid = False
-                        logger.warning("OpenAI/OpenRouter response is not valid JSON, skipping cache save.")
+                                    raise ValueError("No JSON block found")
+                    except Exception as json_err:
+                        raise ValueError(f"Invalid JSON returned: {json_err}")
                 
-                if is_valid:
+                if self.use_cache:
                     self.request_cache[cache_key] = result
                     save_cache(self.request_cache)
-                
-            return result
-        except Exception as e:
-            self.last_usage = {}
-            logger.error(f"OpenAIClient call error: {e}")
-            raise
+                    
+                return result
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    sleep_time = backoff_factor ** (attempt + 1)
+                    logger.warning(f"OpenAI/OpenRouter request failed: {e}. Retrying in {sleep_time}s...")
+                    time.sleep(sleep_time)
+                else:
+                    self.last_usage = {}
+                    logger.error(f"OpenAIClient call error after {max_retries} attempts: {e}")
+                    raise
+
 
 class LLMFactory:
     @staticmethod
