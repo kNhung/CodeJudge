@@ -15,6 +15,8 @@ if str(REPO_ROOT) not in sys.path:
 from dotenv import load_dotenv
 load_dotenv()
 
+from codejudge.core.compiler_helper import merge_folder_code
+
 
 HCMUS_ROOT = Path(__file__).resolve().parent
 PROBLEMS_DIR = HCMUS_ROOT / "problems"
@@ -54,13 +56,20 @@ def parse_question_max(question_text: str) -> Optional[float]:
     return None
 
 def list_code_files(student_dir: Path) -> List[Path]:
-    """Sort Bai01/Bai02/... files in stable numeric order."""
+    """Sort Bai01/Bai02/... files or directories in stable numeric order."""
     def key_fn(path: Path):
-        m = re.search(r"(\d+)", path.stem)
+        m = re.search(r"(\d+)", path.name)
         return int(m.group(1)) if m else 10**9
 
-    cpp_files = [p for p in student_dir.iterdir() if p.is_file() and p.suffix.lower() in {".cpp", ".cc", ".cxx", ".c"}]
-    return sorted(cpp_files, key=key_fn)
+    entries = []
+    if student_dir.is_dir():
+        for p in student_dir.iterdir():
+            if p.is_file() and p.suffix.lower() in {".cpp", ".cc", ".cxx", ".c", ".py"}:
+                entries.append(p)
+            elif p.is_dir() and not p.name.startswith("."):
+                entries.append(p)
+                
+    return sorted(entries, key=key_fn)
 
 def get_problem_path(problem_id: str) -> Path:
     return PROBLEMS_DIR / f"{problem_id}.txt"
@@ -98,6 +107,7 @@ def evaluate_row(
     row: Dict[str, str],
     assessor: Optional[Any],
     dry_run: bool,
+    config_data: Optional[Dict[str, Any]] = None
 ) -> List[Dict[str, object]]:
     row_id = row["id"].strip()
     problem_id = row["problem_id"].strip()
@@ -121,11 +131,23 @@ def evaluate_row(
     results: List[Dict[str, object]] = []
     per_question_results: List[Dict[str, object]] = []
 
+    # Get problem level config if any
+    problem_config = {}
+    if config_data:
+        problem_config = config_data.get(problem_id, {})
+
     # Map each student code file (sorted numerically) to the matching split question block
     for idx, code_file in enumerate(code_files, start=1):
         if idx > len(questions):
             break
-        code_text = code_file.read_text(encoding="utf-8", errors="ignore")
+            
+        if code_file.is_dir():
+            code_text = merge_folder_code(code_file, language)
+            source_path_val = str(code_file)
+        else:
+            code_text = code_file.read_text(encoding="utf-8", errors="ignore")
+            source_path_val = str(code_file)
+            
         question_text = questions[idx - 1]
         question_max = parse_question_max(question_text)
         if question_max is None:
@@ -154,13 +176,23 @@ def evaluate_row(
 
         started_at = time.perf_counter()
         
+        # Extract question level override parameters
+        question_config = problem_config.get(str(idx), {})
+        pre_factors = question_config.get("pre_extracted_factors")
+        f_weights = question_config.get("factor_weights")
+        s_penalties = question_config.get("syntax_penalties")
+
         # Run MultiAgentAssessor
         assert assessor is not None
         assessment_result = assessor.assess(
             question_text=question_text,
             student_code=code_text,
             language=language,
-            question_max=question_max
+            question_max=question_max,
+            pre_extracted_factors=pre_factors,
+            factor_weights=f_weights,
+            syntax_penalties=s_penalties,
+            source_path=source_path_val
         )
         
         item["runtime_seconds"] = round(time.perf_counter() - started_at, 6)
@@ -258,6 +290,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=0, help="Only process first N rows (0 means all)")
     parser.add_argument("--start", type=int, default=0, help="Start index in CSV rows")
     parser.add_argument("--dry-run", action="store_true", help="Do not call LLM; only run compiler and validate layout")
+    parser.add_argument("--config", type=Path, default=None, help="Path to JSON configuration file containing pre-extracted factors and weights")
 
     args = parser.parse_args()
     if args.output is None:
@@ -273,6 +306,16 @@ def main() -> None:
         rows = rows[: args.limit]
 
     processed_ids = load_processed_ids(args.output) if args.resume else set()
+
+    # Load custom config if provided
+    config_data = {}
+    if args.config:
+        if args.config.is_file():
+            with args.config.open("r", encoding="utf-8") as config_f:
+                config_data = json.load(config_f)
+            print(f"📖 Loaded custom HITL config from: {args.config}")
+        else:
+            print(f"⚠️ Warning: Config file {args.config} not found.")
 
     assessor = None
     if not args.dry_run:
@@ -295,6 +338,7 @@ def main() -> None:
                     row=row,
                     assessor=assessor,
                     dry_run=args.dry_run,
+                    config_data=config_data
                 )
             except Exception as e:
                 print(f"Error evaluating row {row_id}: {e}")

@@ -184,52 +184,76 @@ class MultiAgentAssessor:
                 
         return final_eval
 
-    def _classify_syntax_error(self, error_msg: str) -> float:
+    def _classify_syntax_error(self, error_msg: str, syntax_penalties: Optional[Dict[str, float]] = None) -> float:
         err_lower = error_msg.lower()
         
-        # Category 1: Warnings (Penalty: 0.25)
-        if "warning:" in err_lower or "unused variable" in err_lower or "unused parameter" in err_lower:
-            return 0.25
+        # Default penalties
+        warning_p = 0.25
+        typo_p = 0.5
+        major_p = 1.5
+        
+        if syntax_penalties:
+            warning_p = syntax_penalties.get("warning", warning_p)
+            typo_p = syntax_penalties.get("typo", typo_p)
+            major_p = syntax_penalties.get("major", major_p)
             
-        # Category 2: Typos (Penalty: 0.5)
+        # Category 1: Warnings (Penalty: 0.25 default)
+        if "warning:" in err_lower or "unused variable" in err_lower or "unused parameter" in err_lower:
+            return warning_p
+            
+        # Category 2: Typos (Penalty: 0.5 default)
         typo_keywords = [
             "expected ';'", "expected '}'", "expected ')'", "expected ']'", 
             "suggest brackets", "return-statement with a value, in function returning 'void'"
         ]
         if any(k in err_lower for k in typo_keywords):
-            return 0.5
+            return typo_p
             
-        # Category 3: Major/Conceptual (Penalty: 1.5)
-        return 1.5
+        # Category 3: Major/Conceptual (Penalty: 1.5 default)
+        return major_p
 
     def calculate_score(
         self,
         factor_eval: Dict[str, Dict[str, Any]],
         syntax_errors: List[str],
-        question_max: Optional[float] = None
+        question_max: Optional[float] = None,
+        factor_weights: Optional[Dict[str, float]] = None,
+        syntax_penalties: Optional[Dict[str, float]] = None
     ) -> Dict[str, Any]:
         """
         Calculate final score based on factors and syntax errors.
         
         Formula:
-        - Factor score = average(compliance) * 10.0
+        - Factor score = average(compliance) * 10.0 (or weighted average if weights provided)
         - Syntax penalty = sum(classified penalties) (capped at 5.0 points on 10-scale)
         - Final score on 10 = max(0.0, Factor score - Syntax penalty)
         - Scaled score = (Final score on 10 / 10.0) * question_max
         """
-        compliance_scores = []
+        compliance_scores = {}
         for factor, details in factor_eval.items():
             if isinstance(details, dict) and "compliance" in details:
                 try:
                     val = float(details["compliance"])
                     # Clamp compliance to range [0.0, 1.0]
                     val = max(0.0, min(1.0, val))
-                    compliance_scores.append(val)
+                    compliance_scores[factor] = val
                 except (TypeError, ValueError):
                     pass
         
         if compliance_scores:
-            avg_compliance = sum(compliance_scores) / len(compliance_scores)
+            if factor_weights:
+                # Normalize factor weights to sum to 1.0 for valid factors
+                valid_factors = [f for f in factor_weights if f in compliance_scores]
+                total_w = sum(factor_weights[f] for f in valid_factors)
+                if total_w > 0:
+                    norm_weights = {f: factor_weights[f] / total_w for f in valid_factors}
+                else:
+                    norm_weights = {f: 1.0 / len(valid_factors) for f in valid_factors}
+                
+                # Any factor not in factor_weights gets 0.0 weight
+                avg_compliance = sum(compliance_scores[f] * norm_weights.get(f, 0.0) for f in compliance_scores)
+            else:
+                avg_compliance = sum(compliance_scores.values()) / len(compliance_scores)
         else:
             avg_compliance = 0.0
             
@@ -238,7 +262,7 @@ class MultiAgentAssessor:
         # Calculate syntax error penalties based on classification
         total_penalty = 0.0
         for err in syntax_errors:
-            total_penalty += self._classify_syntax_error(err)
+            total_penalty += self._classify_syntax_error(err, syntax_penalties)
         syntax_penalty = min(5.0, total_penalty)
         
         final_score_on_10 = max(0.0, factor_score_on_10 - syntax_penalty)
@@ -296,7 +320,11 @@ class MultiAgentAssessor:
         question_text: str,
         student_code: str,
         language: str = "cpp",
-        question_max: Optional[float] = None
+        question_max: Optional[float] = None,
+        pre_extracted_factors: Optional[List[str]] = None,
+        factor_weights: Optional[Dict[str, float]] = None,
+        syntax_penalties: Optional[Dict[str, float]] = None,
+        source_path: Optional[str] = None
     ) -> Dict[str, Any]:
         """Run the complete Multi-Agent grading flow for a question-code pair."""
         logger.info("--- Starting Multi-Agent Assessment ---")
@@ -312,20 +340,24 @@ class MultiAgentAssessor:
         
         # Step 1: Compiler syntax check
         logger.info("Step 1: Running compiler syntax check...")
-        syntax_errors = check_syntax(student_code, language)
+        syntax_errors = check_syntax(source_path if source_path else student_code, language)
         logger.info(f"Compiler check complete. Found {len(syntax_errors)} errors.")
         
         # Step 2: Factor extraction (Agent 1)
-        try:
-            factors = self.extract_factors(question_text)
-            if hasattr(self.llm_client, 'last_usage') and self.llm_client.last_usage:
-                total_input_tokens += self.llm_client.last_usage.get("input_tokens", 0)
-                total_output_tokens += self.llm_client.last_usage.get("output_tokens", 0)
-        except Exception as e:
-            logger.error(f"Error extracting factors: {e}")
-            llm_error = True
-            error_msg = f"Lỗi Agent 1 (Factor Extractor): {str(e)}"
-            factors = ["Thực hiện đúng logic của câu hỏi"]
+        if pre_extracted_factors is not None:
+            logger.info("Step 2: Using pre-extracted factors (bypassing Agent 1)...")
+            factors = pre_extracted_factors
+        else:
+            try:
+                factors = self.extract_factors(question_text)
+                if hasattr(self.llm_client, 'last_usage') and self.llm_client.last_usage:
+                    total_input_tokens += self.llm_client.last_usage.get("input_tokens", 0)
+                    total_output_tokens += self.llm_client.last_usage.get("output_tokens", 0)
+            except Exception as e:
+                logger.error(f"Error extracting factors: {e}")
+                llm_error = True
+                error_msg = f"Lỗi Agent 1 (Factor Extractor): {str(e)}"
+                factors = ["Thực hiện đúng logic của câu hỏi"]
             
         # Step 3: Factor grading (Agent 2)
         if not llm_error:
@@ -364,7 +396,13 @@ class MultiAgentAssessor:
                 scoring_details["scaled_score"] = -1.0
                 scoring_details["question_max"] = question_max
         else:
-            scoring_details = self.calculate_score(factor_eval, syntax_errors, question_max)
+            scoring_details = self.calculate_score(
+                factor_eval=factor_eval,
+                syntax_errors=syntax_errors,
+                question_max=question_max,
+                factor_weights=factor_weights,
+                syntax_penalties=syntax_penalties
+            )
         
         # Step 5: Generate suggestions
         if llm_error:
