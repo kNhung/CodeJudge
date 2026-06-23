@@ -116,7 +116,7 @@ class MultiAgentAssessor:
         # Ensure all items are strings
         return [str(f) for f in factors]
 
-    def assess_factors(self, student_code: str, factors: List[str], language: str) -> Dict[str, Dict[str, Any]]:
+    def assess_factors(self, student_code: str, factors: List[str], language: str, use_cache: bool = False) -> Dict[str, Dict[str, Any]]:
         """Agent 2: Assess student code compliance against factors, ignoring syntax errors."""
         logger.info("Agent 2: Scoring student code against factors...")
         
@@ -134,7 +134,8 @@ class MultiAgentAssessor:
         response = self.llm_client.call(
             system_prompt=SYSTEM_PROMPT_FACTOR_GRADER,
             user_prompt=user_prompt,
-            format_json=True
+            format_json=True,
+            use_cache=use_cache
         )
         
         evaluation = self._clean_and_parse_json(response)
@@ -324,7 +325,8 @@ class MultiAgentAssessor:
         pre_extracted_factors: Optional[List[str]] = None,
         factor_weights: Optional[Dict[str, float]] = None,
         syntax_penalties: Optional[Dict[str, float]] = None,
-        source_path: Optional[str] = None
+        source_path: Optional[str] = None,
+        use_grader_cache: bool = False
     ) -> Dict[str, Any]:
         """Run the complete Multi-Agent grading flow for a question-code pair."""
         logger.info("--- Starting Multi-Agent Assessment ---")
@@ -364,7 +366,7 @@ class MultiAgentAssessor:
             try:
                 if hasattr(self.llm_client, 'last_usage'):
                     self.llm_client.last_usage = {}
-                factor_eval = self.assess_factors(student_code, factors, language)
+                factor_eval = self.assess_factors(student_code, factors, language, use_cache=use_grader_cache)
                 if hasattr(self.llm_client, 'last_usage') and self.llm_client.last_usage:
                     total_input_tokens += self.llm_client.last_usage.get("input_tokens", 0)
                     total_output_tokens += self.llm_client.last_usage.get("output_tokens", 0)

@@ -1,7 +1,7 @@
 import pytest
 import json
 from unittest.mock import MagicMock, patch
-from codejudge.core.compiler_helper import check_syntax, _check_python_syntax, _check_cpp_syntax
+from codejudge.core.compiler_helper import check_syntax, _check_python_syntax
 from codejudge.core.multi_agent_assessor import MultiAgentAssessor
 
 class TestCompilerHelper:

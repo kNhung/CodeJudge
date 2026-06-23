@@ -92,11 +92,12 @@ class LLMClient:
             print(f"❌ Lỗi generate: {e}")
             return ""
 
-    def call(self, system_prompt, user_prompt, format_json=False):
+    def call(self, system_prompt, user_prompt, format_json=False, use_cache=None):
         """Hàm call mà Binary/Taxonomy Assessor đang yêu cầu"""
+        active_cache = use_cache if use_cache is not None else self.use_cache
 
         # Tạo cache key
-        if self.use_cache:
+        if active_cache:
             cache_key = hashlib.md5(
                 f"{system_prompt}|{user_prompt}".encode()
             ).hexdigest()
@@ -115,7 +116,7 @@ class LLMClient:
         response = self.generate(full_prompt, temperature=0.01)
         print(f"======Raw Response from LLMClient======\n{response}\n==========================")
         # Lưu vào cache
-        if self.use_cache:
+        if active_cache:
             self.request_cache[cache_key] = response
             save_cache(self.request_cache)
             logger.debug(f"Cached LLM response (cache size: {len(self.request_cache)})")
@@ -149,9 +150,11 @@ class GeminiClient:
         self.model = genai.GenerativeModel(model_name)
         logger.info(f"✓ Gemini model {model_name} initialized")
 
-    def call(self, system_prompt, user_prompt, format_json=False):
+    def call(self, system_prompt, user_prompt, format_json=False, use_cache=None):
         """Gọi Gemini API"""
-        if self.use_cache:
+        active_cache = use_cache if use_cache is not None else self.use_cache
+
+        if active_cache:
             cache_key = hashlib.md5(
                 f"{system_prompt}|{user_prompt}".encode()
             ).hexdigest()
@@ -215,7 +218,7 @@ class GeminiClient:
                     except Exception as json_err:
                         raise ValueError(f"Invalid JSON returned: {json_err}")
                 
-                if self.use_cache:
+                if active_cache:
                     self.request_cache[cache_key] = result
                     save_cache(self.request_cache)
                     logger.debug(f"Cached Gemini response (cache size: {len(self.request_cache)})")
@@ -385,9 +388,11 @@ class QwenClient:
             logger.error(f"Qwen local generation error: {e}")
             raise
 
-    def call(self, system_prompt, user_prompt, format_json=False):
+    def call(self, system_prompt, user_prompt, format_json=False, use_cache=None):
         """Hàm call bổ trợ để TaxonomyAssessor có thể gọi được"""
-        if self.use_cache:
+        active_cache = use_cache if use_cache is not None else self.use_cache
+
+        if active_cache:
             cache_key = hashlib.md5(
                 f"{system_prompt}|{user_prompt}".encode()
             ).hexdigest()
@@ -407,7 +412,7 @@ class QwenClient:
         response = self.generate(full_prompt, temperature=0.01)
 
         print(f"======Raw Response from Qwen======\n{response}\n==========================")
-        if self.use_cache:
+        if active_cache:
             self.request_cache[cache_key] = response
             save_cache(self.request_cache)
         return response
@@ -463,10 +468,12 @@ class OpenAIClient:
             logger.error(f"OpenAIClient generate error: {e}")
             raise
 
-    def call(self, system_prompt, user_prompt, format_json=False):
+    def call(self, system_prompt, user_prompt, format_json=False, use_cache=None):
         """Call OpenAI/OpenRouter chat completion endpoint."""
+        active_cache = use_cache if use_cache is not None else self.use_cache
+
         # Create cache key
-        if self.use_cache:
+        if active_cache:
             cache_key = hashlib.md5(
                 f"{system_prompt}|{user_prompt}".encode()
             ).hexdigest()
@@ -538,7 +545,7 @@ class OpenAIClient:
                     except Exception as json_err:
                         raise ValueError(f"Invalid JSON returned: {json_err}")
                 
-                if self.use_cache:
+                if active_cache:
                     self.request_cache[cache_key] = result
                     save_cache(self.request_cache)
                     
