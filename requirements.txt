@@ -60,3 +60,8 @@ pydantic>=2.0.0            # Data validation
 # to use Qwen models (e.g. `pip install <qwen-sdk-package>`). Leave commented here to avoid
 # failing installs when the package name is unknown.
 # qwen-sdk>=0.0.1
+
+# Web Demo Requirements
+python-fasthtml>=0.1.0
+uvicorn>=0.22.0
+
