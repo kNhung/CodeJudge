@@ -25,6 +25,10 @@ conala_test_cases = [
 EVALUATION_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def safe_model_filename(model):
+    return model.replace("/", "-").replace("\\", "-")
+
+
 def read_data(model, temperature, file_name, compare_prompt=None, analyze_prompt=None):
     data_path = os.path.join(EVALUATION_ROOT, "data", "conala", "conala.json")
     with open(data_path) as f:
@@ -219,7 +223,7 @@ def router(
         if step == 1:
             compare_prompt = single_step_prompt[compare_prompt_index]
             file_name = (
-                f"{model}-1-{compare_prompt_index}-{temperature}-sample-{index}.json"
+                f"{safe_model_filename(model)}-1-{compare_prompt_index}-{temperature}-sample-{index}.json"
             )
             print(file_name)
             single_step_workflow(
@@ -234,7 +238,7 @@ def router(
             analyze_prompt = dual_step_prompt["analyze_prompt"][analyze_prompt_index]
             compare_prompt = dual_step_prompt["compare_prompt"][compare_prompt_index]
 
-            file_name = f"{model}-2-{analyze_prompt_index}-{compare_prompt_index}-{temperature}-sample-{index}.json"
+            file_name = f"{safe_model_filename(model)}-2-{analyze_prompt_index}-{compare_prompt_index}-{temperature}-sample-{index}.json"
             print(file_name)
             dual_step_workflow(
                 model,

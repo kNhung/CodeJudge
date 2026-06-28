@@ -13,6 +13,53 @@ import torch
 
 model_cache = {}
 
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+# Short names used in sample scripts -> OpenRouter model ids
+OPENROUTER_MODEL_ALIASES = {
+    "gpt-3.5-turbo-1106": "openai/gpt-3.5-turbo",
+    "gpt-3.5-turbo": "openai/gpt-3.5-turbo",
+    "gpt-4": "openai/gpt-4",
+    "gpt-4-turbo": "openai/gpt-4-turbo",
+    "gemini-2.5-flash": "google/gemini-2.5-flash",
+    "Gemini-2.5-flash": "google/gemini-2.5-flash",
+    "Meta-Llama-3-8B-Instruct": "meta-llama/meta-llama-3-8b-instruct",
+    "Meta-Llama-3-70B-Instruct": "meta-llama/meta-llama-3-70b-instruct",
+    "CodeLlama-34b-Instruct": "meta-llama/codellama-34b-instruct",
+    "Qwen2.5-Coder-7B-Instruct": "qwen/qwen-2.5-coder-7b-instruct",
+}
+
+
+def _get_openrouter_api_key():
+    return os.environ.get("OPENROUTER_API_KEY", "").strip()
+
+
+def resolve_openrouter_model(model):
+    if model in OPENROUTER_MODEL_ALIASES:
+        return OPENROUTER_MODEL_ALIASES[model]
+    if "/" in model:
+        return model
+    return model
+
+
+def should_use_openrouter(model):
+    if not _get_openrouter_api_key():
+        return False
+    if os.environ.get("CODEJUDGE_FORCE_LOCAL", "").lower() in ("1", "true", "yes"):
+        return False
+    if "/" in model or model in OPENROUTER_MODEL_ALIASES:
+        return True
+    lower = model.lower()
+    if lower.startswith("gpt-") or "gemini" in lower or lower.startswith("claude"):
+        return True
+    if any(tag in model for tag in ("Llama-3", "CodeLlama", "Qwen")):
+        return os.environ.get("CODEJUDGE_PREFER_OPENROUTER", "1").lower() not in (
+            "0",
+            "false",
+            "no",
+        )
+    return False
+
 
 def _load_dotenv():
     root = Path(__file__).resolve().parents[1]
@@ -38,6 +85,12 @@ def load_model(model, root_path="./model"):
     if model in model_cache:
         print(f">>> Loading {model} from cache.")
         return model_cache[model]
+
+    if should_use_openrouter(model):
+        openrouter_model = resolve_openrouter_model(model)
+        print(f">>> Using OpenRouter model: {openrouter_model}")
+        model_cache[model] = (None, None)
+        return None, None
 
     # Nhận diện tên mô hình linh hoạt
     pure_model_name = model.split('/')[-1]
@@ -108,6 +161,16 @@ def load_model(model, root_path="./model"):
         raise e
 
 def process_raw_content(content, aspect):
+    helpfulness_match = re.search(
+        r"helpfulness\s*\(0-4\)\s*:\s*(\d+)", content, re.IGNORECASE
+    )
+    if helpfulness_match:
+        return int(helpfulness_match.group(1))
+
+    stripped = content.strip()
+    if stripped.isdigit():
+        return int(stripped)
+
     splits = content.lower().replace("(", "").replace(")", "").split("\n")
     ls = [
         ll.strip(".").replace("out of ", "/").replace("/4", "")
@@ -164,6 +227,75 @@ def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop
             return client.chat.completions.create(model=model, messages=message, max_tokens=max_tokens, temperature=temperature, top_p=top_p, stop=stop).choices[0].message.content
         except: time.sleep(1)
     return ""
+
+
+def openrouter_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+    api_key = _get_openrouter_api_key()
+    if not api_key:
+        raise ValueError("OPENROUTER_API_KEY is not configured")
+
+    client = OpenAI(base_url=OPENROUTER_BASE_URL, api_key=api_key)
+    openrouter_model = resolve_openrouter_model(model)
+    extra_headers = {
+        "HTTP-Referer": os.environ.get("OPENROUTER_HTTP_REFERER", "https://github.com/VichyTong/CodeJudge"),
+        "X-Title": os.environ.get("OPENROUTER_APP_TITLE", "CodeJudge"),
+    }
+    max_retries = int(os.environ.get("CODEJUDGE_MAX_RETRIES", "5"))
+
+    for i in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model=openrouter_model,
+                messages=message,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                top_p=top_p,
+                stop=stop,
+                extra_headers=extra_headers,
+            )
+            content = response.choices[0].message.content
+            if content:
+                return content.strip()
+        except Exception as e:
+            print(f">>> OpenRouter request failed ({i + 1}/{max_retries}): {e}")
+            time.sleep(min(2 ** i, 8))
+    return ""
+
+
+def api_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
+    if should_use_openrouter(model):
+        return openrouter_request(
+            message=message,
+            model=model,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            stop=stop,
+        )
+
+    lower_model = model.lower()
+    if lower_model.startswith("gpt-4") or lower_model.startswith("gpt-3.5-turbo"):
+        return openai_request(
+            message=message,
+            model=model,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            stop=stop,
+        )
+    if "gemini" in lower_model:
+        return gemini_request(
+            message=message,
+            model=model,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            stop=stop,
+        )
+    raise ValueError(
+        f"No API provider configured for model '{model}'. "
+        "Set OPENROUTER_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY."
+    )
 
 import os
 import google.generativeai as genai

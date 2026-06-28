@@ -1,6 +1,6 @@
 import copy
 import re
-from .utils import openai_request, gemini_request
+from .utils import api_request, should_use_openrouter
 
 def code_llama_prompt(message):
     if len(message) == 1:
@@ -68,12 +68,30 @@ def form_filling(
                 if placeholder_tag in item["content"]:
                     item["content"] = item["content"].replace(placeholder_tag, str(text)).strip()
 
-    # 1. Xử lý mô hình API
+    # 1. API models (OpenRouter, OpenAI, Gemini)
+    if should_use_openrouter(model):
+        return api_request(
+            message=message,
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
     lower_model = model.lower()
     if lower_model.startswith("gpt-4") or lower_model.startswith("gpt-3.5-turbo"):
-        return openai_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
+        return api_request(
+            message=message,
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
     elif "gemini" in lower_model:
-        return gemini_request(message=message, model=model, temperature=temperature, max_tokens=max_tokens)
+        return api_request(
+            message=message,
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
 
     # 2. Xử lý mô hình Local (CodeLlama, Qwen hoặc Llama 3)
     do_sample = temperature > 0
