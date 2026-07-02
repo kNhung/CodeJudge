@@ -77,6 +77,7 @@ class LLMClient:
             model_kwargs["token"] = hf_token
         self.model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)
+        self.last_usage = {}
 
     def generate(self, prompt, temperature=0.01, top_p=0.9, stop=None):
         """Hàm generate cơ bản cho utils.py"""
@@ -93,35 +94,95 @@ class LLMClient:
             return ""
 
     def call(self, system_prompt, user_prompt, format_json=False, use_cache=None):
-        """Hàm call mà Binary/Taxonomy Assessor đang yêu cầu"""
+        """Call local LLM model using Llama-3 Chat Template and retry/format_json validation similar to openrouter."""
         active_cache = use_cache if use_cache is not None else self.use_cache
 
-        # Tạo cache key
+        # Create cache key
         if active_cache:
             cache_key = hashlib.md5(
                 f"{system_prompt}|{user_prompt}".encode()
             ).hexdigest()
             
             if cache_key in self.request_cache:
-                logger.debug(f"✓ Cache hit for LLM request")
+                logger.debug(f"✓ Cache hit for local LLM request")
+                self.last_usage = {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0
+                }
                 return self.request_cache[cache_key]
-        
+
         # Format theo Chat Template chuẩn của Llama-3
         full_prompt = (
             f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|>"
             f"<|start_header_id|>user<|end_header_id|>\n\n{user_prompt}<|eot_id|>"
             f"<|start_header_id|>assistant<|end_header_id|>\n\n"
         )
-        # Giảm temperature xuống thấp nhất để có kết quả JSON ổn định
-        response = self.generate(full_prompt, temperature=0.01)
-        print(f"======Raw Response from LLMClient======\n{response}\n==========================")
-        # Lưu vào cache
-        if active_cache:
-            self.request_cache[cache_key] = response
-            save_cache(self.request_cache)
-            logger.debug(f"Cached LLM response (cache size: {len(self.request_cache)})")
-        
-        return response
+
+        import time
+        max_retries = 5
+        backoff_factor = 2.0
+
+        for attempt in range(max_retries):
+            try:
+                response = self.generate(full_prompt, temperature=0.01)
+                
+                # If generation failed completely (e.g. empty response due to pipeline error), raise error to trigger retry.
+                if not response:
+                    raise RuntimeError("Local LLM generated an empty response")
+                
+                print(f"======Raw Response from LLMClient======\n{response}\n==========================")
+
+                # Validate JSON if format_json is True
+                if format_json:
+                    try:
+                        import re
+                        response_clean = response.strip()
+                        try:
+                            json.loads(response_clean)
+                        except json.JSONDecodeError:
+                            code_block_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', response_clean, re.IGNORECASE)
+                            if code_block_match:
+                                json.loads(code_block_match.group(1).strip())
+                            else:
+                                greedy_match = re.search(r'(\[[\s\S]*\]|\{[\s\S]*\})', response_clean)
+                                if greedy_match:
+                                    json.loads(greedy_match.group(1).strip())
+                                else:
+                                    raise ValueError("No JSON block found")
+                    except Exception as json_err:
+                        raise ValueError(f"Invalid JSON returned: {json_err}")
+
+                # Save token usage metadata
+                try:
+                    # Estimate tokens using the tokenizer
+                    input_tokens = len(self.tokenizer.encode(full_prompt))
+                    output_tokens = len(self.tokenizer.encode(response))
+                    self.last_usage = {
+                        "input_tokens": input_tokens,
+                        "output_tokens": output_tokens,
+                        "total_tokens": input_tokens + output_tokens
+                    }
+                except Exception as token_err:
+                    logger.warning(f"Failed to calculate local token usage: {token_err}")
+                    self.last_usage = {}
+
+                # Save to cache
+                if active_cache:
+                    self.request_cache[cache_key] = response
+                    save_cache(self.request_cache)
+                    logger.debug(f"Cached local LLM response (cache size: {len(self.request_cache)})")
+
+                return response
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    sleep_time = backoff_factor ** (attempt + 1)
+                    logger.warning(f"Local LLM request failed: {e}. Retrying in {sleep_time}s...")
+                    time.sleep(sleep_time)
+                else:
+                    self.last_usage = {}
+                    logger.error(f"LLMClient call error after {max_retries} attempts: {e}")
+                    raise
 
 # Các class hỗ trợ để thỏa mãn file __init__.py
 class LLMConfig: 

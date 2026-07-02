@@ -197,3 +197,63 @@ class TestMultiAgentAssessor:
         assert "Lỗi Agent 1" in result["scoring"]["error_message"]
         assert result["final_score"] == -1.0
         assert result["factor_evaluation"]["Thực hiện đúng logic của câu hỏi"]["compliance"] == -1.0
+
+
+class TestLLMClient:
+    @patch("codejudge.core.llm_client.BitsAndBytesConfig")
+    @patch("codejudge.core.llm_client.AutoTokenizer")
+    @patch("codejudge.core.llm_client.AutoModelForCausalLM")
+    @patch("codejudge.core.llm_client.pipeline")
+    def test_llm_client_call_success_with_json_and_token_estimation(self, mock_pipeline, mock_model, mock_tokenizer, mock_bnb_config):
+        # Setup mocks
+        mock_tokenizer_instance = MagicMock()
+        mock_tokenizer_instance.encode.side_effect = [
+            [1, 2, 3], # encode of full_prompt
+            [4, 5]     # encode of response
+        ]
+        mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
+        
+        mock_pipe_instance = MagicMock()
+        mock_pipe_instance.return_value = [{"generated_text": '{"result": "success"}'}]
+        mock_pipeline.return_value = mock_pipe_instance
+        
+        from codejudge.core.llm_client import LLMClient
+        client = LLMClient(model_name="mock-model", use_cache=False)
+        
+        # Test call
+        response = client.call(system_prompt="sys", user_prompt="usr", format_json=True)
+        
+        assert response == '{"result": "success"}'
+        assert client.last_usage == {
+            "input_tokens": 3,
+            "output_tokens": 2,
+            "total_tokens": 5
+        }
+        
+    @patch("codejudge.core.llm_client.BitsAndBytesConfig")
+    @patch("codejudge.core.llm_client.AutoTokenizer")
+    @patch("codejudge.core.llm_client.AutoModelForCausalLM")
+    @patch("codejudge.core.llm_client.pipeline")
+    def test_llm_client_call_retry_on_invalid_json(self, mock_pipeline, mock_model, mock_tokenizer, mock_bnb_config):
+        # Setup mocks
+        mock_tokenizer_instance = MagicMock()
+        mock_tokenizer_instance.encode.side_effect = lambda text: [1]*len(text)
+        mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
+        
+        mock_pipe_instance = MagicMock()
+        mock_pipe_instance.side_effect = [
+            [{"generated_text": "invalid_json"}], # first attempt fails format_json check
+            [{"generated_text": '{"result": "success"}'}] # second attempt succeeds
+        ]
+        mock_pipeline.return_value = mock_pipe_instance
+        
+        from codejudge.core.llm_client import LLMClient
+        client = LLMClient(model_name="mock-model", use_cache=False)
+        
+        with patch("time.sleep") as mock_sleep:
+            response = client.call(system_prompt="sys", user_prompt="usr", format_json=True)
+            
+            assert response == '{"result": "success"}'
+            mock_sleep.assert_called_once_with(2.0) # backoff_factor ** (attempt + 1) -> 2.0 ** 1 = 2.0
+
+
