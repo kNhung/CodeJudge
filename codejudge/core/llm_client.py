@@ -131,7 +131,7 @@ class LLMClient:
                 if not response:
                     raise RuntimeError("Local LLM generated an empty response")
                 
-                print(f"======Raw Response from LLMClient======\n{response}\n==========================")
+                # print(f"======Raw Response from LLMClient======\n{response}\n==========================")
 
                 # Validate JSON if format_json is True
                 if format_json:
@@ -472,7 +472,7 @@ class QwenClient:
 
         response = self.generate(full_prompt, temperature=0.01)
 
-        print(f"======Raw Response from Qwen======\n{response}\n==========================")
+        # print(f"======Raw Response from Qwen======\n{response}\n==========================")
         if active_cache:
             self.request_cache[cache_key] = response
             save_cache(self.request_cache)
