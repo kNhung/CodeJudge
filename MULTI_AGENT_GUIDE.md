@@ -265,6 +265,20 @@ python evaluation/hcmus/score_with_multi_agent.py \
   --provider openrouter \
   --model google/gemini-2.5-flash \
   --limit 5
+
+python evaluation/hcmus/score_with_multi_agent.py \
+  --csv evaluation/hcmus/hcmus_dataset.csv \
+  --provider openrouter \
+  --model meta-llama/llama-3-8b-instruct \
+  --config evaluation/hcmus/configs/hcmus_tuned_weights.json \
+  --output evaluation/hcmus/output_to_share/llama-3-8b-instruct_hcmus_multi_agent_tuned.jsonl 
+
+  python evaluation/hcmus/score_with_multi_agent.py \
+  --csv evaluation/hcmus/hcmus_dataset.csv \
+  --provider openrouter \
+  --model qwen/qwen-2.5-7b-instruct \
+  --config evaluation/hcmus/configs/hcmus_tuned_weights.json \
+  --output evaluation/hcmus/output_to_share/report_11/qwen-2.5-7b-instruct_hcmus_multi_agent_tuned.jsonl 
 ```
 
 Các tham số CLI chính của HCMUS Multi-Agent:

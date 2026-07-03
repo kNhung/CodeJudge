@@ -157,11 +157,11 @@ if __name__ == "__main__":
         TARGET_FILE = sys.argv[1]
     else:
         # Tự động tìm file .jsonl mới nhất trong thư mục output/
-        output_dir = os.path.join(current_dir, "output")
+        output_dir = os.path.join(current_dir, "output_to_share")
         jsonl_files = glob.glob(os.path.join(output_dir, "*.jsonl"))
         if jsonl_files:
             TARGET_FILE = max(jsonl_files, key=os.path.getmtime)
         else:
-            TARGET_FILE = os.path.join(output_dir, "260604_taxonomy_gemini_2.5_flash.jsonl")
+            TARGET_FILE = os.path.join(output_dir,"report_11", "qwen-2.5-7b-instruct_hcmus_multi_agent_tuned.jsonl")
             
     analyze_model_performance(TARGET_FILE)
