@@ -1,3 +1,6 @@
+import json
+import re
+import time
 import torch
 import hashlib
 import logging
@@ -5,6 +8,56 @@ import os
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
 
 logger = logging.getLogger(__name__)
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+OPENROUTER_MODEL_ALIASES = {
+    "gpt-3.5-turbo": "openai/gpt-3.5-turbo",
+    "gpt-3.5-turbo-1106": "openai/gpt-3.5-turbo",
+    "gpt-4": "openai/gpt-4",
+    "gpt-4-turbo": "openai/gpt-4-turbo",
+    "gemini-2.5-flash": "google/gemini-2.5-flash",
+    "google/gemini-2.5-flash": "google/gemini-2.5-flash",
+    "Meta-Llama-3-8B-Instruct": "meta-llama/meta-llama-3-8b-instruct",
+    "Meta-Llama-3-70B-Instruct": "meta-llama/meta-llama-3-70b-instruct",
+}
+
+
+def resolve_openrouter_model(model_name: str) -> str:
+    if model_name in OPENROUTER_MODEL_ALIASES:
+        return OPENROUTER_MODEL_ALIASES[model_name]
+    if "/" in model_name:
+        return model_name
+    lower = model_name.lower()
+    if "gemini" in lower:
+        return f"google/{model_name}"
+    return model_name
+
+
+def _try_parse_json_response(text: str) -> None:
+    """Raise ValueError if text does not contain parseable JSON."""
+    response_clean = text.strip()
+    try:
+        json.loads(response_clean)
+        return
+    except json.JSONDecodeError:
+        code_block_match = re.search(
+            r"```(?:json)?\s*([\s\S]*?)\s*```", response_clean, re.IGNORECASE
+        )
+        if code_block_match:
+            json.loads(code_block_match.group(1).strip())
+            return
+        greedy_match = re.search(r"(\[[\s\S]*\]|\{[\s\S]*\})", response_clean)
+        if greedy_match:
+            json.loads(greedy_match.group(1).strip())
+            return
+        raise ValueError("No JSON block found")
 
 
 def is_running_on_kaggle():
@@ -341,24 +394,183 @@ class OpenAIClient:
         self.model_name = model_name
         self.use_cache = use_cache
         self.request_cache = {}
+        self.last_usage: dict = {}
+
+    def _chat(self, messages, temperature=0.01, top_p=1.0, stop=None, format_json=False):
+        extra_kwargs = {}
+        if format_json:
+            extra_kwargs["response_format"] = {"type": "json_object"}
+        resp = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+            temperature=temperature,
+            top_p=top_p,
+            stop=stop,
+            max_tokens=8192,
+            **extra_kwargs,
+        )
+        if hasattr(resp, "usage") and resp.usage:
+            self.last_usage = {
+                "input_tokens": resp.usage.prompt_tokens,
+                "output_tokens": resp.usage.completion_tokens,
+                "total_tokens": resp.usage.total_tokens,
+            }
+        else:
+            self.last_usage = {}
+        content = resp.choices[0].message.content
+        return content.strip() if content else ""
+
+    def call(self, system_prompt, user_prompt, format_json=False, **kwargs):
+        if self.use_cache:
+            cache_key = hashlib.md5(
+                f"{system_prompt}|{user_prompt}|{format_json}".encode()
+            ).hexdigest()
+            if cache_key in self.request_cache:
+                self.last_usage = {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0,
+                }
+                return self.request_cache[cache_key]
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_prompt})
+        result = self._chat(messages, format_json=format_json)
+        if format_json:
+            _try_parse_json_response(result)
+        if self.use_cache:
+            self.request_cache[cache_key] = result
+        return result
 
     def generate(self, prompt, temperature=0.0, top_p=1.0, stop=None):
-        # Accept either chat-format messages (list of dicts) or a single string prompt
+        if isinstance(prompt, list):
+            return self._chat(prompt, temperature=temperature, top_p=top_p, stop=stop)
+        return self.call(system_prompt="", user_prompt=str(prompt))
+
+
+class OpenRouterClient:
+    """OpenAI-compatible client for OpenRouter (https://openrouter.ai)."""
+
+    def __init__(self, model_name="google/gemini-2.5-flash", api_key=None, use_cache=True, **kwargs):
         try:
-            if isinstance(prompt, list):
-                resp = self.client.chat.completions.create(model=self.model_name, messages=prompt, temperature=temperature, top_p=top_p, stop=stop)
-                return resp.choices[0].message.content
-            else:
-                # Fallback: use completions endpoint
-                resp = self.client.responses.create(model=self.model_name, input=prompt)
-                # SDK response shapes differ; try common access
-                if hasattr(resp, 'output'):
-                    # Newer SDK
-                    return "\n".join([o.get('content', '') for o in resp.output if isinstance(o, dict)]) or str(resp)
-                return str(resp)
-        except Exception as e:
-            logger.error(f"OpenAIClient generate error: {e}")
-            raise
+            from openai import OpenAI
+        except Exception:
+            raise ImportError("openai SDK not installed. pip install openai >= 3.0.0")
+
+        api_key = api_key or os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "OPENROUTER_API_KEY not found. Set it in .env or pass api_key."
+            )
+
+        self.client = OpenAI(base_url=OPENROUTER_BASE_URL, api_key=api_key)
+        self.model_name = resolve_openrouter_model(model_name)
+        self.use_cache = use_cache
+        self.request_cache = {}
+        self.last_usage: dict = {}
+        self.extra_headers = {
+            "HTTP-Referer": os.getenv(
+                "OPENROUTER_HTTP_REFERER", "https://github.com/VichyTong/CodeJudge"
+            ),
+            "X-Title": os.getenv("OPENROUTER_APP_TITLE", "CodeJudge"),
+        }
+        logger.info("OpenRouter client initialized with model %s", self.model_name)
+
+    def call(self, system_prompt, user_prompt, format_json=False, **kwargs):
+        use_cache = kwargs.get("use_cache", self.use_cache)
+        cache_key = None
+        if use_cache:
+            cache_key = hashlib.md5(
+                f"{system_prompt}|{user_prompt}|{format_json}".encode()
+            ).hexdigest()
+            if cache_key in self.request_cache:
+                self.last_usage = {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0,
+                }
+                return self.request_cache[cache_key]
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_prompt})
+
+        extra_kwargs = {"max_tokens": 8192}
+        if format_json:
+            extra_kwargs["response_format"] = {"type": "json_object"}
+
+        max_retries = int(os.getenv("CODEJUDGE_MAX_RETRIES", "5"))
+        backoff_factor = 2.0
+        last_error = None
+
+        for attempt in range(max_retries):
+            try:
+                resp = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    temperature=0.01,
+                    timeout=120.0,
+                    extra_headers=self.extra_headers,
+                    **extra_kwargs,
+                )
+                result = resp.choices[0].message.content or ""
+
+                if hasattr(resp, "usage") and resp.usage:
+                    self.last_usage = {
+                        "input_tokens": resp.usage.prompt_tokens,
+                        "output_tokens": resp.usage.completion_tokens,
+                        "total_tokens": resp.usage.total_tokens,
+                    }
+                else:
+                    self.last_usage = {}
+
+                if format_json:
+                    try:
+                        _try_parse_json_response(result)
+                    except Exception as json_err:
+                        if attempt < max_retries - 1:
+                            raise ValueError(f"Invalid JSON returned: {json_err}")
+                        logger.warning(
+                            "OpenRouter returned non-strict JSON on final attempt; passing raw text to assessor: %s",
+                            json_err,
+                        )
+
+                result = result.strip()
+                if use_cache and cache_key is not None:
+                    self.request_cache[cache_key] = result
+                return result
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    sleep_time = backoff_factor ** (attempt + 1)
+                    logger.warning(
+                        "OpenRouter request failed: %s. Retrying in %ss...",
+                        e,
+                        sleep_time,
+                    )
+                    time.sleep(sleep_time)
+                else:
+                    self.last_usage = {}
+                    logger.error(
+                        "OpenRouter call error after %s attempts: %s",
+                        max_retries,
+                        e,
+                    )
+                    raise last_error
+
+        raise RuntimeError("OpenRouter request failed without a captured error")
+
+    def generate(self, prompt, temperature=0.01, top_p=0.9, stop=None):
+        if isinstance(prompt, list):
+            user_prompt = "\n".join(
+                f"{m.get('role', 'user')}: {m.get('content', '')}" for m in prompt
+            )
+            return self.call(system_prompt="", user_prompt=user_prompt)
+        return self.call(system_prompt="", user_prompt=str(prompt))
+
 
 class LLMFactory:
     @staticmethod
@@ -402,8 +614,9 @@ class LLMFactory:
         if p == "qwen":
             return QwenClient(model_name=model_name, api_key=api_key, use_cache=use_cache, **kwargs)
         if p in ("openai", "gpt", "gpt-api"):
-            # Provide a thin OpenAI client wrapper
             return OpenAIClient(model_name=model_name, api_key=api_key, use_cache=use_cache, **kwargs)
+        if p in ("openrouter", "open-router"):
+            return OpenRouterClient(model_name=model_name, api_key=api_key, use_cache=use_cache, **kwargs)
         # Default: local model
         return LLMClient(model_name=model_name, use_cache=use_cache, **kwargs)
 
