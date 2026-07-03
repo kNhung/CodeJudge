@@ -12,6 +12,36 @@ import torch
 model_cache = {}
 
 
+def uses_openrouter(model, use_openrouter=None):
+    if use_openrouter is not None:
+        return use_openrouter
+    if "/" in model:
+        return True
+    return bool(os.environ.get("OPENROUTER_API_KEY")) and not os.environ.get(
+        "OPENAI_API_KEY"
+    )
+
+
+def create_api_client(use_openrouter=False):
+    if use_openrouter:
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key:
+            raise Exception("Please set the environment variable OPENROUTER_API_KEY")
+        return OpenAI(
+            api_key=api_key.strip(),
+            base_url="https://openrouter.ai/api/v1",
+        )
+
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise Exception("Please set the environment variable OPENAI_API_KEY")
+    return OpenAI(api_key=api_key.strip())
+
+
+def is_remote_api_model(model):
+    return model.startswith("gpt") or "/" in model
+
+
 def load_model(model, root_path="./model"):
     if model in model_cache:
         print(f"Loading {model} from cache.")
@@ -41,7 +71,7 @@ def load_model(model, root_path="./model"):
             pipeline.tokenizer.eos_token_id,
             pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
         ]
-    elif model.startswith("gpt"):
+    elif is_remote_api_model(model):
         terminators = None
         pipeline = None
     else:
@@ -290,12 +320,16 @@ def answer_to_score(answer, return_type):
             return -1
 
 
-def openai_request(message, model, temperature=0, top_p=1, max_tokens=2000, stop=None):
-    if os.environ.get("OPENAI_API_KEY") is None:
-        raise Exception("Please set the environment variable OPENAI_API_KEY=<API-KEY>")
-    client = OpenAI(
-        api_key=os.environ.get("OPENAI_API_KEY"),
-    )
+def openai_request(
+    message,
+    model,
+    temperature=0,
+    top_p=1,
+    max_tokens=2000,
+    stop=None,
+    use_openrouter=None,
+):
+    client = create_api_client(uses_openrouter(model, use_openrouter))
     # print(message[0]["content"])
     # print(message[1]["content"])
     # print(message[2]["content"])

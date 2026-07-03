@@ -65,6 +65,7 @@ def form_filling(
     temperature,
     info=None,
     max_tokens=2000,
+    use_openrouter=None,
 ):
     message = copy.deepcopy(prompt)
     if info is not None:
@@ -75,9 +76,13 @@ def form_filling(
                 if place_holder in item["content"]:
                     item["content"] = item["content"].replace(place_holder, text).strip()
 
-    if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo"):
+    if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo") or "/" in model:
         return openai_request(
-            message=message, model=model, temperature=temperature, max_tokens=max_tokens
+            message=message,
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            use_openrouter=use_openrouter,
         )
     elif model.startswith("CodeLlama"):
         prompt = code_llama_prompt(message)
