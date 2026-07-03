@@ -1,0 +1,80 @@
+{
+    "parameters": {
+        "model": "google/gemini-2.5-flash",
+        "temperature": 0.0,
+        "return_type": "0_to_4_score_usefulness",
+        "limit": 1,
+        "per_question": true,
+        "compare_prompt": [
+            {
+                "role": "system",
+                "content": "Determine the helpfulness of the code snippet. Output a score from 0 to 4 where 0 means the code snippet is not helpful at all and 4 means the code snippet is very helpful.\n\nProblem:\n{{PROBLEM}}\n\nCode Snippet:\n{{CODE1}}\n"
+            },
+            {
+                "role": "assistant",
+                "content": "Helpfulness (0-4): "
+            }
+        ]
+    },
+    "data": [
+        {
+            "id": 1,
+            "problem_id": "1_final",
+            "student_id": "SV091214",
+            "intent": "Câu 1 (3đ):\nTuấn rất thích nghe nhạc. Vì vậy, Tuấn có một bộ sưu tập gồm n đĩa nhạc (n <=10000). Cậu đánh số hiệu cho các đĩa theo thứ tự từ 1 đến n. Ban đầu các đĩa được xếp chồng lên nhau theo đúng thứ tự từ 1 đến n, nghĩa là đĩa có số hiệu là 1 ở trên cùng, tiếp theo là đĩa 2,..., đĩa có số hiệu là n ở dưới cùng. Khi muốn nghe một đĩa nhạc nào đó, Tuấn sẽ rút đĩa đó ra, nghe xong thì để đĩa lại vào vị trí trên cùng. Hỏi sau m lần rút đĩa nghe nhạc, thứ tự chồng đĩa của Nam sẽ như thế nào?\n\nVí dụ:\nInput:\n\tInput number of disks: 7\n\tInput number of changes: 3\n\tChange 1. Disk Number: 5\n\tChange 2. Disk Number: 3\n\tChange 3. Disk Number: 7\nOutput:\n\tDisk stack: 7 3 5 1 2 4 6\n\nGiải thích:\nSố lượng đĩa nhạc là 7. Vì vậy, chồng đĩa ban đầu là: [1, 2, 3, 4, 5, 6, 7]\nSố lượng đĩa Tuấn đã nghe là 3.\nLần 1. Nghe đĩa số 5 => Chồng đĩa trở thành: [5, 1, 2, 3, 4, 6, 7]\nLần 2. Nghe đĩa số 3 => Chồng đĩa trở thành: [3, 5, 1, 2, 4, 6, 7]\nLần 3. Nghe đĩa số 7 => Chồng đĩa trở thành: [7, 3, 5, 1, 2, 4, 6]\n\n\nCâu 2 (2đ):\nCho mảng hai chiều nguyên A kích thước m x m. Viết hàm tạo mảng đối xứng của A theo chiều dọc\n\nInput:\n[1, 2, 3,\n4, 5, 6,\n7, 8, 9]\nOutput:\n[3, 2, 1,\n6, 5, 4,\n9, 8, 7]\n\n\nCâu 3 (5đ):\nCho file “pokemon.txt”:\npokeID,pokeName,type1,type2,speed\n1,Bulbasaur,Grass,Poison,100\n2,Ivysaur,Grass,Poison,60\n3,Venusaur,Grass,Poison,80\n4,Charmander,Fire,NULL,39\n5,Charmeleon,Fire,NULL,58\n6,Charizard,Fire,Flying,78\n7,Squirtle,Water,NULL,44\n8,Wartortle,Water,NULL,59\n\nSinh viên thực hiện các yêu cầu sau\na. Viết hàm đọc file và lưu dữ liệu Pokemon vào mảng pokemons.\n\tvoid ReadFile(char fileName[], Pokemon pokemons[], int &n);\nTrong đó, struct Pokemon sinh viên tự định nghĩa, bao gồm các thuộc tính sau:\n- id: mã số (tối đa 10 kí tự)\n- name: tên pokemon ( tối đa 30 kí tự)\n- type1: hệ thứ nhất (tối đa 25 kí tự)\n- type2: hệ thứ hai (tối đa 25 kí tự)\n- speed: tốc độ của pokemon\n- attack: sức tấn công của pokemon\n\nb. Viết hàm in ra danh sách pokemons.\n\tvoid PrintPokemonList(Pokemon pokemons[], int n)\nTheo định dạng sau:\n=========================\nID: 001\nPokemon name: Bulbasaur\nType: Grass, Poison\nAttack: 49\nSpeed: 45\n=========================\nID: 002\nPokemon name: Charmander\nType: Fire\nAttack: 52\nSpeed: 65\n=========================\n\nc. Viết hàm nhận vào hệ của pokemon trả về danh sách các pokemon thuộc hệ đã cần tìm.\n\tvoid Search(char type1[], char type2[], Pokemon pokemons[], int n, Pokemon result[])\nViết hàm main để in danh sách Pokemon result. Sử dụng lại hàm PrintPokemonList của câu b",
+            "submission": "// --- bai01.cpp ---\n#include<iostream>\n#include<cstring>\n#include<fstream>\nusing namespace std;\n\nvoid inputArray(int a[], int &n) {\n\tfor (int i=0; i < n; i++) {\n\t\tcin >> a[i];\n\t}\n}\n\nvoid printArray(int a[], int n) {\n\tfor (int i=0; i < n; i++) {\n\t\tcout << a[i] << \" \";\n\t}\n}\n\nvoid removeElement(int a[], int &n, int index) {\n\tfor (int i = index; i < n-1; i++) {\n\t\ta[i] = a[i+1];\n\t}\n\tn--;\n} \n\n\nvoid addElement(int a[], int &n, int index, int value) {\n\t\n\tfor (int i = n; i > index; i--) {\n\t\ta[i] = a[i-1];\n\t\ta[index] = value;\n\t}\n\tn++;\n} \n\nint main() {\n\tint a[10000];\n\tint order[100];\n\tint disk, change;\n\tint n=0;\n\tint num = 0;\n\tdo {\n\t\tcout << \"Input number of disks: \";\n\t\tcin >> disk;\n\t} while (n > 10000);\n\n\tfor (int i=0; i < disk; i++) {\n\t\tnum+=1;\n\t\ta[i] = num; \n\t}\n\tcout << \"Input number of changes: \";\n\tcin >> change;\n\t\n\tcout << \"The order of changes: \";\n\tinputArray(order, change);\n\tfor (int i=0; i < change; i++) {\n\t\tfor (int j =0; j < disk; j++) {\n\t\t\tif(a[j] == order[i]) {\n\t\t\t\tremoveElement(a, disk, j);\n\t\t\t\taddElement(a, disk, 0, order[i]);\n\t\t\t\t\n\t\t\t}\n\t\t}\n\t\t\n\t}\n\tprintArray(a, n);\n\t\n\treturn 0;\n}\n\n\n// --- bai02.cpp ---\n#include<iostream>\n#include<cstring>\n#include<fstream>\nusing namespace std;\n\n\n\nvoid inputMatrix(int a[][100], int &n, int &m) {\n\tfor (int i=0; i < n; i++) {\n\t\tfor (int j = 0; j < m; j++) {\n\t\t\tcin >> a[i][j];\n\t\t}\t\t\n\t}\n}\n\nvoid printMatrix(int a[][100], int n, int m) {\n\tfor (int i=0; i < n; i++) {\n\t\tfor (int j = 0; j < m; j++) {\n\t\t\tcout  << a[i][j] << \" \";\n\t\t}\t\t\n\t\tcout << endl;\n\t}\n}\n\nvoid matrixDoixung(int a[][100], int n,int  m) {\n\tint b[100][100];\n\tfor (int i=0; i < n; i++) {\n\t\tfor (int j = 0; j < m; j++) {\n\t\t\tb[i][m-j-1] = a[i][j];\n\t\t}\t\t\n\t}\n\t\n\tprintMatrix(b, n, m);\n}\nint main() {\n\tint a[100][100];\n\tint n, m;\n\tcout << \"Input dim: \";\n\tcin >> n >> m;\n\tcout << \"Input Arr: \";\n\tinputMatrix(a, n, m);\n\tprintMatrix(a, n, m);\n\tmatrixDoixung(a, n, m);\n\t\n\treturn 0;\n}\n\n\n// --- bai03.cpp ---\n#include <iostream>\n#include <fstream>\n#include <string>  // �?m b?o bao g?m thu vi?n n�y d? s? d?ng std::string\n\nvoid removeEmptyLines(const std::string& filePath) {\n    std::ifstream inFile(filePath.c_str());  // S? d?ng .c_str() d? chuy?n d?i t? std::string sang const char*\n    if (!inFile.is_open()) {\n        std::cerr << \"Unable to open file: \" << filePath << std::endl;\n        return;\n    }\n\n    std::ofstream outFile(\"hello.txt\");  // T?o m?t t?p tin t?m th?i\n\n    std::string line;\n\n    while (std::getline(inFile, line)) {\n        // Ki?m tra d�ng c� ch? ch?a k� t? '\\n' kh�ng\n        if (line == \"\\n\" || line == \"\\r\\n\" || line == \"\\r\" || !line.empty()) {\n            outFile << line << std::endl;\n        }\n    }\n\n    inFile.close();\n    outFile.close();\n\n  \n}\n\nint main() {\n    std::string filePath = \"input.txt\";\n    removeEmptyLines(filePath);\n\n    return 0;\n}\n\nvoid xoaXe(xe ds[], int n){\n    int nam;\n    time_t now = time(0);\n    tm* t = localtime(&now);\n    cout<<\"Nhap so nam: \"; cin>>nam;\n    for(int i=0; i<n; i++){\n        if((1900 + t->tm_year) - ds[i].namSX == nam){\n            for(int j=i; j<n-1; j++){\n                ds[j]=ds[j+1];\n            }\n            n--;\n            i--;\n        }\n    }\n    xuatDS(ds, n);\n}\n\n#include <iostream>\n#include <fstream>\n#include <string>\n\nusing namespace std;\n\nconst int MAX_STUDENTS = 100;\nconst int MAX_SUBJECTS = 10;\n\n\nstruct pokemon {\n\tint id;\n\tstring name;\n\tstring type1;\n\tstring type2;\n\tfloat speed;\n};\n\nvoid docThongTinSinhVien(ifstream& fileIn, pokemon &poke) {\n    getline(fileIn, sinhVien.hoTen, ',');\n    getline(fileIn, sinhVien.mssv, ',');\n    getline(fileIn, sinhVien.ngaySinh);\n\n    fileIn >> sinhVien.soMonHoc;\n    fileIn.ignore(); // �?c k� t? xu?ng d�ng\n\n    for (int i = 0; i < sinhVien.soMonHoc; ++i) {\n        docThongTinMonHoc(fileIn, sinhVien.dsMonHoc[i]);\n    }\n}\n\nvoid ReadFile(char fileName[], Pokemon pokemons[], int &n) {\n\tifstream fileIn(fileName);\n\tif (!fileIn.is_open()) {\n        cout << \"Khong the mo file.\" << endl;\n        return 1;\n    }\n    while (!fileIn.eof()) {\n        docThongTinSinhVien(fileIn, dsSinhVien[soSinhVien]);\n        soSinhVien++;\n    }\n\n}\n\nvoid docThongTinMonHoc(ifstream& fileIn, MonHoc& monHoc) {\n    getline(fileIn, monHoc.tenMon, '-');\n    fileIn >> monHoc.diem;\n}\n\n\n\nvoid inThongTinSinhVien(SinhVien sinhVien) {\n    cout << \"Ho ten: \" << sinhVien.hoTen << endl;\n    cout << \"MSSV: \" << sinhVien.mssv << endl;\n    cout << \"Ngay sinh: \" << sinhVien.ngaySinh << endl;\n\n    cout << \"Ds mon hoc:\" << endl;\n    for (int i = 0; i < sinhVien.soMonHoc; ++i) {\n        cout << sinhVien.dsMonHoc[i].tenMon << \": \" << sinhVien.dsMonHoc[i].diem << endl;\n    }\n\n    cout << endl;\n}\n\nint main() {\n    ifstream fileIn(\"input.txt\");\n\n    \n    SinhVien dsSinhVien[MAX_STUDENTS];\n    int soSinhVien = 0;\n\n    \n\n    fileIn.close();\n\n    // In ra thong tin cac sinh vien\n    for (int i = 0; i < soSinhVien; ++i) {\n        inThongTinSinhVien(dsSinhVien[i]);\n    }\n\n    return 0;\n}\n",
+            "expect_grade": 3.75,
+            "code_gpt_score": {
+                "submission": {
+                    "questions": {
+                        "1": {
+                            "index": 1,
+                            "weight": 3,
+                            "file": "bai01.cpp",
+                            "code_gpt_score": 2.0,
+                            "comparison": "2"
+                        },
+                        "2": {
+                            "index": 2,
+                            "weight": 2,
+                            "file": "bai02.cpp",
+                            "code_gpt_score": 4.0,
+                            "comparison": "4"
+                        },
+                        "3": {
+                            "index": 3,
+                            "weight": 5,
+                            "file": "bai03.cpp",
+                            "code_gpt_score": 0.0,
+                            "comparison": "0"
+                        }
+                    },
+                    "code_gpt_score": 1.4,
+                    "comparison": [
+                        {
+                            "index": 1,
+                            "weight": 3,
+                            "file": "bai01.cpp",
+                            "code_gpt_score": 2.0,
+                            "comparison": "2"
+                        },
+                        {
+                            "index": 2,
+                            "weight": 2,
+                            "file": "bai02.cpp",
+                            "code_gpt_score": 4.0,
+                            "comparison": "4"
+                        },
+                        {
+                            "index": 3,
+                            "weight": 5,
+                            "file": "bai03.cpp",
+                            "code_gpt_score": 0.0,
+                            "comparison": "0"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

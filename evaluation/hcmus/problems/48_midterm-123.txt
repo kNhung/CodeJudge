@@ -1,0 +1,40 @@
+Câu 1. (3đ) Viết chương trình tính tổng các số chẵn trong khoảng từ a đến b, trong đó a và b là hai số nguyên được nhập từ bàn phím (a <= b).
+
+VD:
+	Input:
+		Nhập a: 3
+		Nhập b: 10
+	Output: 28
+
+
+Câu 2. (3đ) Một số automorphic là một số tự nhiên mà bình phương của nó chứa số kết thúc bằng chính nó. Viết chương trình nhập vào một số nguyên dương n (n > 0), kiểm tra n có phải là số automorphic hay không. In ra 1 nếu n là số automorphic, ngược lại, in ra 0.
+
+VD:
+	Input: 25
+	Output: 1
+	(số 25 là một số Automorphic vì bình phương của nó là 625 và 625 kết thúc bằng chính số 25)
+
+
+Câu 3. (2đ) Số nguyên n gọi là số đối xứng là số có từ 2 chữ số trở lên và nếu đọc từ trái qua phải, hay từ phải qua trái đều được số giống nhau. Viết chương trình nhập vào một số nguyên dương n (1000 <= n <= 9999), in ra số đối xứng lớn nhất có thể tạo ra được bằng việc xóa con số bất kì trong n. Lưu ý: số lượng con số bị xóa chưa được xác định.
+
+VD:
+	Input: 1231
+	Output: 121 (xóa 1 chữ số 3)
+
+	Input: 1221
+	Output: 1221 (Xóa 0 chữ số)
+
+
+Câu 4. (2đ) Một cặp số nguyên dương được gọi là số bạn bè nếu tổng các ước số của số này (không tính bản thân số đó) bằng chính số kia và ngược lại. Viết chương trình nhập vào hai số nguyên dương a và b, kiểm tra xem hai số nhập vào có phải là số bạn bè hay không. In 0 nếu không phải số bạn bè, ngược lại, trả về 1.
+
+VD:
+	Input:
+		Nhập a: 220
+		Nhập b: 284
+	Output: 1
+Giải thích:
+	Tổng các ước số của 220 là:
+		1 + 2 + 4 + 5 + 10 + 11 + 20 + 22 + 44 + 55 + 110 = 284
+	Tổng các ước số của 284 là:
+		1 + 2 + 4 + 71 + 142 = 220
+	=> 220 và 284 là số bạn bè
