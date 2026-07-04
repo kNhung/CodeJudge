@@ -169,6 +169,19 @@ python evaluation/conala/score_conala_multi_agent.py \
   --model google/gemini-2.5-flash \
   --source codex \
   --limit 20
+
+python evaluation/conala/score_conala_multi_agent.py \
+  --json evaluation/conala/conala.json \
+  --provider openrouter \
+  --model meta-llama/llama-3-8b-instruct \
+  --output evaluation/conala/output_to_share/report_11/llama-3-8b-instruct_conala_multi_agent.jsonl
+
+python evaluation/conala/score_conala_multi_agent.py \
+--json evaluation/conala/conala.json \
+--provider openrouter \
+--model qwen/qwen-2.5-7b-instruct \
+--output evaluation/conala/output_to_share/report_11/qwen-2.5-7b-instruct_conala_multi_agent.jsonl
+ 
 ```
 
 ### Các tham số CLI chính:

@@ -214,7 +214,10 @@ def main() -> None:
     start_total = time.time()
     records = []
 
-    with output_path.open("w", encoding="utf-8") as f:
+    mode = "a" if args.start > 0 and output_path.exists() else "w"
+    if mode == "a":
+        print(f"🔄 Đang ghi tiếp (append) vào tệp kết quả: {output_path}")
+    with output_path.open(mode, encoding="utf-8") as f:
         for idx, example in enumerate(tqdm(examples, desc="Đang chấm điểm", unit="mẫu"), start=args.start):
             example_record = {
                 "example_index": idx,
