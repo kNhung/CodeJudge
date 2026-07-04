@@ -2,6 +2,7 @@ import os
 import json
 import sys
 import argparse
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -131,6 +132,9 @@ def resume_single_step_per_question_workflow(
         compare_prompt=compare_prompt,
     )
 
+    start_time = time.time()
+    previous_elapsed = out.get("parameters", {}).get("elapsed_seconds", 0.0)
+
     terminators, pipeline = load_model(model)
 
     for item in tqdm(data):
@@ -176,6 +180,7 @@ def resume_single_step_per_question_workflow(
             )
             existing["code_gpt_score"]["submission"]["comparison"] = question_results
 
+            out["parameters"]["elapsed_seconds"] = previous_elapsed + (time.time() - start_time)
             os.makedirs("./output/hcmus/", exist_ok=True)
             with open("./output/hcmus/" + file_name, "w", encoding="utf-8") as f:
                 json.dump(out, f, indent=4, ensure_ascii=False)
@@ -201,6 +206,9 @@ def single_step_workflow(
     )
     if len(out["data"]) == len(data):
         return
+
+    start_time = time.time()
+    previous_elapsed = out.get("parameters", {}).get("elapsed_seconds", 0.0)
 
     terminators, pipeline = load_model(model)
     for item in tqdm(data[len(out["data"]) :]):
@@ -230,6 +238,7 @@ def single_step_workflow(
         }
 
         out["data"].append(output_item)
+        out["parameters"]["elapsed_seconds"] = previous_elapsed + (time.time() - start_time)
         os.makedirs("./output/hcmus/", exist_ok=True)
         with open("./output/hcmus/" + file_name, "w", encoding="utf-8") as f:
             json.dump(out, f, indent=4, ensure_ascii=False)
@@ -258,6 +267,9 @@ def dual_step_workflow(
     )
     if len(out["data"]) == len(data):
         return
+
+    start_time = time.time()
+    previous_elapsed = out.get("parameters", {}).get("elapsed_seconds", 0.0)
 
     include_language = compare_prompt_index >= 2
     terminators, pipeline = load_model(model)
@@ -304,6 +316,7 @@ def dual_step_workflow(
         }
 
         out["data"].append(output_item)
+        out["parameters"]["elapsed_seconds"] = previous_elapsed + (time.time() - start_time)
         os.makedirs("./output/hcmus/", exist_ok=True)
         with open("./output/hcmus/" + file_name, "w", encoding="utf-8") as f:
             json.dump(out, f, indent=4, ensure_ascii=False)
