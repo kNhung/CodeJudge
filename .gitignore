@@ -25,3 +25,6 @@ humaneval-*
 env/
 venv/
 .venv/
+
+/evaluation/conala/output/*
+/evaluation/hcmus/output/*
