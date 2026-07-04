@@ -6,6 +6,7 @@ Các module chính cho chấm điểm code tự động
 from .llm_client import (
     LLMClient,
     OpenAIClient,
+    OpenRouterClient,
     AnthropicClient,
     LocalLLMClient,
     LLMFactory,
@@ -39,6 +40,7 @@ __all__ = [
     # LLM Clients
     "LLMClient",
     "OpenAIClient",
+    "OpenRouterClient",
     "AnthropicClient",
     "LocalLLMClient",
     "LLMFactory",
