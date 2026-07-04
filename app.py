@@ -91,9 +91,8 @@ def get():
                                     Label("LLM Model", cls="label-text text-xs font-bold text-neutral-content/80 mb-1 block"),
                                     Select(
                                         Option("Gemini-2.5-Flash", value="openrouter|google/gemini-2.5-flash", selected=True),
-                                        Option("Llama-3.3-70B-Free", value="openrouter|meta-llama/llama-3.3-70b-instruct:free"),
-                                        Option("DeepSeek-Chat", value="openrouter|deepseek/deepseek-chat"),
-                                        Option("GPT-4o-Mini", value="openrouter|openai/gpt-4o-mini"),
+                                        Option("Llama-3-8B-Instruct", value="openrouter|meta-llama/llama-3-8b-instruct"),
+                                        Option("Qwen2.5-7B-Instruct", value="openrouter|qwen/qwen2.5-7b-instruct"),
                                         id="model_select", name="model_select", cls="select select-bordered select-sm w-full"
                                     ),
                                     cls="flex-1"
