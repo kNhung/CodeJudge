@@ -29,3 +29,5 @@ venv/
 # Ignore ouput files except folder push to git
 */hcmus/output/*
 */conala/output/*
+
+evaluation/output/*

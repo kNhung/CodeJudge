@@ -88,3 +88,52 @@ Sau khi hoàn tất việc đánh giá toàn bộ 142 mẫu thi thực tế củ
 | **Độ lệch trung bình (Mean Bias)** | -2.5075 (Chấm quá khắt khe) | **-0.9376** (Chấm tiệm cận giảng viên) | Giảm độ lệch khắt khe từ hơn 2.5 điểm xuống dưới 0.94 điểm. |
 | **Thời gian phản hồi trung bình** | 60.157 giây / bài thi | **13.077 giây / bài thi** (~5x nhanh hơn) | Tiết kiệm chi phí API và tài nguyên nhờ cơ chế Cache thông minh. |
 
+---
+
+## 🚀 File & Folder Submission (Nộp bằng File & Thư mục)
+
+Chúng ta đã triển khai thành công tính năng nộp bài bằng tệp/thư mục cho cả đề bài (Instruction) và mã nguồn của sinh viên (Student Code).
+
+### 1. Thay đổi về UI/UX (`app.py`)
+- **Tải tệp đề bài**: Bổ sung trường chọn file `<input type="file">` bên dưới vùng nhập đề bài. Cho phép kéo thả hoặc tải lên các tệp định dạng `.txt`, `.md`, `.pdf`, `.docx`.
+- **Giao diện tab nộp mã nguồn**: Tích hợp thanh chọn tab (DaisyUI) để chuyển đổi giữa 3 hình thức nộp:
+  1. **Nhập trực tiếp**: Trình soạn thảo Monaco Editor (mặc định).
+  2. **Nộp bằng file**: Hỗ trợ tải lên 1 tệp mã nguồn đơn lẻ (`.py`, `.cpp`, `.h`, `.hpp`, `.java`).
+  3. **Nộp cả thư mục**: Hỗ trợ tải lên toàn bộ một thư mục mã nguồn chứa nhiều file (sử dụng thuộc tính `webkitdirectory` và `directory`).
+- **Cải tiến giao diện Tab (Sửa lỗi đè chữ & Thêm nền bo góc)**:
+  - Loại bỏ lớp `tab-sm` để tăng chiều cao và khoảng đệm (padding), tránh chữ bị tràn hoặc đè lên viền của ô.
+  - Sử dụng thuộc tính `whitespace-nowrap` để đảm bảo văn bản hiển thị trên một dòng duy nhất và tự động cuộn ngang (`overflow-x-auto`) nếu màn hình quá hẹp, tăng độ cao cấp cho giao diện di động.
+  - Thêm thuộc tính `rounded-t-lg` để bo tròn 2 góc trên cho từng tab.
+  - Thiết lập nền màu động bằng Javascript: Tab đang kích hoạt sẽ có nền sáng hơn (`bg-base-200`), tab chưa kích hoạt sẽ có màu nền tối hơn (`bg-base-300`).
+- **Tự động chuyển tab**: Khi click chọn các Ví Dụ Mẫu (Preset Examples), hệ thống tự động đưa tab nhập mã nguồn về "Nhập trực tiếp" và hiển thị mã nguồn mẫu trong Monaco Editor.
+- **Ràng buộc kiểm tra phía client**: Bổ sung hàm Javascript để kiểm tra và thông báo lỗi nếu người dùng nhấn đánh giá mà không nhập/chọn đề bài hoặc mã nguồn tương ứng với tab đang chọn.
+
+### 2. Xử lý phía Backend (`app.py`)
+- **Trích xuất nội dung đề bài**:
+  - Đối với `.txt` và `.md`: Đọc và giải mã dưới dạng UTF-8.
+  - Đối với `.pdf`: Sử dụng thư viện `pypdf` để duyệt qua các trang và trích xuất văn bản.
+  - Đối với `.docx`: Sử dụng thư viện `python-docx` để đọc các đoạn văn (paragraphs) và ghép nối thành văn bản thuần.
+  - Có cơ chế bắt lỗi và hiển thị cảnh báo trực quan nếu tệp bị lỗi hoặc thiếu thư viện.
+- **Quản lý thư mục tạm & Trình biên dịch**:
+  - Khi sinh viên nộp file hoặc folder, hệ thống tạo thư mục tạm thông qua module `tempfile` và ghi các file nhận được vào thư mục tạm này (giữ nguyên cấu trúc thư mục của bài nộp).
+  - Sử dụng thư viện `shutil` để tự động dọn dẹp (rmtree) thư mục tạm này ngay sau khi quá trình biên dịch/chạy thử cú pháp hoàn tất trong khối `finally`, đảm bảo không bị rò rỉ dung lượng ổ đĩa.
+  - Gọi trình kiểm tra cú pháp biên dịch (`check_syntax`) trên toàn bộ thư mục tạm đối với bài nộp dạng thư mục (cho phép g++ kiểm tra liên kết chéo giữa nhiều file `.cpp` và `.h` hoặc kiểm tra cú pháp toàn bộ project Python).
+
+### 3. Core Engine (`compiler_helper.py`)
+- **Hỗ trợ Java**: Mở rộng hàm `merge_folder_code` để hỗ trợ quét và tự động gộp tất cả các file nguồn `.java` trong thư mục bài nộp thành một file duy nhất được ngăn cách rõ ràng bởi các tiêu đề tệp (giúp LLM dễ đọc và phân tích cấu trúc chương trình Java nhiều file).
+
+### 4. Kết quả kiểm thử
+- Các hàm kiểm tra cú pháp đã chạy và hoàn thành tốt 4/4 bài test tự động của `TestCompilerHelper` trong `test_multi_agent.py`.
+
+### 5. Hỗ trợ Light Mode / Dark Mode
+- **Bộ chuyển đổi theme (Theme Switcher)**: Thêm nút chuyển đổi giao diện (DaisyUI Swap) trên thanh Navbar để người dùng nhanh chóng chuyển qua lại giữa chế độ Light và Dark.
+- **Đồng bộ Monaco Editor**: Tự động chuyển đổi giao diện của trình soạn thảo code Monaco Editor (từ chế độ tối `vs-dark` sang chế độ sáng `vs` và ngược lại) tương ứng với chế độ hiển thị tổng thể của trang web.
+- **Lưu trạng thái (Persistence)**: Trạng thái giao diện được lưu trữ tự động trong `LocalStorage` của trình duyệt để duy trì chế độ sáng/tối khi người dùng tải lại trang hoặc truy cập lại sau này.
+- **Màu chữ thích ứng (Dynamic Contrast Text)**: Thay thế toàn bộ các class màu chữ tĩnh `text-neutral-content` bằng class thích ứng `text-base-content` của DaisyUI. Nhờ đó, chữ sẽ hiển thị màu trắng/sáng trong chế độ Dark Mode và tự động đổi sang màu đen/tối trong chế độ Light Mode, tránh hiện tượng chữ bị mờ hoặc chìm màu trên nền sáng.
+
+### 6. Mở rộng kích thước Khung chính (Full-width Responsive Layout)
+- **Thiết kế co dãn linh hoạt**: Thay thế giới hạn chiều rộng `max-w-7xl` bằng `w-full max-w-full`. Đồng thời tinh chỉnh lề ngoài (`px-4 md:px-8`) giúp khung giao diện chính tận dụng tối đa chiều ngang của các màn hình lớn, đem lại không gian làm việc rộng rãi và trực quan hơn.
+
+
+
+

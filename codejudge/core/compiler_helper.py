@@ -291,4 +291,25 @@ def merge_folder_code(folder_path: Union[str, Path], language: str) -> str:
             except Exception as e:
                 merged_lines.append(f"# Lỗi đọc file {p.name}: {e}")
                 
+    elif lang in {"java"}:
+        merged_lines.append("// [HỆ THỐNG: Đã gộp các file nguồn Java trong thư mục bài nộp]")
+        merged_lines.append("// [HỆ THỐNG: Vui lòng chỉ tập trung đánh giá tư duy thuật toán và logic của sinh viên]")
+        merged_lines.append("")
+        
+        try:
+            java_files = sorted([p for p in folder.iterdir() if p.is_file() and p.suffix.lower() == ".java"])
+        except Exception as e:
+            return f"// Lỗi quét thư mục bài nộp: {e}"
+            
+        for p in java_files:
+            try:
+                content = p.read_text(encoding="utf-8", errors="ignore")
+                merged_lines.append("// " + "=" * 50)
+                merged_lines.append(f"// FILE: {p.name}")
+                merged_lines.append("// " + "=" * 50)
+                merged_lines.append(content)
+                merged_lines.append("")
+            except Exception as e:
+                merged_lines.append(f"// Lỗi đọc file {p.name}: {e}")
+                
     return "\n".join(merged_lines)

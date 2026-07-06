@@ -100,6 +100,9 @@ class MultiAgentAssessor:
         )
         
         factors = self._clean_and_parse_json(response)
+        if isinstance(factors, list) and len(factors) == 1 and isinstance(factors[0], dict):
+            factors = factors[0]
+            
         if isinstance(factors, dict):
             # Try to find a list within the dictionary values
             for k, v in factors.items():

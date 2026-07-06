@@ -470,5 +470,8 @@
   "792bddd3d05f83fe94c914f34e122377": "{\n  \"factors\": [\n    \"Tìm giá trị lớn nhất trong ma trận matrix\"\n  ]\n}",
   "eadc0fb93490b1ff487ece9d2632d5c8": "{\n  \"factors\": [\n    \"Hàm viết chuỗi 'hi there' vào file `f`\"\n  ]\n}",
   "7268e5b1f4c75f8eb4a4d368f8538728": "{\n  \"factors\": [\n    \"Hàm viết chuỗi 'hi there' vào file `myfile`\"\n  ]\n}",
-  "e55816a5f570335a9f89ed2de4664ef0": "{\n  \"factors\": [\n    \"Hàm ghi dữ liệu vào file đúng chuẩn\"\n  ]\n}"
+  "e55816a5f570335a9f89ed2de4664ef0": "{\n  \"factors\": [\n    \"Hàm ghi dữ liệu vào file đúng chuẩn\"\n  ]\n}",
+  "eed6cb8b4e31d014f25aee0e695fc325": "{\n  \"factors\": [\n    \"Hàm longest_substring nhận chuỗi s làm đầu vào và trả về độ dài của chuỗi con dài nhất không chứa ký tự lặp lại\",\n    \"Xử lý trường hợp chuỗi rỗng hoặc chuỗi chỉ có một ký tự\",\n    \"Xử lý chuỗi có nhiều hơn một ký tự và tìm chuỗi con dài nhất không chứa ký tự lặp lại\"\n  ]\n}",
+  "f40992cc1fd009e447cbc7e09106e692": "[{\"factors\": [\"Define struct Pokemon with attributes id, name, speed, type1, type2, attack\", \"Read file ReadFile and store data into array pokemons\", \"Write function PrintPokemonList to print array pokemons\", \"Write function Search to search for pokemons by type\", \"Write main function to print result\"]}]",
+  "bc22e4a3abcf7c4c6dea2e94dbad0396": "API works!"
 }
