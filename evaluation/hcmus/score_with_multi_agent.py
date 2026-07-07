@@ -107,7 +107,9 @@ def evaluate_row(
     row: Dict[str, str],
     assessor: Optional[Any],
     dry_run: bool,
-    config_data: Optional[Dict[str, Any]] = None
+    config_data: Optional[Dict[str, Any]] = None,
+    parallel_factors: bool = False,
+    max_factor_workers: int = 5,
 ) -> List[Dict[str, object]]:
     row_id = row["id"].strip()
     problem_id = row["problem_id"].strip()
@@ -192,10 +194,13 @@ def evaluate_row(
             pre_extracted_factors=pre_factors,
             factor_weights=f_weights,
             syntax_penalties=s_penalties,
-            source_path=source_path_val
+            source_path=source_path_val,
+            parallel_factors=parallel_factors,
+            max_factor_workers=max_factor_workers,
         )
         
         item["runtime_seconds"] = round(time.perf_counter() - started_at, 6)
+        item["parallel_factors"] = parallel_factors
         item["result"] = assessment_result
         
         # Compatibility root-level scores
@@ -291,6 +296,12 @@ def main() -> None:
     parser.add_argument("--start", type=int, default=0, help="Start index in CSV rows")
     parser.add_argument("--dry-run", action="store_true", help="Do not call LLM; only run compiler and validate layout")
     parser.add_argument("--config", type=Path, default=None, help="Path to JSON configuration file containing pre-extracted factors and weights")
+    parser.add_argument("--parallel-factors", action="store_true", default=False,
+                        help="Grade each factor in a separate parallel LLM call")
+    parser.add_argument("--max-factor-workers", type=int, default=5,
+                        help="Max worker threads when --parallel-factors is set")
+    parser.add_argument("--no-cache", action="store_true", default=False,
+                        help="Disable LLM request cache (recommended for fair A/B timing)")
 
     args = parser.parse_args()
     if args.output is None:
@@ -313,32 +324,45 @@ def main() -> None:
         if args.config.is_file():
             with args.config.open("r", encoding="utf-8") as config_f:
                 config_data = json.load(config_f)
-            print(f"📖 Loaded custom HITL config from: {args.config}")
+            print(f"Loaded custom HITL config from: {args.config}")
         else:
-            print(f"⚠️ Warning: Config file {args.config} not found.")
+            print(f"Warning: Config file {args.config} not found.")
 
     assessor = None
     if not args.dry_run:
         from codejudge.core import MultiAgentAssessor, LLMFactory
-        llm_client = LLMFactory.create(provider=args.provider, model_name=args.model)
+        llm_client = LLMFactory.create(
+            provider=args.provider,
+            model_name=args.model,
+            use_cache=not args.no_cache,
+        )
         assessor = MultiAgentAssessor(llm_client=llm_client)
+
+    mode = "PARALLEL factors" if args.parallel_factors else "BATCH factors (1 call)"
+    cache_mode = "off" if args.no_cache else "on"
+    print(f"Mode: MULTI-AGENT / {mode} (Provider: {args.provider}, Model: {args.model}, cache={cache_mode})")
+    print(f"Scoring {len(rows)} exam rows -> {args.output}")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     written = 0
     file_mode = "a" if args.resume and args.output.exists() else "w"
+    start_total = time.perf_counter()
     
     with args.output.open(file_mode, encoding="utf-8") as f:
-        for row in rows:
+        for row_idx, row in enumerate(rows, start=1):
             row_id = str(row.get("id", "")).strip()
             if args.resume and row_id and row_id in processed_ids:
                 continue
 
+            print(f"[{row_idx}/{len(rows)}] Scoring exam id={row_id} ...")
             try:
                 items = evaluate_row(
                     row=row,
                     assessor=assessor,
                     dry_run=args.dry_run,
-                    config_data=config_data
+                    config_data=config_data,
+                    parallel_factors=args.parallel_factors,
+                    max_factor_workers=args.max_factor_workers,
                 )
             except Exception as e:
                 print(f"Error evaluating row {row_id}: {e}")
@@ -348,13 +372,18 @@ def main() -> None:
                 # Add run-level metadata
                 item["model"] = args.model
                 item["provider"] = args.provider
+                item["parallel_factors"] = args.parallel_factors
                 f.write(json.dumps(item, ensure_ascii=False) + "\n")
                 written += 1
 
             if args.resume and row_id:
                 processed_ids.add(row_id)
 
+    duration = time.perf_counter() - start_total
     print(f"Done. Wrote {written} rows to {args.output}")
+    print(f"Total wall-clock: {duration:.2f}s ({duration/60:.2f} min)")
+    if len(rows) > 0:
+        print(f"Avg wall-clock per exam: {duration/len(rows):.2f}s")
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,8 @@
 import json
 import re
 import logging
-from typing import List, Dict, Any, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Dict, Any, Optional, Tuple
 from .llm_client import LLMClient, LLMFactory
 from .compiler_helper import check_syntax
 
@@ -62,6 +63,20 @@ class MultiAgentAssessor:
     """
     def __init__(self, llm_client: LLMClient = None):
         self.llm_client = llm_client or LLMFactory.create()
+
+    def _read_usage(self) -> Dict[str, int]:
+        """Read token usage from the LLM client (thread-local when available)."""
+        if hasattr(self.llm_client, "get_last_usage"):
+            usage = self.llm_client.get_last_usage() or {}
+        elif hasattr(self.llm_client, "last_usage") and self.llm_client.last_usage:
+            usage = self.llm_client.last_usage
+        else:
+            usage = {}
+        return {
+            "input_tokens": int(usage.get("input_tokens", 0) or 0),
+            "output_tokens": int(usage.get("output_tokens", 0) or 0),
+            "total_tokens": int(usage.get("total_tokens", 0) or 0),
+        }
 
     def _clean_and_parse_json(self, response: str) -> Any:
         """Helper to extract and parse JSON block from LLM response string."""
@@ -187,6 +202,102 @@ class MultiAgentAssessor:
                 }
                 
         return final_eval
+
+    def _grade_one_factor(
+        self, student_code: str, factor: str, language: str, use_cache: bool = False
+    ) -> Tuple[Dict[str, Any], Dict[str, int]]:
+        """Grade a single factor; returns (evaluation, usage)."""
+        user_prompt = (
+            f"Ngôn ngữ lập trình: {language}\n\n"
+            f"Factor cần chấm:\n{factor}\n\n"
+            f"Code của sinh viên:\n```\n{student_code}\n```\n\n"
+            'Trả về JSON object duy nhất dạng: {"compliance": 0.0, "reasoning": "..."} '
+            "với compliance từ 0.0 đến 1.0."
+        )
+        response = self.llm_client.call(
+            system_prompt=SYSTEM_PROMPT_FACTOR_GRADER,
+            user_prompt=user_prompt,
+            format_json=True,
+            use_cache=use_cache,
+        )
+        usage = {}
+        if hasattr(self.llm_client, "get_last_usage"):
+            usage = dict(self.llm_client.get_last_usage() or {})
+        elif hasattr(self.llm_client, "last_usage") and self.llm_client.last_usage:
+            usage = dict(self.llm_client.last_usage)
+
+        data = self._clean_and_parse_json(response)
+        if isinstance(data, dict) and "compliance" in data:
+            return (
+                {
+                    "compliance": float(data.get("compliance", 0.0)),
+                    "reasoning": str(data.get("reasoning", "")),
+                },
+                usage,
+            )
+        if isinstance(data, dict):
+            for value in data.values():
+                if isinstance(value, dict) and "compliance" in value:
+                    return (
+                        {
+                            "compliance": float(value.get("compliance", 0.0)),
+                            "reasoning": str(value.get("reasoning", "")),
+                        },
+                        usage,
+                    )
+        return (
+            {"compliance": 0.0, "reasoning": "Không thể đánh giá hoặc thiếu phản hồi từ model."},
+            usage,
+        )
+
+    def assess_factors_parallel(
+        self,
+        student_code: str,
+        factors: List[str],
+        language: str,
+        use_cache: bool = False,
+        max_workers: int = 5,
+    ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, int]]:
+        """Agent 2 (parallel): grade each factor in a separate LLM call."""
+        logger.info("Agent 2: Scoring student code against factors (parallel)...")
+        final_eval: Dict[str, Dict[str, Any]] = {}
+        total_input = 0
+        total_output = 0
+        workers = max(1, min(max_workers, len(factors) or 1))
+
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {
+                executor.submit(
+                    self._grade_one_factor, student_code, factor, language, use_cache
+                ): factor
+                for factor in factors
+            }
+            for future in as_completed(futures):
+                factor = futures[future]
+                try:
+                    evaluation, usage = future.result()
+                    final_eval[factor] = evaluation
+                    total_input += int(usage.get("input_tokens", 0) or 0)
+                    total_output += int(usage.get("output_tokens", 0) or 0)
+                except Exception as e:
+                    logger.error(f"Error grading factor '{factor}': {e}")
+                    final_eval[factor] = {
+                        "compliance": 0.0,
+                        "reasoning": f"Lỗi khi chấm factor: {e}",
+                    }
+
+        for factor in factors:
+            if factor not in final_eval:
+                final_eval[factor] = {
+                    "compliance": 0.0,
+                    "reasoning": "Không thể đánh giá hoặc thiếu phản hồi từ model.",
+                }
+
+        return final_eval, {
+            "input_tokens": total_input,
+            "output_tokens": total_output,
+            "total_tokens": total_input + total_output,
+        }
 
     def _classify_syntax_error(self, error_msg: str, syntax_penalties: Optional[Dict[str, float]] = None) -> float:
         err_lower = error_msg.lower()
@@ -329,7 +440,9 @@ class MultiAgentAssessor:
         factor_weights: Optional[Dict[str, float]] = None,
         syntax_penalties: Optional[Dict[str, float]] = None,
         source_path: Optional[str] = None,
-        use_grader_cache: bool = False
+        use_grader_cache: bool = False,
+        parallel_factors: bool = False,
+        max_factor_workers: int = 5,
     ) -> Dict[str, Any]:
         """Run the complete Multi-Agent grading flow for a question-code pair."""
         logger.info("--- Starting Multi-Agent Assessment ---")
@@ -355,9 +468,9 @@ class MultiAgentAssessor:
         else:
             try:
                 factors = self.extract_factors(question_text)
-                if hasattr(self.llm_client, 'last_usage') and self.llm_client.last_usage:
-                    total_input_tokens += self.llm_client.last_usage.get("input_tokens", 0)
-                    total_output_tokens += self.llm_client.last_usage.get("output_tokens", 0)
+                usage = self._read_usage()
+                total_input_tokens += usage.get("input_tokens", 0)
+                total_output_tokens += usage.get("output_tokens", 0)
             except Exception as e:
                 logger.error(f"Error extracting factors: {e}")
                 llm_error = True
@@ -369,10 +482,23 @@ class MultiAgentAssessor:
             try:
                 if hasattr(self.llm_client, 'last_usage'):
                     self.llm_client.last_usage = {}
-                factor_eval = self.assess_factors(student_code, factors, language, use_cache=use_grader_cache)
-                if hasattr(self.llm_client, 'last_usage') and self.llm_client.last_usage:
-                    total_input_tokens += self.llm_client.last_usage.get("input_tokens", 0)
-                    total_output_tokens += self.llm_client.last_usage.get("output_tokens", 0)
+                if parallel_factors:
+                    factor_eval, grader_usage = self.assess_factors_parallel(
+                        student_code,
+                        factors,
+                        language,
+                        use_cache=use_grader_cache,
+                        max_workers=max_factor_workers,
+                    )
+                    total_input_tokens += grader_usage.get("input_tokens", 0)
+                    total_output_tokens += grader_usage.get("output_tokens", 0)
+                else:
+                    factor_eval = self.assess_factors(
+                        student_code, factors, language, use_cache=use_grader_cache
+                    )
+                    usage = self._read_usage()
+                    total_input_tokens += usage.get("input_tokens", 0)
+                    total_output_tokens += usage.get("output_tokens", 0)
             except Exception as e:
                 logger.error(f"Error assessing factors: {e}")
                 llm_error = True

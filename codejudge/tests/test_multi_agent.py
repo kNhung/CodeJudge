@@ -98,6 +98,30 @@ class TestMultiAgentAssessor:
         assert evaluation["Factor 2"]["compliance"] == 0.5
         mock_llm.call.assert_called_once()
 
+    def test_assess_factors_parallel(self):
+        mock_llm = MagicMock()
+
+        def call_side_effect(system_prompt, user_prompt, format_json=False, use_cache=None):
+            if "Factor 1" in user_prompt:
+                return json.dumps({"compliance": 1.0, "reasoning": "Đúng"})
+            return json.dumps({"compliance": 0.5, "reasoning": "Thiếu"})
+
+        mock_llm.call.side_effect = call_side_effect
+        mock_llm.get_last_usage.return_value = {
+            "input_tokens": 10, "output_tokens": 5, "total_tokens": 15
+        }
+
+        assessor = MultiAgentAssessor(llm_client=mock_llm)
+        evaluation, usage = assessor.assess_factors_parallel(
+            "code", ["Factor 1", "Factor 2"], "python", max_workers=2
+        )
+
+        assert evaluation["Factor 1"]["compliance"] == 1.0
+        assert evaluation["Factor 2"]["compliance"] == 0.5
+        assert mock_llm.call.call_count == 2
+        assert usage["input_tokens"] == 20
+        assert usage["output_tokens"] == 10
+
     def test_calculate_score(self):
         assessor = MultiAgentAssessor(llm_client=MagicMock())
         

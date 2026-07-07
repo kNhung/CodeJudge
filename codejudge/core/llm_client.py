@@ -3,6 +3,7 @@ import torch
 import hashlib
 import logging
 import os
+import threading
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
 from dotenv import load_dotenv
 
@@ -510,6 +511,15 @@ class OpenAIClient:
         self.use_cache = use_cache
         self.request_cache = load_cache() if use_cache else {}
         self.last_usage = {}
+        self._tls = threading.local()
+
+    def _set_usage(self, usage: dict):
+        self.last_usage = usage
+        self._tls.last_usage = usage
+
+    def get_last_usage(self) -> dict:
+        """Thread-safe usage snapshot for the current thread."""
+        return getattr(self._tls, "last_usage", None) or self.last_usage or {}
 
     def generate(self, prompt, temperature=0.0, top_p=1.0, stop=None):
         # Accept either chat-format messages (list of dicts) or a single string prompt
@@ -541,11 +551,11 @@ class OpenAIClient:
             
             if cache_key in self.request_cache:
                 logger.debug("✓ Cache hit for OpenAI/OpenRouter request")
-                self.last_usage = {
+                self._set_usage({
                     "input_tokens": 0,
                     "output_tokens": 0,
                     "total_tokens": 0
-                }
+                })
                 return self.request_cache[cache_key]
 
         messages = []
@@ -576,15 +586,15 @@ class OpenAIClient:
                 )
                 result = resp.choices[0].message.content
                 
-                # Save token usage metadata
+                # Save token usage metadata (thread-local for parallel grading)
                 if hasattr(resp, 'usage') and resp.usage:
-                    self.last_usage = {
+                    self._set_usage({
                         "input_tokens": resp.usage.prompt_tokens,
                         "output_tokens": resp.usage.completion_tokens,
                         "total_tokens": resp.usage.total_tokens
-                    }
+                    })
                 else:
-                    self.last_usage = {}
+                    self._set_usage({})
                 
                 # Validate JSON if format_json is True
                 if format_json:
@@ -617,7 +627,7 @@ class OpenAIClient:
                     logger.warning(f"OpenAI/OpenRouter request failed: {e}. Retrying in {sleep_time}s...")
                     time.sleep(sleep_time)
                 else:
-                    self.last_usage = {}
+                    self._set_usage({})
                     logger.error(f"OpenAIClient call error after {max_retries} attempts: {e}")
                     raise
 

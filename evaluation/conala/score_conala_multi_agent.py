@@ -101,7 +101,9 @@ def evaluate_example(
     model: str = "",
     pre_extracted_factors: Optional[List[str]] = None,
     factor_weights: Optional[Dict[str, float]] = None,
-    syntax_penalties: Optional[Dict[str, float]] = None
+    syntax_penalties: Optional[Dict[str, float]] = None,
+    parallel_factors: bool = False,
+    max_factor_workers: int = 5,
 ) -> Dict[str, Any]:
     intent = example.get("intent", "").strip()
     student_code = normalize_code(example.get(source))
@@ -111,7 +113,8 @@ def evaluate_example(
         "source": source, 
         "grade_reference": grade_reference,
         "provider": provider,
-        "model": model
+        "model": model,
+        "parallel_factors": parallel_factors,
     }
     if dry_run:
         item["result"] = {
@@ -131,7 +134,9 @@ def evaluate_example(
         question_max=None, # We will get score on 10 by default
         pre_extracted_factors=pre_extracted_factors,
         factor_weights=factor_weights,
-        syntax_penalties=syntax_penalties
+        syntax_penalties=syntax_penalties,
+        parallel_factors=parallel_factors,
+        max_factor_workers=max_factor_workers,
     )
     item["runtime_seconds"] = round(time.perf_counter() - started_at, 6)
     
@@ -169,6 +174,12 @@ def main() -> None:
                         help="Validate dataset and CLI without calling the LLM")
     parser.add_argument("--config", type=Path, default=None,
                         help="Path to JSON configuration file containing pre-extracted factors and weights")
+    parser.add_argument("--parallel-factors", action="store_true", default=False,
+                        help="Grade each factor in a separate parallel LLM call")
+    parser.add_argument("--max-factor-workers", type=int, default=5,
+                        help="Max worker threads when --parallel-factors is set")
+    parser.add_argument("--no-cache", action="store_true", default=False,
+                        help="Disable LLM request cache (recommended for fair A/B timing)")
     args = parser.parse_args()
 
     sources = CANDIDATE_FIELDS if args.source == "all" else [args.source]
@@ -197,7 +208,7 @@ def main() -> None:
         llm_client = LLMFactory.create(
             provider=args.provider, 
             model_name=args.model, 
-            use_cache=True,
+            use_cache=not args.no_cache,
             api_key=args.api_key
         )
         assessor = MultiAgentAssessor(llm_client=llm_client)
@@ -205,7 +216,9 @@ def main() -> None:
     if args.dry_run:
         print("📋 Dry run mode: no LLM calls will be made")
     else:
-        print(f"📋 Mode: MULTI-AGENT (Provider: {args.provider}, Model: {args.model})")
+        mode = "PARALLEL factors" if args.parallel_factors else "BATCH factors (1 call)"
+        cache_mode = "off" if args.no_cache else "on"
+        print(f"📋 Mode: MULTI-AGENT / {mode} (Provider: {args.provider}, Model: {args.model}, cache={cache_mode})")
     
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -246,7 +259,9 @@ def main() -> None:
                     model=args.model,
                     pre_extracted_factors=pre_factors,
                     factor_weights=f_weights,
-                    syntax_penalties=s_penalties
+                    syntax_penalties=s_penalties,
+                    parallel_factors=args.parallel_factors,
+                    max_factor_workers=args.max_factor_workers,
                 )
                 example_record["results"].append(item)
             if not example_record["results"]:
