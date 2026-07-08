@@ -86,11 +86,12 @@ def form_filling(
         )
     elif model.startswith("CodeLlama"):
         prompt = code_llama_prompt(message)
+        do_sample = temperature > 0
         return pipeline(
             prompt,
-            do_sample=True,
-            temperature=temperature,
-            top_p=0.9,
+            do_sample=do_sample,
+            temperature=temperature if do_sample else None,
+            top_p=0.9 if do_sample else None,
             num_return_sequences=1,
             eos_token_id=terminators,
             max_new_tokens=max_tokens,
@@ -98,11 +99,12 @@ def form_filling(
         )[0]["generated_text"].strip()
     elif model.startswith("Meta-Llama-3"):
         prompt = llama3_prompt(message)
+        do_sample = temperature > 0
         return pipeline(
             prompt,
-            do_sample=True,
-            temperature=temperature,
-            top_p=0.9,
+            do_sample=do_sample,
+            temperature=temperature if do_sample else None,
+            top_p=0.9 if do_sample else None,
             num_return_sequences=1,
             eos_token_id=terminators,
             max_new_tokens=max_tokens,

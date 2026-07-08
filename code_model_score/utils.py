@@ -38,47 +38,124 @@ def create_api_client(use_openrouter=False):
     return OpenAI(api_key=api_key.strip())
 
 
+def is_running_on_kaggle():
+    return os.path.exists('/kaggle') or os.environ.get('KAGGLE_KERNEL_RUN_TYPE') is not None
+
+
+def get_kaggle_env():
+    """Get environment-specific paths and settings for Kaggle/local."""
+    if is_running_on_kaggle():
+        return {
+            "cache_dir": "/kaggle/working/hf_cache",
+            "model_root": "/kaggle/working/model",
+            "offload_folder": "/kaggle/working/offload",
+        }
+    else:
+        return {
+            "cache_dir": os.path.expanduser("~/.cache/huggingface"),
+            "model_root": "./model",
+            "offload_folder": None,
+        }
+
+
 def is_remote_api_model(model):
-    return model.startswith("gpt") or "/" in model
+    return model.startswith("gpt") or "/" in model or "gemini" in model.lower() or "qwen" in model.lower()
 
 
-def load_model(model, root_path="./model"):
+def load_model(model, root_path=None, cache_dir=None, offload_folder=None):
     if model in model_cache:
         print(f"Loading {model} from cache.")
         return model_cache[model]
 
-    if model.startswith("CodeLlama"):
-        model_path = f"{root_path}/codellama/{model}-hf"
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
-        terminators = tokenizer.eos_token_id
-        pipeline = transformers.pipeline(
-            "text-generation",
-            model=model_path,
-            torch_dtype=torch.float16,
-            device_map="auto",
-            return_full_text=False,
-        )
-    elif model.startswith("Meta-Llama-3"):
-        model_path = f"{root_path}/llama3/{model}-hf"
-        pipeline = transformers.pipeline(
-            "text-generation",
-            model=model_path,
-            model_kwargs={"torch_dtype": torch.bfloat16},
-            device_map="auto",
-            return_full_text=False,
-        )
-        terminators = [
-            pipeline.tokenizer.eos_token_id,
-            pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
-        ]
-    elif is_remote_api_model(model):
-        terminators = None
-        pipeline = None
-    else:
-        raise ("Invalid model name")
+    # Determine environment paths
+    env_paths = get_kaggle_env()
+    if root_path is None:
+        root_path = env_paths["model_root"]
+    if cache_dir is None:
+        cache_dir = env_paths["cache_dir"]
+    if offload_folder is None:
+        offload_folder = env_paths["offload_folder"]
 
-    model_cache[model] = (terminators, pipeline)
-    return terminators, pipeline
+    # Nhận diện tên mô hình linh hoạt
+    pure_model_name = model.split('/')[-1]
+    base_name = pure_model_name.replace("-hf", "")
+    
+    if "CodeLlama" in pure_model_name:
+        repo_id = f"codellama/{pure_model_name}"
+        local_subdir = f"codellama/{base_name}-hf"
+    elif "Meta-Llama-3" in pure_model_name:
+        repo_id = f"meta-llama/{pure_model_name}"
+        local_subdir = f"llama3/{base_name}-hf"
+    elif is_remote_api_model(model):
+        model_cache[model] = (None, None)
+        return None, None
+    else:
+        repo_id = model
+        local_subdir = pure_model_name
+
+    model_path = os.path.join(root_path, local_subdir)
+    
+    # Cơ chế tự tìm model trên Kaggle Input
+    if not os.path.exists(model_path):
+        found_in_kaggle = False
+        for search_root in ['/kaggle/input', '/kaggle/working']:
+            if os.path.exists(search_root):
+                for r, dirs, _ in os.walk(search_root):
+                    if pure_model_name in dirs:
+                        model_path = os.path.join(r, pure_model_name)
+                        found_in_kaggle = True
+                        break
+            if found_in_kaggle: break
+        
+        if not found_in_kaggle:
+            print(f">>> 🌐 Tải {repo_id} từ Hugging Face Hub...")
+            model_path = repo_id
+
+    print(f">>> 🚀 Đang khởi tạo model từ: {model_path}")
+
+    auth_token = os.environ.get("HUGGINGFACE_TOKEN")
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_path,
+            token=auth_token,
+            cache_dir=cache_dir,
+            trust_remote_code=False
+        )
+        dtype = torch.bfloat16 if "Llama-3" in pure_model_name else torch.float16
+        
+        # Prepare pipeline kwargs
+        pipeline_kwargs = {
+            "torch_dtype": dtype,
+            "device_map": "auto",
+            "return_full_text": False,
+        }
+        if auth_token:
+            pipeline_kwargs["token"] = auth_token
+        
+        # Add offload settings for low-memory environments
+        if offload_folder:
+            os.makedirs(offload_folder, exist_ok=True)
+            pipeline_kwargs["offload_folder"] = offload_folder
+        
+        pipeline = transformers.pipeline(
+            "text-generation",
+            model=model_path,
+            **pipeline_kwargs
+        )
+        
+        if "Llama-3" in pure_model_name:
+            terminators = [
+                pipeline.tokenizer.eos_token_id,
+                pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
+            ]
+        else:
+            terminators = tokenizer.eos_token_id
+
+        model_cache[model] = (terminators, pipeline)
+        return terminators, pipeline
+    except Exception as e:
+        print(f"❌ Lỗi load model: {e}")
+        raise e
 
 
 # This function adopted from https://github.com/terryyz/ice-score/blob/main/llm_code_eval/evaluator.py#L24-L59
