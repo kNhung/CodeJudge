@@ -151,6 +151,12 @@ if __name__ == "__main__":
     import sys
     import glob
 
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     if len(sys.argv) > 1:

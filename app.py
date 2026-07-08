@@ -207,9 +207,9 @@ app, rt = fast_app(
                 min-height: 2.5rem !important;
             }
             .upload-file-input::file-selector-button {
-                background: #97D0DE !important;
-                color: #1e3a44 !important;
-                border: 2px solid #97D0DE !important;
+                background: #141414 !important;
+                color: #FFFFFF !important;
+                border: 2px solid #141414 !important;
                 border-radius: 8px !important;
                 padding: 0.4rem 0.85rem !important;
                 margin-right: 0.75rem !important;
@@ -219,9 +219,9 @@ app, rt = fast_app(
                 transition: background-color 0.2s, border-color 0.2s !important;
             }
             .upload-file-input::file-selector-button:hover {
-                background: #7fc0d0 !important;
-                border-color: #7fc0d0 !important;
-                color: #1e3a44 !important;
+                background: #2a2a2a !important;
+                border-color: #2a2a2a !important;
+                color: #FFFFFF !important;
             }
             .upload-filename {
                 font-size: 0.65rem;
