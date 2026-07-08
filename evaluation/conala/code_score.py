@@ -3,6 +3,12 @@ import json
 import sys
 import random
 import argparse
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+load_dotenv()
 
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -186,6 +192,10 @@ def dual_step_workflow(
             json.dump(out, f, indent=4)
 
 
+def sanitize_model_name(model):
+    return model.replace("/", "-").replace(":", "-")
+
+
 def router(
     model,
     step,
@@ -197,10 +207,11 @@ def router(
     start_index,
 ):
     for index in range(start_index, start_index + num_samples):
+        safe_model = sanitize_model_name(model)
         if step == 1:
             compare_prompt = single_step_prompt[compare_prompt_index]
             file_name = (
-                f"{model}-1-{compare_prompt_index}-{temperature}-sample-{index}.json"
+                f"{safe_model}-1-{compare_prompt_index}-{temperature}-sample-{index}.json"
             )
             print(file_name)
             single_step_workflow(
@@ -214,7 +225,7 @@ def router(
             analyze_prompt = dual_step_prompt["analyze_prompt"][analyze_prompt_index]
             compare_prompt = dual_step_prompt["compare_prompt"][compare_prompt_index]
 
-            file_name = f"{model}-2-{analyze_prompt_index}-{compare_prompt_index}-{temperature}-sample-{index}.json"
+            file_name = f"{safe_model}-2-{analyze_prompt_index}-{compare_prompt_index}-{temperature}-sample-{index}.json"
             print(file_name)
             dual_step_workflow(
                 model,
@@ -239,6 +250,9 @@ def main():
     parser.add_argument("--start_index", type=int, default=0)
 
     args = parser.parse_args()
+
+    if "/" in args.model and not os.environ.get("OPENROUTER_API_KEY"):
+        raise SystemExit("OPENROUTER_API_KEY is not set in environment/.env")
 
     model = args.model
     step = args.step
