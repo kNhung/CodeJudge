@@ -66,16 +66,17 @@ def single_step_workflow(
     temperature,
     file_name,
     return_type,
+    use_openrouter,
 ):
     data, out = read_data(model, temperature, file_name, compare_prompt=compare_prompt)
     if len(out["data"]) == len(data):
         return
-
+ 
     terminators, pipeline = load_model(model)
     for item in tqdm(data[len(out["data"]) :]):
         reference = item["snippet"]
         problem = item["intent"]
-
+ 
         output_item = {
             "intent": item["intent"],
             "snippet": item["snippet"],
@@ -87,10 +88,10 @@ def single_step_workflow(
             "grade": item["grade"],
             "code_gpt_score": {},
         }
-
+ 
         for case in conala_test_cases:
             prediction = item[case]
-
+ 
             code_gpt_answer = form_filling(
                 model,
                 compare_prompt,
@@ -101,22 +102,23 @@ def single_step_workflow(
                     "CODE1": prediction,
                     "CODE2": reference,
                     "PROBLEM": problem,
-                }
+                },
+                use_openrouter=use_openrouter,
             )
-
+ 
             output_item["code_gpt_score"][case] = {
                 "code_gpt_score": float(answer_to_score(code_gpt_answer, return_type)),
                 "comparison": code_gpt_answer,
             }
-
+ 
         out["data"].append(output_item)
-
+ 
         os.makedirs(f"./output/conala/", exist_ok=True)
-
+ 
         with open(f"./output/conala/" + file_name, "w") as f:
             json.dump(out, f, indent=4)
-
-
+ 
+ 
 def dual_step_workflow(
     model,
     analyze_prompt,
@@ -124,6 +126,7 @@ def dual_step_workflow(
     temperature,
     file_name,
     return_type,
+    use_openrouter,
 ):
     data, out = read_data(
         model,
@@ -134,12 +137,12 @@ def dual_step_workflow(
     )
     if len(out["data"]) == len(data):
         return
-
+ 
     terminators, pipeline = load_model(model)
     for item in tqdm(data[len(out["data"]) :]):
         reference = item["snippet"]
         problem = item["intent"]
-
+ 
         output_item = {
             "intent": item["intent"],
             "snippet": item["snippet"],
@@ -151,10 +154,10 @@ def dual_step_workflow(
             "grade": item["grade"],
             "code_gpt_score": {},
         }
-
+ 
         for case in conala_test_cases:
             prediction = item[case]
-
+ 
             nl_mistakes = form_filling(
                 model,
                 compare_prompt,
@@ -165,7 +168,8 @@ def dual_step_workflow(
                     "CODE1": prediction,
                     "CODE2": reference,
                     "PROBLEM": problem,
-                }
+                },
+                use_openrouter=use_openrouter,
             )
             code_gpt_answer = form_filling(
                 model,
@@ -177,25 +181,26 @@ def dual_step_workflow(
                     "MISTAKES": nl_mistakes,
                 },
                 max_tokens=10,
+                use_openrouter=use_openrouter,
             )
             code_gpt_score = answer_to_score(code_gpt_answer, return_type)
-
+ 
             output_item["code_gpt_score"][case] = {
                 "code_gpt_score": float(code_gpt_score),
                 "comparison": nl_mistakes,
                 "parsed_comparison": code_gpt_answer,
             }
-
+ 
         out["data"].append(output_item)
         os.makedirs(f"./output/conala/", exist_ok=True)
         with open(f"./output/conala/" + file_name, "w") as f:
             json.dump(out, f, indent=4)
-
-
+ 
+ 
 def sanitize_model_name(model):
     return model.replace("/", "-").replace(":", "-")
-
-
+ 
+ 
 def router(
     model,
     step,
@@ -205,6 +210,7 @@ def router(
     return_type,
     num_samples,
     start_index,
+    use_openrouter,
 ):
     for index in range(start_index, start_index + num_samples):
         safe_model = sanitize_model_name(model)
@@ -220,11 +226,12 @@ def router(
                 temperature,
                 file_name,
                 return_type,
+                use_openrouter,
             )
         elif step == 2:
             analyze_prompt = dual_step_prompt["analyze_prompt"][analyze_prompt_index]
             compare_prompt = dual_step_prompt["compare_prompt"][compare_prompt_index]
-
+ 
             file_name = f"{safe_model}-2-{analyze_prompt_index}-{compare_prompt_index}-{temperature}-sample-{index}.json"
             print(file_name)
             dual_step_workflow(
@@ -234,12 +241,13 @@ def router(
                 temperature,
                 file_name,
                 return_type,
+                use_openrouter,
             )
-
-
+ 
+ 
 def main():
     parser = argparse.ArgumentParser()
-
+ 
     parser.add_argument("--model", type=str, default="gpt-3.5-turbo")
     parser.add_argument("--step", type=int, default=1)
     parser.add_argument("--analyze_prompt", type=int, default=0)
@@ -248,12 +256,18 @@ def main():
     parser.add_argument("--return_type", type=str, default="bool")
     parser.add_argument("--num_samples", type=int, default=1)
     parser.add_argument("--start_index", type=int, default=0)
-
+    parser.add_argument(
+        "--use_openrouter",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Use OPENROUTER_API_KEY with OpenRouter endpoint.",
+    )
+ 
     args = parser.parse_args()
-
-    if "/" in args.model and not os.environ.get("OPENROUTER_API_KEY"):
+ 
+    if args.use_openrouter and "/" in args.model and not os.environ.get("OPENROUTER_API_KEY"):
         raise SystemExit("OPENROUTER_API_KEY is not set in environment/.env")
-
+ 
     model = args.model
     step = args.step
     analyze_prompt_index = args.analyze_prompt
@@ -262,7 +276,8 @@ def main():
     return_type = args.return_type
     num_samples = args.num_samples
     start_index = args.start_index
-
+    use_openrouter = args.use_openrouter
+ 
     router(
         model,
         step,
@@ -272,6 +287,7 @@ def main():
         return_type,
         num_samples,
         start_index,
+        use_openrouter,
     )
 
 
