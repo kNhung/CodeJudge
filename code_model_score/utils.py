@@ -86,6 +86,9 @@ def load_model(model, root_path=None, cache_dir=None, offload_folder=None):
     elif "Meta-Llama-3" in pure_model_name:
         repo_id = f"meta-llama/{pure_model_name}"
         local_subdir = f"llama3/{base_name}-hf"
+    elif "qwen" in pure_model_name.lower():
+        repo_id = model
+        local_subdir = pure_model_name
     elif is_remote_api_model(model):
         model_cache[model] = (None, None)
         return None, None
@@ -147,6 +150,11 @@ def load_model(model, root_path=None, cache_dir=None, offload_folder=None):
             terminators = [
                 pipeline.tokenizer.eos_token_id,
                 pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
+            ]
+        elif "qwen" in pure_model_name.lower():
+            terminators = [
+                pipeline.tokenizer.eos_token_id,
+                pipeline.tokenizer.convert_tokens_to_ids("<|im_end|>"),
             ]
         else:
             terminators = tokenizer.eos_token_id

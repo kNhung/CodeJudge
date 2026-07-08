@@ -57,6 +57,16 @@ def llama3_prompt(message):
     return prompt
 
 
+def qwen_prompt(message):
+    prompt = ""
+    for sentence in message:
+        role = sentence['role']
+        content = sentence['content']
+        prompt += f"<|im_start|>{role}\n{content}<|im_end|>\n"
+    prompt += "<|im_start|>assistant\n"
+    return prompt
+
+
 def form_filling(
     model,
     prompt,
@@ -76,6 +86,32 @@ def form_filling(
                 if place_holder in item["content"]:
                     item["content"] = item["content"].replace(place_holder, text).strip()
 
+    # 1. If local pipeline is loaded, run it locally
+    if pipeline is not None:
+        do_sample = temperature > 0
+        if "CodeLlama" in model:
+            formatted_prompt = code_llama_prompt(message)
+        elif "Meta-Llama-3" in model:
+            formatted_prompt = llama3_prompt(message)
+        elif "qwen" in model.lower():
+            formatted_prompt = qwen_prompt(message)
+        else:
+            try:
+                formatted_prompt = pipeline.tokenizer.apply_chat_template(message, tokenize=False, add_generation_prompt=True)
+            except Exception:
+                formatted_prompt = str(message)
+        return pipeline(
+            formatted_prompt,
+            do_sample=do_sample,
+            temperature=temperature if do_sample else None,
+            top_p=0.9 if do_sample else None,
+            num_return_sequences=1,
+            eos_token_id=terminators,
+            max_new_tokens=max_tokens,
+            pad_token_id=pipeline.tokenizer.eos_token_id,
+        )[0]["generated_text"].strip()
+
+    # 2. Otherwise call remote APIs
     if model.startswith("gpt-4") or model.startswith("gpt-3.5-turbo") or "/" in model:
         return openai_request(
             message=message,
@@ -84,31 +120,5 @@ def form_filling(
             max_tokens=max_tokens,
             use_openrouter=use_openrouter,
         )
-    elif model.startswith("CodeLlama"):
-        prompt = code_llama_prompt(message)
-        do_sample = temperature > 0
-        return pipeline(
-            prompt,
-            do_sample=do_sample,
-            temperature=temperature if do_sample else None,
-            top_p=0.9 if do_sample else None,
-            num_return_sequences=1,
-            eos_token_id=terminators,
-            max_new_tokens=max_tokens,
-            pad_token_id=pipeline.tokenizer.eos_token_id,
-        )[0]["generated_text"].strip()
-    elif model.startswith("Meta-Llama-3"):
-        prompt = llama3_prompt(message)
-        do_sample = temperature > 0
-        return pipeline(
-            prompt,
-            do_sample=do_sample,
-            temperature=temperature if do_sample else None,
-            top_p=0.9 if do_sample else None,
-            num_return_sequences=1,
-            eos_token_id=terminators,
-            max_new_tokens=max_tokens,
-            pad_token_id=pipeline.tokenizer.eos_token_id,
-        )[0]["generated_text"].strip()
     else:
         raise Exception("Invalid model")
