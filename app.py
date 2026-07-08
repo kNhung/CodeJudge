@@ -2,6 +2,7 @@ import asyncio
 import os
 import re
 import json
+import html
 import logging
 from dotenv import load_dotenv
 from starlette.responses import StreamingResponse, HTMLResponse
@@ -55,6 +56,34 @@ def extract_text_from_docx(content_bytes: bytes) -> str:
 from codejudge.core.multi_agent_assessor import MultiAgentAssessor
 from codejudge.core.llm_client import LLMFactory
 from codejudge.core.compiler_helper import check_syntax
+
+FILE_INPUT_CLS = (
+    "upload-file-input file-input file-input-bordered file-input-sm w-full "
+    "bg-slate-50 dark:bg-slate-850 border-slate-200 dark:border-white/10 rounded-xl text-xs"
+)
+UPLOAD_ZONE_CLS = (
+    "upload-zone p-4 bg-slate-50/50 dark:bg-slate-900/20 "
+    "border-2 border-dashed border-[#9E8AEC]/25 dark:border-[#9E8AEC]/20 rounded-2xl"
+)
+
+def file_upload_field(label_text, input_id, name, accept="", hint="", webkitdirectory=False, directory=False, multiple=False, zone_cls=""):
+    upload_kwargs = {"type": "file", "id": input_id, "name": name, "cls": FILE_INPUT_CLS}
+    if accept:
+        upload_kwargs["accept"] = accept
+    if webkitdirectory:
+        upload_kwargs["webkitdirectory"] = True
+    if directory:
+        upload_kwargs["directory"] = True
+    if multiple:
+        upload_kwargs["multiple"] = True
+    children = [
+        Label(label_text, cls="label-text text-[11px] text-slate-500 dark:text-slate-400 mb-2 block font-semibold"),
+        Input(**upload_kwargs),
+    ]
+    if hint:
+        children.append(P(hint, cls="text-[10px] text-slate-400 dark:text-slate-500 mt-2"))
+    return Div(*children, cls=f"{UPLOAD_ZONE_CLS} {zone_cls}".strip())
+
 # We use TailwindCSS, DaisyUI and Monaco Editor via CDN
 app, rt = fast_app(
     hdrs=(
@@ -167,12 +196,131 @@ app, rt = fast_app(
             [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
                 background: rgba(255, 255, 255, 0.2);
             }
+            .upload-zone {
+                transition: border-color 0.2s, background-color 0.2s;
+            }
+            .upload-zone:hover {
+                border-color: rgba(158, 138, 236, 0.45) !important;
+                background-color: rgba(158, 138, 236, 0.04) !important;
+            }
+            .upload-file-input {
+                min-height: 2.5rem !important;
+            }
+            .upload-file-input::file-selector-button {
+                background: #97D0DE !important;
+                color: #1e3a44 !important;
+                border: 2px solid #97D0DE !important;
+                border-radius: 8px !important;
+                padding: 0.4rem 0.85rem !important;
+                margin-right: 0.75rem !important;
+                font-weight: 700 !important;
+                font-size: 0.7rem !important;
+                cursor: pointer !important;
+                transition: background-color 0.2s, border-color 0.2s !important;
+            }
+            .upload-file-input::file-selector-button:hover {
+                background: #7fc0d0 !important;
+                border-color: #7fc0d0 !important;
+                color: #1e3a44 !important;
+            }
+            .upload-filename {
+                font-size: 0.65rem;
+                font-weight: 600;
+                color: #9E8AEC;
+                margin-top: 0.35rem;
+            }
         """)
     )
 )
 
+def get_hcmus_config_dir() -> str:
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "evaluation", "hcmus", "configs")
+
+def list_builtin_problem_ids() -> list:
+    ids = set()
+    config_dir = get_hcmus_config_dir()
+    for filename in ["hcmus_tuned_weights.json", "hcmus_factors.json"]:
+        path = os.path.join(config_dir, filename)
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        ids.update(data.keys())
+            except Exception as e:
+                logger.error(f"Error listing problem ids from {filename}: {e}")
+    return sorted(ids)
+
+def load_builtin_hcmus_config(problem_id: str) -> dict:
+    if not problem_id:
+        return {}
+    config_dir = get_hcmus_config_dir()
+    for filename in ["hcmus_tuned_weights.json", "hcmus_factors.json"]:
+        path = os.path.join(config_dir, filename)
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict) and problem_id in data:
+                        logger.info(f"Loaded configuration for {problem_id} from {filename}")
+                        return data[problem_id]
+            except Exception as e:
+                logger.error(f"Error reading {filename}: {e}")
+    return {}
+
+def parse_uploaded_config(data: dict, problem_id: str = "") -> dict:
+    if not isinstance(data, dict):
+        raise ValueError("File config phải là JSON object.")
+
+    if problem_id and problem_id in data and isinstance(data[problem_id], dict):
+        return data[problem_id]
+
+    if data and all(str(k).isdigit() for k in data.keys()):
+        return data
+
+    if len(data) == 1:
+        only_val = next(iter(data.values()))
+        if isinstance(only_val, dict) and any(str(k).isdigit() for k in only_val.keys()):
+            return only_val
+
+    for key, value in data.items():
+        if isinstance(value, dict) and any(str(qk).isdigit() for qk in value.keys()):
+            if not problem_id or key == problem_id:
+                return value
+
+    raise ValueError(
+        "Không nhận diện được cấu trúc config. "
+        "Hãy dùng dạng {\"1_final\": {\"1\": {...}}} hoặc {\"1\": {...}, \"2\": {...}}."
+    )
+
+def resolve_problem_config(config_mode: str, problem_id: str = "", config_file_bytes: bytes = None) -> tuple:
+    mode = (config_mode or "none").strip().lower()
+    if mode == "none":
+        return {}, ""
+
+    if mode == "upload":
+        if not config_file_bytes:
+            raise ValueError("Vui lòng chọn file config JSON để upload.")
+        try:
+            data = json.loads(config_file_bytes.decode("utf-8"))
+        except json.JSONDecodeError as e:
+            raise ValueError(f"File config không phải JSON hợp lệ: {e}") from e
+        return parse_uploaded_config(data, problem_id), "uploaded"
+
+    if mode == "builtin":
+        cfg = load_builtin_hcmus_config(problem_id)
+        if not cfg:
+            if problem_id:
+                raise ValueError(f"Không tìm thấy config có sẵn cho problem_id='{problem_id}'.")
+            raise ValueError("Vui lòng nhập Problem ID hoặc upload file đề bài để tự nhận diện.")
+        return cfg, "builtin"
+
+    raise ValueError(f"Chế độ config không hợp lệ: {config_mode}")
+
 @rt("/")
 def get():
+    builtin_problem_ids = list_builtin_problem_ids()
+    builtin_ids_hint = ", ".join(builtin_problem_ids) if builtin_problem_ids else "Không có config có sẵn"
     return (
         Title("CodeEval Agent - Friendly SaaS Dashboard"),
         Div(
@@ -238,8 +386,7 @@ def get():
                 Div(
                     Div(
                         Div(
-                            H2("Input Form", cls="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-100"),
-                            Button("View dashboard", type="button", cls="btn btn-xs bg-[#9E8AEC] hover:bg-[#8A75DE] text-white border-none font-bold rounded-md px-3 py-0 text-[10px] flex items-center justify-center text-center leading-none h-6"),
+                            H2("Nhập thông tin bài toán", cls="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-100"),
                             cls="flex items-center justify-between mb-4 border-b border-black/[0.02] pb-2"
                         ),
                         
@@ -248,7 +395,7 @@ def get():
                             Div(
                                 # Language Selection
                                 Div(
-                                    Label("Programming language", cls="label-text text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block"),
+                                    Label("Ngôn ngữ lập trình", cls="label-text text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block"),
                                     Details(
                                         Summary(
                                             Span("🐍 Python", id="selected-lang", cls="text-xs font-semibold text-slate-700 dark:text-slate-200"),
@@ -266,7 +413,7 @@ def get():
                                 ),
                                 # Model Selection
                                 Div(
-                                    Label("LLM Model", cls="label-text text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block"),
+                                    Label("Mô hình LLM", cls="label-text text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block"),
                                     Details(
                                         Summary(
                                             Span("✨ Gemini-2.5-Flash", id="selected-model", cls="text-xs font-semibold text-slate-700 dark:text-slate-200"),
@@ -286,6 +433,49 @@ def get():
                                 ),
                                 cls="flex gap-4 mb-4"
                             ),
+
+                            # Grading Config
+                            Div(
+                                Label("Cấu hình tiêu chí đánh giá", cls="label-text text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block"),
+                                Details(
+                                    Summary(
+                                        Span("Không dùng cấu hình có sẵn", id="selected-config-mode", cls="text-xs font-semibold text-slate-700 dark:text-slate-200"),
+                                        cls="btn btn-sm w-full bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-white/10 hover:bg-slate-100 hover:dark:bg-slate-800 flex justify-between items-center px-3 font-normal !rounded-2xl h-9 min-h-[2.25rem] cursor-pointer"
+                                    ),
+                                    Ul(
+                                        Li(A("Không dùng cấu hình có sẵn", onclick="selectConfigMode('none', 'Không dùng config')", cls="text-xs")),
+                                        Li(A("Config HCMUS có sẵn", onclick="selectConfigMode('builtin', 'Config HCMUS có sẵn')", cls="text-xs")),
+                                        Li(A("Upload file cấu hình", onclick="selectConfigMode('upload', 'Upload file config')", cls="text-xs")),
+                                        cls="dropdown-content z-20 menu p-1.5 bg-white dark:bg-[#1E293B] rounded-2xl w-full border border-slate-100 dark:border-white/5 mt-1 shadow-none"
+                                    ),
+                                    cls="dropdown w-full mb-2"
+                                ),
+                                Input(type="hidden", id="config_mode", name="config_mode", value="none"),
+                                Div(
+                                    Label("Problem ID", cls="label-text text-[10px] text-slate-400 dark:text-slate-500 mb-1 block"),
+                                    Input(
+                                        type="text",
+                                        id="problem_id",
+                                        name="problem_id",
+                                        placeholder="VD: 1_final, 48_midterm-123 (tự nhận từ tên file đề)",
+                                        cls="input input-bordered input-sm w-full bg-slate-50 border-slate-200 dark:bg-slate-850 dark:border-white/10 rounded-lg text-xs"
+                                    ),
+                                    P(f"Có sẵn: {builtin_ids_hint}", cls="text-[10px] text-slate-400 dark:text-slate-500 mt-1"),
+                                    id="config-builtin-panel",
+                                    cls="hidden mt-2"
+                                ),
+                                Div(
+                                    file_upload_field(
+                                        "File config (.json)",
+                                        "config_file", "config_file",
+                                        accept=".json,application/json",
+                                        hint='Hỗ trợ dạng {"1_final": {"1": {...}}} hoặc {"1": {...}, "2": {...}}.',
+                                    ),
+                                    id="config-upload-panel",
+                                    cls="hidden mt-2"
+                                ),
+                                cls="form-control mb-4"
+                            ),
                             
                             # Instruction
                             Div(
@@ -295,17 +485,31 @@ def get():
                                     id="question_text", name="question_text",
                                     cls="textarea textarea-bordered textarea-sm w-full h-20 bg-slate-50 border-slate-200 dark:bg-slate-850 dark:border-white/10 rounded-lg text-sm leading-relaxed"
                                 ),
-                                Div(
-                                    Label("Hoặc nộp file đề bài (.txt, .md, .pdf, .docx)", cls="label-text text-[10px] text-slate-400 dark:text-slate-500 mt-1 block"),
-                                    Input(type="file", id="question_file", name="question_file", accept=".txt,.md,.pdf,.docx", cls="file-input file-input-ghost file-input-xs bg-transparent border-0 text-[10px] text-slate-500 focus:outline-none w-full mt-0.5"),
-                                    cls="mt-1 flex items-center justify-between"
+                                file_upload_field(
+                                    "Nộp file đề bài (.txt, .md, .pdf, .docx)",
+                                    "question_file", "question_file",
+                                    accept=".txt,.md,.pdf,.docx",
+                                    zone_cls="mt-2",
                                 ),
                                 cls="form-control mb-4"
                             ),
-                            
-                            # Code Editor
+
+                            # Grading Mode
                             Div(
-                                Label("Mã nguồn sinh viên (Student Code)", cls="label-text text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block"),
+                                Label("Chế độ chấm", cls="label-text text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block"),
+                                Div(
+                                    Button("Chấm một bài", type="button", id="tab-grade-single", onclick="switchGradingMode('single')", cls="btn btn-xs rounded-full px-3 py-1 font-bold text-[10px] bg-[#9E8AEC] text-white border-none"),
+                                    Button("Chấm nhiều bài", type="button", id="tab-grade-batch", onclick="switchGradingMode('batch')", cls="btn btn-xs rounded-full px-3 py-1 font-bold text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-none"),
+                                    cls="flex gap-2 mb-2"
+                                ),
+                                Input(type="hidden", id="grading_mode", name="grading_mode", value="single"),
+                                P("Batch: upload thư mục gốc, mỗi thư mục con = 1 bài sinh viên.", id="grading-mode-hint", cls="text-[10px] text-slate-400 dark:text-slate-500"),
+                                cls="form-control mb-4"
+                            ),
+                            
+                            # Code Editor - Single
+                            Div(
+                                Label("Mã nguồn sinh viên", cls="label-text text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block"),
                                 Input(type="hidden", id="code_input_type", name="code_input_type", value="editor"),
                                 
                                 # Switcher tabs
@@ -334,20 +538,39 @@ def get():
                                 
                                 # File Wrapper (Hidden initially)
                                 Div(
-                                    Label("Chọn tệp mã nguồn (.cpp, .py, .java)", cls="label-text text-[11px] text-slate-400 dark:text-slate-500 mb-2 block"),
-                                    Input(type="file", id="code_file", name="code_file", accept=".cpp,.cc,.cxx,.c,.py,.java", cls="file-input file-input-bordered file-input-sm w-full bg-slate-50 dark:bg-slate-850"),
+                                    file_upload_field(
+                                        "Chọn tệp mã nguồn (.cpp, .py, .java)",
+                                        "code_file", "code_file",
+                                        accept=".cpp,.cc,.cxx,.c,.py,.java",
+                                    ),
                                     id="file-wrapper",
-                                    cls="hidden p-4 bg-slate-50/50 dark:bg-slate-900/20 border border-dashed border-slate-200 dark:border-white/5 rounded-2xl"
+                                    cls="hidden"
                                 ),
                                 
                                 # Folder Wrapper (Hidden initially)
                                 Div(
-                                    Label("Chọn thư mục mã nguồn sinh viên", cls="label-text text-[11px] text-slate-400 dark:text-slate-500 mb-2 block"),
-                                    Input(type="file", id="code_folder", name="code_folder", webkitdirectory=True, directory=True, multiple=True, cls="file-input file-input-bordered file-input-sm w-full bg-slate-50 dark:bg-slate-850"),
+                                    file_upload_field(
+                                        "Chọn thư mục mã nguồn sinh viên",
+                                        "code_folder", "code_folder",
+                                        webkitdirectory=True, directory=True, multiple=True,
+                                    ),
                                     id="folder-wrapper",
-                                    cls="hidden p-4 bg-slate-50/50 dark:bg-slate-900/20 border border-dashed border-slate-200 dark:border-white/5 rounded-2xl"
+                                    cls="hidden"
                                 ),
+                                id="single-code-section",
                                 cls="form-control mb-4"
+                            ),
+
+                            # Batch upload
+                            Div(
+                                file_upload_field(
+                                    "Thư mục nhiều bài làm (Batch)",
+                                    "batch_folder", "batch_folder",
+                                    webkitdirectory=True, directory=True, multiple=True,
+                                    hint="Cấu trúc: thư_mục_gốc/1/Bai01.cpp, thư_mục_gốc/2/Bai01.cpp hoặc thư_mục_gốc/SV091214/Bai01.cpp",
+                                ),
+                                id="batch-code-section",
+                                cls="hidden form-control mb-4"
                             ),
                             
                             # Action Buttons stacked vertically
@@ -378,6 +601,26 @@ def get():
                                     alert('Vui lòng nhập đề bài hoặc nộp file đề bài!');
                                     return false;
                                 }
+                                const gradingMode = document.getElementById('grading_mode').value;
+                                if (gradingMode === 'batch') {
+                                    if (document.getElementById('batch_folder').files.length === 0) {
+                                        alert('Vui lòng chọn thư mục chứa nhiều bài làm sinh viên!');
+                                        return false;
+                                    }
+                                    const configMode = document.getElementById('config_mode').value;
+                                    if (configMode === 'upload' && document.getElementById('config_file').files.length === 0) {
+                                        alert('Vui lòng chọn file config JSON!');
+                                        return false;
+                                    }
+                                    if (configMode === 'builtin') {
+                                        const pid = document.getElementById('problem_id').value.trim();
+                                        if (!pid && qFile === 0) {
+                                            alert('Khi dùng config có sẵn, hãy nhập Problem ID hoặc upload file đề bài.');
+                                            return false;
+                                        }
+                                    }
+                                    return true;
+                                }
                                 const inputType = document.getElementById('code_input_type').value;
                                 if (inputType === 'editor') {
                                     const val = window.editor ? window.editor.getValue() : document.getElementById('fallback_code').value;
@@ -394,6 +637,21 @@ def get():
                                 } else if (inputType === 'folder') {
                                     if (document.getElementById('code_folder').files.length === 0) {
                                         alert('Vui lòng chọn thư mục mã nguồn sinh viên!');
+                                        return false;
+                                    }
+                                }
+                                const configMode = document.getElementById('config_mode').value;
+                                if (configMode === 'upload') {
+                                    if (document.getElementById('config_file').files.length === 0) {
+                                        alert('Vui lòng chọn file config JSON!');
+                                        return false;
+                                    }
+                                }
+                                if (configMode === 'builtin') {
+                                    const qFile = document.getElementById('question_file').files.length;
+                                    const pid = document.getElementById('problem_id').value.trim();
+                                    if (!pid && qFile === 0) {
+                                        alert('Khi dùng config có sẵn, hãy nhập Problem ID hoặc upload file đề bài để tự nhận diện.');
                                         return false;
                                     }
                                 }
@@ -491,8 +749,45 @@ def get():
                                 }
                             });
                         }
+                        initFileUploadLabels();
                     });
                 })();
+
+                function initFileUploadLabels() {
+                    document.querySelectorAll('.upload-file-input').forEach(input => {
+                        if (input.dataset.bound === '1') return;
+                        input.dataset.bound = '1';
+                        input.addEventListener('change', function() {
+                            const zone = this.closest('.upload-zone');
+                            if (!zone) return;
+                            let nameEl = zone.querySelector('.upload-filename');
+                            if (!nameEl) {
+                                nameEl = document.createElement('p');
+                                nameEl.className = 'upload-filename';
+                                zone.appendChild(nameEl);
+                            }
+                            if (!this.files || this.files.length === 0) {
+                                nameEl.textContent = '';
+                                return;
+                            }
+                            if (this.webkitdirectory || this.getAttribute('webkitdirectory') !== null) {
+                                const folders = new Set();
+                                Array.from(this.files).forEach(f => {
+                                    const p = (f.webkitRelativePath || f.name || '').replace(/\\\\/g, '/');
+                                    const top = p.split('/')[0];
+                                    if (top) folders.add(top);
+                                });
+                                nameEl.textContent = folders.size
+                                    ? `Đã chọn ${folders.size} thư mục · ${this.files.length} tệp`
+                                    : `Đã chọn ${this.files.length} tệp`;
+                            } else {
+                                nameEl.textContent = this.files.length > 1
+                                    ? `Đã chọn ${this.files.length} tệp`
+                                    : `Đã chọn: ${this.files[0].name}`;
+                            }
+                        });
+                    });
+                }
 
                 // Custom Select helpers
                 function selectLang(val, label) {
@@ -510,6 +805,42 @@ def get():
                     document.getElementById('selected-model').textContent = label;
                     const details = document.getElementById('selected-model').closest('details');
                     if (details) details.removeAttribute('open');
+                }
+
+                function selectConfigMode(mode, label) {
+                    document.getElementById('config_mode').value = mode;
+                    document.getElementById('selected-config-mode').textContent = label;
+                    const builtinPanel = document.getElementById('config-builtin-panel');
+                    const uploadPanel = document.getElementById('config-upload-panel');
+                    if (builtinPanel) builtinPanel.classList.toggle('hidden', mode !== 'builtin');
+                    if (uploadPanel) uploadPanel.classList.toggle('hidden', mode !== 'upload');
+                    const details = document.getElementById('selected-config-mode').closest('details');
+                    if (details) details.removeAttribute('open');
+                }
+
+                function switchGradingMode(mode) {
+                    document.getElementById('grading_mode').value = mode;
+                    const singleSection = document.getElementById('single-code-section');
+                    const batchSection = document.getElementById('batch-code-section');
+                    const tabSingle = document.getElementById('tab-grade-single');
+                    const tabBatch = document.getElementById('tab-grade-batch');
+                    const hint = document.getElementById('grading-mode-hint');
+                    if (singleSection) singleSection.classList.toggle('hidden', mode !== 'single');
+                    if (batchSection) batchSection.classList.toggle('hidden', mode !== 'batch');
+                    if (tabSingle && tabBatch) {
+                        if (mode === 'single') {
+                            tabSingle.className = 'btn btn-xs rounded-full px-3 py-1 font-bold text-[10px] bg-[#9E8AEC] text-white border-none';
+                            tabBatch.className = 'btn btn-xs rounded-full px-3 py-1 font-bold text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-none';
+                        } else {
+                            tabBatch.className = 'btn btn-xs rounded-full px-3 py-1 font-bold text-[10px] bg-[#9E8AEC] text-white border-none';
+                            tabSingle.className = 'btn btn-xs rounded-full px-3 py-1 font-bold text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-none';
+                        }
+                    }
+                    if (hint) {
+                        hint.textContent = mode === 'batch'
+                            ? 'Batch: mỗi thư mục con trong upload = 1 bài sinh viên.'
+                            : 'Chấm từng bài: nhập code hoặc upload file/thư mục một sinh viên.';
+                    }
                 }
 
                 // Global click listener to close details.dropdown when clicking outside
@@ -735,6 +1066,7 @@ async def post(request):
     import uuid
     import tempfile
     import os
+    import shutil
     from codejudge.core.compiler_helper import merge_folder_code
 
     form = await request.form()
@@ -781,6 +1113,80 @@ async def post(request):
         elif "đối xứng" in question_text.lower() and "đường chéo" in question_text.lower():
             problem_id = "96_final-123"
 
+    manual_problem_id = form.get("problem_id", "").strip()
+    if manual_problem_id:
+        problem_id = manual_problem_id
+
+    config_mode = form.get("config_mode", "none")
+    config_file = form.get("config_file")
+    config_file_bytes = None
+    if config_file and getattr(config_file, "filename", None):
+        try:
+            config_file_bytes = await config_file.read()
+        except Exception as e:
+            logger.error(f"Error reading config file: {e}")
+            return HTMLResponse(content=f"""
+            <div class="p-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl text-sm text-rose-600 dark:text-rose-400">
+                Không thể đọc file config: {e}
+            </div>
+            """)
+
+    try:
+        problem_config, config_source = resolve_problem_config(config_mode, problem_id, config_file_bytes)
+    except ValueError as e:
+        return HTMLResponse(content=f"""
+        <div class="p-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl text-sm text-rose-600 dark:text-rose-400">
+            Lỗi cấu hình chấm điểm: {e}
+        </div>
+        """)
+
+    grading_mode = form.get("grading_mode", "single")
+
+    # --- Batch grading mode ---
+    if grading_mode == "batch":
+        batch_files = form.getlist("batch_folder")
+        if not batch_files:
+            return HTMLResponse(content="""
+            <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-sm text-rose-600">
+                Vui lòng chọn thư mục chứa nhiều bài làm sinh viên.
+            </div>
+            """)
+
+        temp_dir = tempfile.mkdtemp()
+        for uf in batch_files:
+            if uf.filename:
+                rel = uf.filename.replace("\\", "/")
+                dest = os.path.join(temp_dir, rel)
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                content_bytes = await uf.read()
+                with open(dest, "wb") as f:
+                    f.write(content_bytes)
+
+        submissions = group_batch_submissions_root(temp_dir)
+        if not submissions:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            return HTMLResponse(content="""
+            <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-sm text-rose-600">
+                Không tìm thấy thư mục bài làm con. Mỗi thư mục con trong upload phải là 1 sinh viên.
+            </div>
+            """)
+
+        task_id = str(uuid.uuid4())
+        EVAL_STATUS[task_id] = {
+            "status": "running",
+            "step": 1,
+            "html": render_batch_progress_html(task_id, 0, len(submissions), [], "Khởi tạo batch...")
+        }
+        asyncio.create_task(
+            run_batch_evaluation_task(
+                task_id, question_text, submissions, language, provider, model_name,
+                problem_id=problem_id, problem_config=problem_config, config_source=config_source,
+                temp_dir_to_clean=temp_dir,
+            )
+        )
+        return HTMLResponse(content=EVAL_STATUS[task_id]["html"])
+
+    # --- Single submission mode ---
     # 3. Extract student code and set up temp files
     student_code = ""
     temp_dir = tempfile.mkdtemp()
@@ -858,7 +1264,8 @@ async def post(request):
     asyncio.create_task(
         run_evaluation_task(
             task_id, question_text, student_code, language, provider, model_name,
-            source_path=source_path, temp_dir_to_clean=temp_dir, problem_id=problem_id
+            source_path=source_path, temp_dir_to_clean=temp_dir, problem_id=problem_id,
+            problem_config=problem_config, config_source=config_source
         )
     )
     
@@ -1194,21 +1601,341 @@ def list_code_files(student_dir: str) -> list:
                 entries.append(p)
     return sorted(entries, key=lambda x: key_fn(os.path.basename(x)))
 
-def load_hcmus_config(problem_id: str) -> dict:
-    for filename in ["hcmus_tuned_weights.json", "hcmus_factors.json"]:
-        path = os.path.join("/home/knhung/KLTN/CodeJudge/evaluation/hcmus/configs", filename)
-        if os.path.exists(path):
-            try:
-                with open(path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    if problem_id in data:
-                        logger.info(f"Loaded configuration for {problem_id} from {filename}")
-                        return data[problem_id]
-            except Exception as e:
-                logger.error(f"Error reading {filename}: {e}")
-    return {}
+BATCH_MAX_CONCURRENCY = 2
 
-async def run_evaluation_task(task_id: str, question_text: str, student_code: str, language: str, provider: str, model_name: str, source_path: str = None, temp_dir_to_clean: str = None, problem_id: str = None):
+def _batch_sort_key(name: str):
+    m = re.search(r"(\d+)", name)
+    return int(m.group(1)) if m else 10**9
+
+def group_batch_submissions_root(temp_dir: str) -> list:
+    """Group uploaded batch folder into one submission per immediate subfolder."""
+    root = temp_dir
+    entries = [e for e in os.listdir(root) if not e.startswith(".")]
+    if len(entries) == 1:
+        only_path = os.path.join(root, entries[0])
+        if os.path.isdir(only_path):
+            children = [c for c in os.listdir(only_path) if not c.startswith(".")]
+            if children and any(os.path.isdir(os.path.join(only_path, c)) for c in children):
+                root = only_path
+                entries = [c for c in children if os.path.isdir(os.path.join(only_path, c))]
+
+    submissions = []
+    for name in sorted(entries, key=_batch_sort_key):
+        path = os.path.join(root, name)
+        if os.path.isdir(path):
+            submissions.append({"student_id": name, "source_path": path})
+    return submissions
+
+async def extract_factors_for_questions(questions: list, problem_config: dict, provider: str, model_name: str) -> dict:
+    """Pre-extract factors for all questions (shared across batch submissions)."""
+    import asyncio
+    factors_by_question = {}
+
+    async def extract_one(idx: int, q_text: str):
+        question_config = problem_config.get(str(idx), {})
+        pre_factors = question_config.get("pre_extracted_factors")
+        if pre_factors is not None:
+            return idx, pre_factors
+        try:
+            local_client = LLMFactory.create(provider=provider, model_name=model_name)
+            local_assessor = MultiAgentAssessor(llm_client=local_client)
+            factors = await asyncio.to_thread(local_assessor.extract_factors, q_text)
+            return idx, factors
+        except Exception as e:
+            logger.error(f"Error extracting factors for Q{idx}: {e}")
+            return idx, ["Thực hiện đúng logic của câu hỏi"]
+
+    results = await asyncio.gather(*[
+        extract_one(idx, q_text) for idx, q_text in enumerate(questions, start=1)
+    ])
+    for idx, factors in results:
+        factors_by_question[idx] = factors
+    return factors_by_question
+
+async def evaluate_submission_core(
+    questions: list,
+    language: str,
+    provider: str,
+    model_name: str,
+    source_path: str,
+    problem_config: dict,
+    factors_by_question: dict,
+) -> dict:
+    """Grade one student submission folder."""
+    import asyncio
+    from codejudge.core.compiler_helper import merge_folder_code
+
+    assessor = MultiAgentAssessor(llm_client=LLMFactory.create(provider=provider, model_name=model_name))
+    code_files = list_code_files(source_path) if source_path and os.path.isdir(source_path) else []
+    question_evals = []
+
+    async def grade_one_question(idx: int, q_text: str):
+        factors = factors_by_question.get(idx, ["Thực hiện đúng logic của câu hỏi"])
+        if code_files and (idx - 1) < len(code_files):
+            file_path = code_files[idx - 1]
+            if os.path.isdir(file_path):
+                code_i = merge_folder_code(file_path, language)
+                source_path_i = file_path
+            else:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    code_i = f.read()
+                source_path_i = file_path
+        else:
+            code_i = merge_folder_code(source_path, language) if source_path else ""
+            source_path_i = source_path
+
+        syntax_errors_i = check_syntax(source_path_i if source_path_i else code_i, language)
+        question_config = problem_config.get(str(idx), {})
+        f_weights = question_config.get("factor_weights")
+        s_penalties = question_config.get("syntax_penalties")
+        qmax = parse_question_max(q_text)
+        if qmax is None:
+            qmax = 10.0 / len(questions)
+
+        try:
+            local_client = LLMFactory.create(provider=provider, model_name=model_name)
+            local_assessor = MultiAgentAssessor(llm_client=local_client)
+            factor_eval = await asyncio.to_thread(
+                local_assessor.assess_factors, code_i, factors, language, use_cache=False
+            )
+        except Exception as e:
+            logger.error(f"Error assessing factors for Q{idx}: {e}")
+            factor_eval = {
+                f: {"compliance": -1.0, "reasoning": f"Lỗi chấm LLM: {e}"} for f in factors
+            }
+
+        scoring = assessor.calculate_score(
+            factor_eval=factor_eval,
+            syntax_errors=syntax_errors_i,
+            question_max=qmax,
+            factor_weights=f_weights,
+            syntax_penalties=s_penalties,
+        )
+        suggestions = assessor.generate_suggestions(factor_eval, syntax_errors_i)
+        return {
+            "question_index": idx,
+            "question_name": q_text.splitlines()[0].strip() if q_text else f"Câu {idx}",
+            "question_max": qmax,
+            "factor_eval": factor_eval,
+            "scoring": scoring,
+            "suggestions": suggestions,
+            "syntax_errors": syntax_errors_i,
+            "code_file": os.path.basename(code_files[idx - 1]) if (code_files and (idx - 1) < len(code_files)) else "student_code",
+        }
+
+    graded = await asyncio.gather(*[grade_one_question(idx, q_text) for idx, q_text in enumerate(questions, start=1)])
+    question_evals = sorted(graded, key=lambda x: x["question_index"])
+
+    total_max_score = sum(q["question_max"] for q in question_evals)
+    final_score = sum(q["scoring"].get("scaled_score", 0.0) for q in question_evals)
+    factor_score = sum((q["scoring"].get("factor_score_on_10", 0.0) / 10.0) * q["question_max"] for q in question_evals)
+    syntax_penalty = sum((q["scoring"].get("syntax_penalty_on_10", 0.0) / 10.0) * q["question_max"] for q in question_evals)
+
+    return {
+        "question_evals": question_evals,
+        "total_max_score": total_max_score,
+        "final_score": final_score,
+        "factor_score": factor_score,
+        "syntax_penalty": syntax_penalty,
+    }
+
+def render_batch_progress_html(task_id: str, done: int, total: int, results: list, current_student: str = "") -> str:
+    poll_attr = f'hx-get="/evaluate/status/{task_id}" hx-trigger="every 1s" hx-swap="outerHTML"'
+    pct = int((done / total) * 100) if total else 0
+    rows = ""
+    for r in results:
+        sid = html.escape(str(r.get("student_id", "")))
+        if r.get("error"):
+            score_cell = f'<span class="text-rose-500 text-xs">{html.escape(r["error"])}</span>'
+        else:
+            score_cell = f'<span class="font-bold text-[#9E8AEC]">{r.get("final_score", 0):.2f}</span> / {r.get("total_max_score", 10):.1f}'
+        rows += f"""
+        <tr class="border-b border-slate-100 dark:border-white/5">
+            <td class="py-2 px-2 text-xs font-semibold">{sid}</td>
+            <td class="py-2 px-2 text-xs text-right">{score_cell}</td>
+        </tr>
+        """
+    current_line = f'<p class="text-xs text-slate-500 mb-2">Đang chấm: <span class="font-bold">{html.escape(current_student)}</span></p>' if current_student else ""
+    return f"""
+    <div id="evaluation-progress-container" {poll_attr} class="p-6 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-white/5 rounded-2xl min-h-[380px]">
+        <div class="flex items-center space-x-3 mb-4 border-b border-black/[0.03] dark:border-white/5 pb-3">
+            <span class="loading loading-spinner text-[#9E8AEC] loading-sm"></span>
+            <h3 class="font-extrabold text-sm text-slate-800 dark:text-slate-100">Chấm batch: {done}/{total} bài ({pct}%)</h3>
+        </div>
+        <progress class="progress progress-primary w-full mb-3" value="{done}" max="{total}"></progress>
+        {current_line}
+        <div class="overflow-x-auto max-h-[280px] overflow-y-auto">
+            <table class="table table-xs w-full">
+                <thead><tr><th class="text-[10px]">Sinh viên</th><th class="text-[10px] text-right">Điểm</th></tr></thead>
+                <tbody>{rows}</tbody>
+            </table>
+        </div>
+    </div>
+    """
+
+def render_batch_results_html(batch_results: list, model_name: str, provider: str, language: str, question_text: str, problem_id: str = "") -> str:
+    model_display = html.escape(model_name.split("/")[-1] if "/" in model_name else model_name)
+    lines = [l.strip() for l in question_text.splitlines() if l.strip()]
+    assignment_name = html.escape(lines[0][:50] + ("..." if lines and len(lines[0]) > 50 else "") if lines else (problem_id or "Batch grading"))
+
+    ok_results = [r for r in batch_results if not r.get("error")]
+    avg_score = sum(r.get("final_score", 0) for r in ok_results) / len(ok_results) if ok_results else 0
+    max_score = ok_results[0].get("total_max_score", 10) if ok_results else 10
+
+    rows = ""
+    detail_blocks = ""
+    for r in batch_results:
+        sid = html.escape(str(r.get("student_id", "")))
+        if r.get("error"):
+            rows += f'<tr class="border-b border-slate-100 dark:border-white/5"><td class="py-2 text-xs font-semibold">{sid}</td><td class="py-2 text-xs text-rose-500">{html.escape(r["error"])}</td></tr>'
+            continue
+        fs = r.get("final_score", 0)
+        tmax = r.get("total_max_score", 10)
+        rows += f'<tr class="border-b border-slate-100 dark:border-white/5"><td class="py-2 text-xs font-semibold">{sid}</td><td class="py-2 text-xs text-right font-bold text-[#9E8AEC]">{fs:.2f} / {tmax:.1f}</td></tr>'
+        detail_html = render_results_block_html(
+            r.get("question_evals", []), tmax, fs,
+            r.get("factor_score", 0), r.get("syntax_penalty", 0),
+            model_name, provider, language, question_text
+        )
+        detail_blocks += f"""
+        <details class="collapse collapse-arrow bg-slate-50/50 dark:bg-slate-900/20 border border-slate-100 dark:border-white/5 rounded-xl mb-2">
+            <summary class="collapse-title text-xs font-bold py-3 min-h-0">{sid} — {fs:.2f}/{tmax:.1f}</summary>
+            <div class="collapse-content px-3 pb-3">{detail_html}</div>
+        </details>
+        """
+
+    return f"""
+    <div class="space-y-4 animate-fade-in">
+        <div class="p-5 bg-slate-50/50 dark:bg-slate-900/25 rounded-2xl border border-slate-100 dark:border-white/5">
+            <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Batch Summary</span>
+            <h4 class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">{assignment_name}</h4>
+            <div class="grid grid-cols-3 gap-2 mt-3">
+                <div class="p-2 rounded-xl bg-white dark:bg-[#1A2333] border border-slate-100 dark:border-white/5 text-center">
+                    <span class="text-[8px] text-slate-400 font-bold uppercase block">Tổng bài</span>
+                    <span class="text-sm font-black text-slate-700 dark:text-slate-200">{len(batch_results)}</span>
+                </div>
+                <div class="p-2 rounded-xl bg-white dark:bg-[#1A2333] border border-slate-100 dark:border-white/5 text-center">
+                    <span class="text-[8px] text-slate-400 font-bold uppercase block">Thành công</span>
+                    <span class="text-sm font-black text-emerald-500">{len(ok_results)}</span>
+                </div>
+                <div class="p-2 rounded-xl bg-white dark:bg-[#1A2333] border border-slate-100 dark:border-white/5 text-center">
+                    <span class="text-[8px] text-slate-400 font-bold uppercase block">Điểm TB</span>
+                    <span class="text-sm font-black text-[#9E8AEC]">{avg_score:.2f}/{max_score:.1f}</span>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-2">Model: {model_display} · {html.escape(language)}</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="table table-sm w-full">
+                <thead><tr><th class="text-[10px]">Sinh viên</th><th class="text-[10px] text-right">Điểm</th></tr></thead>
+                <tbody>{rows}</tbody>
+            </table>
+        </div>
+        <div class="space-y-2">
+            <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Chi tiết từng bài</span>
+            {detail_blocks}
+        </div>
+    </div>
+    """
+
+def update_batch_html(task_id: str, done: int, total: int, results: list, current_student: str = "", completed: bool = False, final_html: str = ""):
+    if completed:
+        EVAL_STATUS[task_id]["status"] = "completed"
+        EVAL_STATUS[task_id]["html"] = f'<div id="evaluation-progress-container" class="animate-fade-in">{final_html}</div>'
+    else:
+        EVAL_STATUS[task_id]["status"] = "running"
+        EVAL_STATUS[task_id]["html"] = render_batch_progress_html(task_id, done, total, results, current_student)
+
+async def run_batch_evaluation_task(
+    task_id: str,
+    question_text: str,
+    submissions: list,
+    language: str,
+    provider: str,
+    model_name: str,
+    problem_id: str = None,
+    problem_config: dict = None,
+    config_source: str = "",
+    temp_dir_to_clean: str = None,
+):
+    import asyncio
+    import shutil
+
+    try:
+        EVAL_STATUS[task_id]["status"] = "running"
+        total = len(submissions)
+        problem_config = problem_config or {}
+        questions = split_questions(question_text)
+        batch_results = []
+
+        if "mock" in provider or "mock" in model_name:
+            await asyncio.sleep(0.5)
+            for i, sub in enumerate(submissions, start=1):
+                batch_results.append({
+                    "student_id": sub["student_id"],
+                    "final_score": round(10.0 - i * 0.5, 2),
+                    "total_max_score": 10.0,
+                    "factor_score": 8.0,
+                    "syntax_penalty": 0.5,
+                    "question_evals": [],
+                })
+                update_batch_html(task_id, i, total, batch_results)
+                await asyncio.sleep(0.2)
+            final_html = render_batch_results_html(batch_results, model_name, provider, language, question_text, problem_id or "")
+            update_batch_html(task_id, total, total, batch_results, completed=True, final_html=final_html)
+            return
+
+        update_batch_html(task_id, 0, total, batch_results, "Đang trích xuất tiêu chí...")
+        factors_by_question = await extract_factors_for_questions(questions, problem_config, provider, model_name)
+
+        semaphore = asyncio.Semaphore(BATCH_MAX_CONCURRENCY)
+        completed_count = 0
+        lock = asyncio.Lock()
+
+        async def grade_submission(sub: dict):
+            nonlocal completed_count
+            sid = sub["student_id"]
+            async with semaphore:
+                update_batch_html(task_id, completed_count, total, batch_results, sid)
+                try:
+                    result = await evaluate_submission_core(
+                        questions=questions,
+                        language=language,
+                        provider=provider,
+                        model_name=model_name,
+                        source_path=sub["source_path"],
+                        problem_config=problem_config,
+                        factors_by_question=factors_by_question,
+                    )
+                    row = {"student_id": sid, **result}
+                except Exception as e:
+                    logger.error(f"Batch grading failed for {sid}: {e}")
+                    row = {"student_id": sid, "error": str(e)}
+                async with lock:
+                    batch_results.append(row)
+                    batch_results.sort(key=lambda x: _batch_sort_key(str(x.get("student_id", ""))))
+                    completed_count += 1
+                    update_batch_html(task_id, completed_count, total, batch_results)
+
+        await asyncio.gather(*[grade_submission(sub) for sub in submissions])
+        final_html = render_batch_results_html(batch_results, model_name, provider, language, question_text, problem_id or "")
+        update_batch_html(task_id, total, total, batch_results, completed=True, final_html=final_html)
+    except Exception as e:
+        logger.error(f"Batch evaluation failed: {e}")
+        EVAL_STATUS[task_id]["status"] = "failed"
+        EVAL_STATUS[task_id]["html"] = f"""
+        <div id="evaluation-progress-container" class="p-6 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 rounded-2xl text-sm text-rose-600">
+            Lỗi chấm batch: {html.escape(str(e))}
+        </div>
+        """
+    finally:
+        if temp_dir_to_clean and os.path.exists(temp_dir_to_clean):
+            try:
+                shutil.rmtree(temp_dir_to_clean)
+            except Exception as e:
+                logger.warning(f"Error cleaning batch temp dir: {e}")
+
+async def run_evaluation_task(task_id: str, question_text: str, student_code: str, language: str, provider: str, model_name: str, source_path: str = None, temp_dir_to_clean: str = None, problem_id: str = None, problem_config: dict = None, config_source: str = ""):
     import asyncio
     import re
     import shutil
@@ -1346,10 +2073,9 @@ async def run_evaluation_task(task_id: str, question_text: str, student_code: st
         llm_client = LLMFactory.create(provider=provider, model_name=model_name)
         assessor = MultiAgentAssessor(llm_client=llm_client)
         
-        # Load pre-extracted factors config
-        problem_config = {}
-        if problem_id:
-            problem_config = load_hcmus_config(problem_id)
+        problem_config = problem_config or {}
+        if config_source:
+            logger.info(f"Using grading config source={config_source}, problem_id={problem_id}")
             
         # Helper list to keep results
         question_evals = []
