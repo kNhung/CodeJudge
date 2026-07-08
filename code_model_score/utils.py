@@ -126,24 +126,35 @@ def load_model(model, root_path=None, cache_dir=None, offload_folder=None):
         )
         dtype = torch.bfloat16 if "Llama-3" in pure_model_name else torch.float16
         
-        # Prepare pipeline kwargs
-        pipeline_kwargs = {
+        # Prepare model loading kwargs
+        from transformers import AutoModelForCausalLM
+        
+        model_kwargs = {
             "torch_dtype": dtype,
             "device_map": "auto",
-            "return_full_text": False,
+            "trust_remote_code": False,
+            "cache_dir": cache_dir,
         }
         if auth_token:
-            pipeline_kwargs["token"] = auth_token
+            model_kwargs["token"] = auth_token
         
         # Add offload settings for low-memory environments
         if offload_folder:
             os.makedirs(offload_folder, exist_ok=True)
-            pipeline_kwargs["offload_folder"] = offload_folder
+            model_kwargs["offload_folder"] = offload_folder
+            model_kwargs["low_cpu_mem_usage"] = True
+        
+        print(f">>> 🚀 Đang tải trọng số mô hình vào RAM/VRAM...")
+        loaded_model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            **model_kwargs
+        )
         
         pipeline = transformers.pipeline(
             "text-generation",
-            model=model_path,
-            **pipeline_kwargs
+            model=loaded_model,
+            tokenizer=tokenizer,
+            return_full_text=False,
         )
         
         if "Llama-3" in pure_model_name:
