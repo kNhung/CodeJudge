@@ -49,11 +49,18 @@ except Exception:
     HAS_QWEN = False
 
 class LLMClient:
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", api_key=None, use_cache=True, **kwargs):
+    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", api_key=None, use_cache=True, cache_dir=None, offload_folder=None, **kwargs):
         print(f"🚀 [CodeJudge] Đang nạp model: {model_name}")
         self.model_name = model_name
         self.use_cache = use_cache
         self.request_cache = load_cache() if use_cache else {}  # Cache LLM requests
+        
+        # Determine environment paths
+        if is_running_on_kaggle():
+            if cache_dir is None:
+                cache_dir = "/kaggle/working/hf_cache"
+            if offload_folder is None:
+                offload_folder = "/kaggle/working/offload"
         
         # Cấu hình 4-bit để không bị văng khỏi Kaggle
         # Adjust bitsandbytes config based on environment: Kaggle often has limited memory,
@@ -65,17 +72,34 @@ class LLMClient:
             bnb_4bit_use_double_quant=True
         )
 
-        # Use trust_remote_code only when not in a restrictive environment
-        trust_remote = not is_running_on_kaggle()
+        # Allow trust_remote_code to be True by default for flexibility (needed by Qwen, etc.)
+        trust_remote = kwargs.get("trust_remote_code", True)
         hf_token = os.environ.get("HUGGINGFACE_TOKEN")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_token)
+        
+        tokenizer_kwargs = {
+            "token": hf_token,
+            "trust_remote_code": trust_remote
+        }
+        if cache_dir:
+            tokenizer_kwargs["cache_dir"] = cache_dir
+            
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, **tokenizer_kwargs)
+        
         model_kwargs = {
             "quantization_config": bnb_config,
             "device_map": "auto",
             "trust_remote_code": trust_remote,
+            "low_cpu_mem_usage": True,
         }
         if hf_token:
             model_kwargs["token"] = hf_token
+        if cache_dir:
+            model_kwargs["cache_dir"] = cache_dir
+        if offload_folder:
+            model_kwargs["offload_folder"] = offload_folder
+            model_kwargs["offload_state_dict"] = True
+            os.makedirs(offload_folder, exist_ok=True)
+            
         self.model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)
         self.last_usage = {}
@@ -491,7 +515,10 @@ class OpenAIClient:
             raise ImportError("openai SDK not installed. pip install openai >= 3.0.0")
         
         # Determine API key based on base_url or defaults
-        if base_url and "openrouter.ai" in base_url:
+        is_local_api = base_url and any(h in base_url for h in ("localhost", "127.0.0.1", "0.0.0.0"))
+        if is_local_api:
+            api_key = api_key or os.getenv("OPENAI_API_KEY") or "local"
+        elif base_url and "openrouter.ai" in base_url:
             api_key = api_key or os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
         else:
             api_key = api_key or os.getenv("OPENAI_API_KEY")
@@ -684,6 +711,26 @@ class LLMFactory:
                 api_key=api_key,
                 use_cache=use_cache,
                 base_url="https://openrouter.ai/api/v1",
+                **kwargs
+            )
+        if p == "ollama":
+            api_key = api_key or "ollama"
+            base_url = kwargs.get("base_url") or "http://localhost:11434/v1"
+            return OpenAIClient(
+                model_name=model_name,
+                api_key=api_key,
+                use_cache=use_cache,
+                base_url=base_url,
+                **kwargs
+            )
+        if p == "vllm":
+            api_key = api_key or "vllm"
+            base_url = kwargs.get("base_url") or "http://localhost:8000/v1"
+            return OpenAIClient(
+                model_name=model_name,
+                api_key=api_key,
+                use_cache=use_cache,
+                base_url=base_url,
                 **kwargs
             )
         # Default: local model
