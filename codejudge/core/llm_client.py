@@ -134,10 +134,15 @@ class LLMClient:
         """Hàm generate cơ bản cho utils.py"""
         try:
             do_sample = temperature > 0
+            
             outputs = self.pipe(
                 prompt,
                 temperature=temperature if do_sample else None,
-                do_sample=do_sample
+                top_p=top_p if do_sample else None,
+                do_sample=do_sample,
+                return_full_text=False,
+                max_new_tokens=7000,
+                max_length=None
             )
             return outputs[0]['generated_text'].strip()
         except Exception as e:
