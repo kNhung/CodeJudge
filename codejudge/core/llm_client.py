@@ -34,6 +34,30 @@ def save_cache(cache: dict):
 def is_running_on_kaggle():
     return os.path.exists('/kaggle') or os.environ.get('KAGGLE_KERNEL_RUN_TYPE') is not None
 
+
+def resolve_kaggle_model_path(model_name: str) -> str:
+    """If running on Kaggle and the model exists in /kaggle/input, return the local path."""
+    if not is_running_on_kaggle():
+        return model_name
+        
+    if os.path.exists(model_name):
+        return model_name
+        
+    pure_name = model_name.split('/')[-1]
+    normalized_pure = pure_name.lower().replace("-", "").replace("_", "").replace(".", "")
+    
+    # Try searching in /kaggle/input and /kaggle/working
+    for search_root in ('/kaggle/input', '/kaggle/working'):
+        if os.path.exists(search_root):
+            for root, dirs, files in os.walk(search_root):
+                if "config.json" in files:
+                    # Split path parts
+                    parts = [p.lower().replace("-", "").replace("_", "").replace(".", "") for p in root.split('/')]
+                    if any(normalized_pure in p or p in normalized_pure for p in parts if p):
+                        logger.info(f"✓ Found local model at: {root}")
+                        return root
+    return model_name
+
 # Thử import google.generativeai nếu có
 try:
     import google.generativeai as genai
@@ -62,6 +86,8 @@ class LLMClient:
             if offload_folder is None:
                 offload_folder = "/kaggle/working/offload"
         
+        actual_model_name = resolve_kaggle_model_path(model_name)
+        
         # Cấu hình 4-bit để không bị văng khỏi Kaggle
         # Adjust bitsandbytes config based on environment: Kaggle often has limited memory,
         # but keep 4-bit quantization as default to reduce memory usage.
@@ -83,7 +109,7 @@ class LLMClient:
         if cache_dir:
             tokenizer_kwargs["cache_dir"] = cache_dir
             
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, **tokenizer_kwargs)
+        self.tokenizer = AutoTokenizer.from_pretrained(actual_model_name, **tokenizer_kwargs)
         
         model_kwargs = {
             "quantization_config": bnb_config,
@@ -100,7 +126,7 @@ class LLMClient:
             model_kwargs["offload_state_dict"] = True
             os.makedirs(offload_folder, exist_ok=True)
             
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
+        self.model = AutoModelForCausalLM.from_pretrained(actual_model_name, **model_kwargs)
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)
         self.last_usage = {}
 
@@ -392,12 +418,12 @@ class QwenClient:
             bnb_4bit_use_double_quant=True
         )
         
-        trust_remote = not is_running_on_kaggle()
-        
+        trust_remote = True
+        actual_model_name = resolve_kaggle_model_path(model_name)
         hf_token = os.environ.get("HUGGINGFACE_TOKEN")
         self.tokenizer = AutoTokenizer.from_pretrained(
-            model_name,
-            trust_remote_code=True,  # Qwen models often use custom code
+            actual_model_name,
+            trust_remote_code=trust_remote,  # Qwen models often use custom code
             cache_dir=cache_dir,
             token=hf_token
         )
@@ -406,7 +432,7 @@ class QwenClient:
             "token": hf_token,
             "quantization_config": bnb_config,
             "device_map": "auto",
-            "trust_remote_code": True,
+            "trust_remote_code": trust_remote,
             "cache_dir": cache_dir,
             "low_cpu_mem_usage": True,
             "offload_state_dict": True,
@@ -415,7 +441,7 @@ class QwenClient:
             model_kwargs["offload_folder"] = offload_folder
             os.makedirs(offload_folder, exist_ok=True)
         
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
+        self.model = AutoModelForCausalLM.from_pretrained(actual_model_name, **model_kwargs)
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)
         self.client = None
         logger.info(f"✓ Qwen local model ({model_name}) initialized")
