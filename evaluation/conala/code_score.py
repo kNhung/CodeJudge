@@ -229,7 +229,7 @@ def router(
         if step == 1:
             compare_prompt = single_step_prompt[compare_prompt_index]
             file_name = (
-                f"{safe_model}-1-{compare_prompt_index}-{temperature}-sample-{index}.json"
+                f"{safe_model}-1-{compare_prompt_index}-{temperature}-sample-{index}-new.json"
             )
             print(file_name)
             single_step_workflow(
