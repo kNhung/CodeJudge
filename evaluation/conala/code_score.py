@@ -3,6 +3,7 @@ import json
 import sys
 import random
 import argparse
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -72,6 +73,9 @@ def single_step_workflow(
     if len(out["data"]) == len(data):
         return
  
+    start_time = time.time()
+    previous_elapsed = out.get("parameters", {}).get("elapsed_seconds", 0.0)
+
     terminators, pipeline = load_model(model)
     for item in tqdm(data[len(out["data"]) :]):
         reference = item["snippet"]
@@ -113,6 +117,9 @@ def single_step_workflow(
  
         out["data"].append(output_item)
  
+        elapsed = time.time() - start_time + previous_elapsed
+        out["parameters"]["elapsed_seconds"] = elapsed
+
         os.makedirs(f"./output/conala/", exist_ok=True)
  
         with open(f"./output/conala/" + file_name, "w") as f:
@@ -138,6 +145,9 @@ def dual_step_workflow(
     if len(out["data"]) == len(data):
         return
  
+    start_time = time.time()
+    previous_elapsed = out.get("parameters", {}).get("elapsed_seconds", 0.0)
+
     terminators, pipeline = load_model(model)
     for item in tqdm(data[len(out["data"]) :]):
         reference = item["snippet"]
@@ -192,6 +202,8 @@ def dual_step_workflow(
             }
  
         out["data"].append(output_item)
+        elapsed = time.time() - start_time + previous_elapsed
+        out["parameters"]["elapsed_seconds"] = elapsed
         os.makedirs(f"./output/conala/", exist_ok=True)
         with open(f"./output/conala/" + file_name, "w") as f:
             json.dump(out, f, indent=4)
