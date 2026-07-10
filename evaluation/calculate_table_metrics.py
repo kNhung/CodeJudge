@@ -20,14 +20,14 @@ def calculate_tokens_cost(total_in, total_out, model_name="", filename="", provi
         key = str(filename).lower()
         
     if "gemini" in key:
-        in_rate = 0.075 / 1000000
-        out_rate = 0.30 / 1000000
+        in_rate = 0.30 / 1000000
+        out_rate = 2.50 / 1000000
     elif "llama" in key:
-        in_rate = 0.055 / 1000000
-        out_rate = 0.055 / 1000000
+        in_rate = 0.14 / 1000000
+        out_rate = 0.14 / 1000000
     elif "qwen" in key:
-        in_rate = 0.070 / 1000000
-        out_rate = 0.070 / 1000000
+        in_rate = 0.04 / 1000000
+        out_rate = 0.10 / 1000000
     else:
         in_rate = 0.0
         out_rate = 0.0
@@ -36,7 +36,7 @@ def calculate_tokens_cost(total_in, total_out, model_name="", filename="", provi
         return "x"
         
     cost_usd = (total_in * in_rate) + (total_out * out_rate)
-    return f"${cost_usd:.5f}"
+    return f"${cost_usd:.3f}"
 
 def calculate_conala_json_metrics(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
@@ -45,6 +45,8 @@ def calculate_conala_json_metrics(file_path):
     data = content.get("data", [])
     parameters = content.get("parameters", {})
     elapsed_seconds = parameters.get("elapsed_seconds", 0.0)
+    detected_model = parameters.get("model", "")
+    detected_provider = parameters.get("provider", "")
     
     sources = ["baseline", "tranx-annot", "best-tranx", "best-tranx-rerank", "codex"]
     
@@ -54,6 +56,9 @@ def calculate_conala_json_metrics(file_path):
     per_example_mae = []
     per_example_rmse = []
     per_example_bias = []
+    
+    total_input_tokens = 0
+    total_output_tokens = 0
     
     for item in data:
         grade = item.get("grade", {})
@@ -65,13 +70,17 @@ def calculate_conala_json_metrics(file_path):
         for src in sources:
             if src in grade and src in gpt_score:
                 actual = float(grade[src])
-                pred_val = gpt_score[src].get("code_gpt_score")
+                pred_dict = gpt_score[src]
+                pred_val = pred_dict.get("code_gpt_score")
                 if pred_val is not None:
                     # In json files, code_gpt_score is out of 1.0, scale to 4.0
                     pred = float(pred_val) * 4.0
                     if pred >= 0:
                         ex_actuals.append(actual)
                         ex_preds.append(pred)
+                
+                total_input_tokens += int(pred_dict.get("input_tokens", 0) or 0)
+                total_output_tokens += int(pred_dict.get("output_tokens", 0) or 0)
         
         if len(ex_actuals) >= 2 and len(set(ex_actuals)) > 1 and len(set(ex_preds)) > 1:
             try:
@@ -100,11 +109,14 @@ def calculate_conala_json_metrics(file_path):
     
     avg_time = elapsed_seconds / n_samples if n_samples > 0 else 0.0
     
+    filename = os.path.basename(file_path)
+    cost_val = calculate_tokens_cost(total_input_tokens, total_output_tokens, model_name=detected_model, filename=filename, provider=detected_provider)
+    
     return {
         "n": n_samples,
         "AP": {"Kendall": ap_tau, "Spearman": ap_spearman, "MAE": ap_mae, "RMSE": ap_rmse, "Bias": ap_bias},
         "avg_time": avg_time,
-        "cost": "x"
+        "cost": cost_val
     }
 
 def calculate_conala_jsonl_metrics(file_path):
@@ -216,9 +228,13 @@ def calculate_hcmus_json_metrics_ap(file_path):
     data = content.get("data", [])
     parameters = content.get("parameters", {})
     elapsed_seconds = parameters.get("elapsed_seconds", 0.0)
+    detected_model = parameters.get("model", "")
+    detected_provider = parameters.get("provider", "")
     
     actuals = []
     preds = []
+    total_input_tokens = 0
+    total_output_tokens = 0
     for item in data:
         if "expect_grade" in item and "code_gpt_score" in item:
             actual = float(item["expect_grade"])
@@ -233,6 +249,9 @@ def calculate_hcmus_json_metrics_ap(file_path):
                         if q_score < 0:
                             q_score = 0.0
                         total_pred_score += q_score * q_weight
+                        
+                        total_input_tokens += int(q_val.get("input_tokens", 0) or 0)
+                        total_output_tokens += int(q_val.get("output_tokens", 0) or 0)
                     actuals.append(actual)
                     preds.append(total_pred_score)
                     
@@ -251,11 +270,14 @@ def calculate_hcmus_json_metrics_ap(file_path):
         
     avg_time = elapsed_seconds / len(data) if len(data) > 0 else 0.0
     
+    filename = os.path.basename(file_path)
+    cost_val = calculate_tokens_cost(total_input_tokens, total_output_tokens, model_name=detected_model, filename=filename, provider=detected_provider)
+    
     return {
         "n": len(data),
         "AP": ap_metrics,
         "avg_time": avg_time,
-        "cost": "x"
+        "cost": cost_val
     }
 
 def calculate_hcmus_jsonl_metrics_ap(file_path):
