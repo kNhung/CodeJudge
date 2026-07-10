@@ -20,6 +20,7 @@ def analyze_model_performance(file_path):
     total_evaluations = 0 # Tổng số lượt đánh giá thành phần
     total_input_tokens = 0
     total_output_tokens = 0
+    example_groups = {} # Group refs and preds by example_index to compute per-example correlation
 
     with open(file_path, 'r', encoding='utf-8') as f:
         for idx, line in enumerate(f, start=1):
@@ -28,6 +29,9 @@ def analyze_model_performance(file_path):
                 continue
             try:
                 data = json.loads(line)
+                example_index = data.get("example_index", idx)
+                ex_refs = []
+                ex_preds = []
                 
                 results = data.get("results", [])
                 for res_item in results:
@@ -63,7 +67,10 @@ def analyze_model_performance(file_path):
                             if isinstance(scoring, dict):
                                 final_score_10 = scoring.get("final_score_on_10")
                                 if final_score_10 is not None:
-                                    predicted = float(final_score_10) / 10.0 * 4.0
+                                    if float(final_score_10) == -1.0:
+                                        predicted = -1.0
+                                    else:
+                                        predicted = float(final_score_10) / 10.0 * 4.0
                     
                     if predicted is None:
                         predicted = 0.0
@@ -81,11 +88,16 @@ def analyze_model_performance(file_path):
                         
                     actual_grades.append(actual)
                     predicted_grades.append(predicted)
+                    ex_refs.append(actual)
+                    ex_preds.append(predicted)
                     
                     # Thời gian chạy
                     runtime = float(res_item.get("runtime_seconds", 0.0))
                     if runtime > 0:
                         runtime_list.append(runtime)
+                
+                if len(ex_refs) >= 2:
+                    example_groups[example_index] = (ex_refs, ex_preds)
                         
             except Exception as e:
                 print(f"⚠️ Cảnh báo dòng {idx}: Không parse được JSON thô hoặc lỗi kiểu dữ liệu. Chi tiết: {e}")
@@ -110,15 +122,29 @@ def analyze_model_performance(file_path):
     cost_per_sample_usd = cost_usd / num_valid_samples if num_valid_samples > 0 else 0.0
     cost_per_sample_vnd = cost_vnd / num_valid_samples if num_valid_samples > 0 else 0.0
 
-    # Tính toán các hệ số tương quan
-    pearson_r, spearman_r, tau = 0.0, 0.0, 0.0
+    # Tính toán các hệ số tương quan toàn cục
+    g_pearson, g_spearman, g_tau = 0.0, 0.0, 0.0
     if len(set(actual_grades)) > 1 and len(set(predicted_grades)) > 1:
         try:
-            pearson_r, _ = pearsonr(actual_grades, predicted_grades)
-            spearman_r, _ = spearmanr(actual_grades, predicted_grades)
-            tau, _ = kendalltau(actual_grades, predicted_grades)
+            g_pearson, _ = pearsonr(actual_grades, predicted_grades)
+            g_spearman, _ = spearmanr(actual_grades, predicted_grades)
+            g_tau, _ = kendalltau(actual_grades, predicted_grades)
         except Exception as e:
-            print(f"⚠️ Không tính được tương quan: {e}")
+            print(f"⚠️ Không tính được tương quan toàn cục: {e}")
+
+    # Tính toán các hệ số tương quan trung bình theo từng bài toán (Per-example Average Correlation - Khớp với Paper)
+    k_list, s_list, p_list = [], [], []
+    for ex_index, (r, p) in example_groups.items():
+        if len(set(r)) > 1 and len(set(p)) > 1:
+            try:
+                p_list.append(pearsonr(r, p)[0])
+                s_list.append(spearmanr(r, p)[0])
+                k_list.append(kendalltau(r, p)[0])
+            except:
+                pass
+    avg_pearson = np.nanmean(p_list) if p_list else 0.0
+    avg_spearman = np.nanmean(s_list) if s_list else 0.0
+    avg_kendall = np.nanmean(k_list) if k_list else 0.0
 
     # MAE, RMSE, Mean Bias
     actuals = np.array(actual_grades)
@@ -130,19 +156,25 @@ def analyze_model_performance(file_path):
     avg_time = np.mean(runtime_list) if runtime_list else 0.0
 
     # ---- IN KẾT QUẢ ĐẸP MẮT ----
-    print("\n" + "="*50)
+    print("\n" + "="*60)
     print("🎯 BẢNG TỔNG HỢP METRICS ĐÁNH GIÁ MÔ HÌNH (CoNaLa)")
-    print("="*50)
+    print("="*60)
     print(f"🔹 Tổng số lượt đánh giá đọc được: {total_evaluations}")
     print(f"🔹 Số lượng mẫu hợp lệ (Valid)  : {num_valid_samples} ({valid_pct:.2f}%)")
     print(f"🔹 Số lượng mẫu lỗi (Errors -1) : {error_samples} ({error_pct:.2f}%)")
-    print(f"🔹 Hệ số tương quan Pearson R   : {pearson_r:.4f}")
-    print(f"🔹 Hệ số tương quan Spearman R  : {spearman_r:.4f}")
-    print(f"🔹 Hệ số tương quan Kendall Tau : {tau:.4f}")
-    print(f"🔹 Sai số tuyệt đối TB (MAE)    : {mae:.4f} (Thang điểm 4)")
-    print(f"🔹 Căn sai số bình phương (RMSE): {rmse:.4f} (Thang điểm 4)")
-    print(f"🔹 Độ lệch trung bình (Mean Bias): {mean_bias:+.4f} (Ý nghĩa: >0 chấm nới tay, <0 chấm khắt khe)")
-    print(f"🔹 Tổng token tiêu thụ (Usage)  : {total_input_tokens + total_output_tokens:,} tokens")
+    print("\n📈 [Cách 1] Tương quan trung bình theo bài toán (Khớp với Paper):")
+    print(f"   + Hệ số tương quan Pearson R   : {avg_pearson:.4f}")
+    print(f"   + Hệ số tương quan Spearman R  : {avg_spearman:.4f}")
+    print(f"   + Hệ số tương quan Kendall Tau : {avg_kendall:.4f}")
+    print("\n📊 [Cách 2] Tương quan toàn cục (Global Flattened Correlation):")
+    print(f"   + Hệ số tương quan Pearson R   : {g_pearson:.4f}")
+    print(f"   + Hệ số tương quan Spearman R  : {g_spearman:.4f}")
+    print(f"   + Hệ số tương quan Kendall Tau : {g_tau:.4f}")
+    print("\n📉 Sai số và độ lệch (Thang điểm 4):")
+    print(f"   + Sai số tuyệt đối TB (MAE)    : {mae:.4f}")
+    print(f"   + Căn sai số bình phương (RMSE): {rmse:.4f}")
+    print(f"   + Độ lệch trung bình (Mean Bias): {mean_bias:+.4f} (>0: nới tay, <0: khắt khe)")
+    print(f"\n🔹 Tổng token tiêu thụ (Usage)  : {total_input_tokens + total_output_tokens:,} tokens")
     print(f"   + Input Tokens               : {total_input_tokens:,} tokens")
     print(f"   + Output Tokens              : {total_output_tokens:,} tokens")
     print(f"🔹 Chi phí ước tính (Est. Cost) : {cost_usd:.5f} USD (~{cost_vnd:,.0f} VNĐ)")
@@ -150,7 +182,7 @@ def analyze_model_performance(file_path):
     print(f"🔹 Thời gian phản hồi trung bình: {avg_time:.3f} giây / lượt đánh giá")
     if skipped_rows > 0:
         print(f"🔸 Số dòng bị bỏ qua do lỗi    : {skipped_rows}")
-    print("="*50 + "\n")
+    print("="*60 + "\n")
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))

@@ -31,3 +31,4 @@ venv/
 */conala/output/*
 
 evaluation/output/*
+evaluation/output_old/*
