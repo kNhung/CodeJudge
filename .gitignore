@@ -21,3 +21,6 @@ humaneval-*
 .env
 venv/
 .venv/
+
+evaluation/calculate_table_metrics.py
+evaluation/metrics_summary.md
