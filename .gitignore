@@ -12,6 +12,9 @@ humaneval-*
 
 .env
 
+# FastHTML session signing key (auto-generated)
+.sesskey
+
 # LLM request caches
 .codeeval_cache.json
 .codejudge_cache.json
