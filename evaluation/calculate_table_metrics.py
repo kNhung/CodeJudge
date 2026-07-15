@@ -1,6 +1,7 @@
 import os
 import json
 import glob
+from pathlib import Path
 import numpy as np
 from scipy.stats import kendalltau, spearmanr, pearsonr
 from collections import defaultdict
@@ -393,8 +394,10 @@ def print_result_row(file_name, n, metrics, avg_time, cost, lines_list, scale=4)
     lines_list.append(row)
 
 def main():
-    conala_dir = "/home/knhung/KLTN/CodeJudge/evaluation/output/conala"
-    hcmus_dir = "/home/knhung/KLTN/CodeJudge/evaluation/output/hcmus"
+    root = Path(__file__).resolve().parents[1]
+    conala_dir = str(root / "evaluation" / "output" / "conala")
+    hcmus_dir = str(root / "evaluation" / "output" / "hcmus")
+    summary_path = str(root / "evaluation" / "metrics_summary.md")
     
     out_lines = []
     def log(msg=""):
@@ -448,7 +451,6 @@ def main():
             log(f"Error processing {fp}: {e}")
             
     # Write to file
-    summary_path = "/home/knhung/KLTN/CodeJudge/evaluation/metrics_summary.md"
     with open(summary_path, "w", encoding="utf-8") as f_out:
         f_out.write("\n".join(out_lines))
     print(f"\n💾 Saved summary to: {summary_path}")

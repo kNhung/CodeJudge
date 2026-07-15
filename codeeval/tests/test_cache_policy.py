@@ -1,10 +1,10 @@
 import pytest
 import json
 from unittest.mock import MagicMock, patch
-from codejudge.core.multi_agent_assessor import MultiAgentAssessor
+from codeeval.core.multi_agent_assessor import MultiAgentAssessor
 
 class TestCachePolicy:
-    @patch("codejudge.core.multi_agent_assessor.check_syntax")
+    @patch("codeeval.core.multi_agent_assessor.check_syntax")
     def test_assess_grader_cache_default_false(self, mock_check_syntax):
         mock_check_syntax.return_value = []
         
@@ -34,7 +34,7 @@ class TestCachePolicy:
         second_call_kwargs = mock_llm.call.call_args_list[1][1]
         assert second_call_kwargs.get("use_cache") is False
 
-    @patch("codejudge.core.multi_agent_assessor.check_syntax")
+    @patch("codeeval.core.multi_agent_assessor.check_syntax")
     def test_assess_grader_cache_force_true(self, mock_check_syntax):
         mock_check_syntax.return_value = []
         

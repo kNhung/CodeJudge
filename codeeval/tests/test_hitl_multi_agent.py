@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from codejudge.core.multi_agent_assessor import MultiAgentAssessor
+from codeeval.core.multi_agent_assessor import MultiAgentAssessor
 
 def test_default_arithmetic_average_score():
     # Test that default calculate_score uses simple arithmetic average
@@ -120,7 +120,7 @@ def test_pre_extracted_factors_injection():
 
 
 def test_merge_folder_code_cpp(tmp_path):
-    from codejudge.core.compiler_helper import merge_folder_code
+    from codeeval.core.compiler_helper import merge_folder_code
     
     # Create temp headers and source files
     helper_h = tmp_path / "helper.h"
@@ -151,7 +151,7 @@ def test_merge_folder_code_cpp(tmp_path):
 
 
 def test_merge_folder_code_python(tmp_path):
-    from codejudge.core.compiler_helper import merge_folder_code
+    from codeeval.core.compiler_helper import merge_folder_code
     
     utils_py = tmp_path / "utils.py"
     utils_py.write_text("def add(a, b):\n    return a + b\n", encoding="utf-8")
@@ -168,7 +168,7 @@ def test_merge_folder_code_python(tmp_path):
 
 
 def test_check_syntax_cpp_directory(tmp_path):
-    from codejudge.core.compiler_helper import check_syntax
+    from codeeval.core.compiler_helper import check_syntax
     
     # 1. Test clean C++ directory syntax checking
     helper_h = tmp_path / "helper.h"
@@ -191,7 +191,7 @@ def test_check_syntax_cpp_directory(tmp_path):
 
 
 def test_check_syntax_python_directory(tmp_path):
-    from codejudge.core.compiler_helper import check_syntax
+    from codeeval.core.compiler_helper import check_syntax
     
     # 1. Clean Python directory syntax checking
     main_py = tmp_path / "main.py"

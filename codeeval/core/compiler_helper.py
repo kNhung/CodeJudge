@@ -7,7 +7,9 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-WORKSPACE_DIR = "/home/knhung/KLTN/CodeJudge"
+# Repo root: codeeval/core/compiler_helper.py → parents[2]
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+WORKSPACE_DIR = str(_REPO_ROOT / ".compiler_tmp")
 
 def check_syntax(code_or_path: str, language: str) -> List[str]:
     """

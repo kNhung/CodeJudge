@@ -1,5 +1,5 @@
 """
-CodeJudge Core Engine
+CodeEval Core Engine
 Multi-agent code grading: compiler syntax check + factor extract/grade.
 """
 

@@ -12,6 +12,13 @@ humaneval-*
 
 .env
 
+# LLM request caches
+.codeeval_cache.json
+.codejudge_cache.json
+
+# Compiler helper temp files
+.compiler_tmp/
+
 # Ignore generated result/output files and folders
 
 /data/**/results/

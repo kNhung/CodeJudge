@@ -1,4 +1,4 @@
-# CodeEval / CodeJudge multi-agent runtime dependencies
+# CodeEval multi-agent runtime dependencies
 # Python >= 3.10 recommended
 
 # --- Local HF models (provider=local / local Qwen) ---

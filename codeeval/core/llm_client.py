@@ -12,7 +12,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-CACHE_FILE = ".codejudge_cache.json"
+CACHE_FILE = ".codeeval_cache.json"
 
 def load_cache() -> dict:
     if os.path.exists(CACHE_FILE):
@@ -74,7 +74,7 @@ except Exception:
 
 class LLMClient:
     def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", api_key=None, use_cache=True, cache_dir=None, offload_folder=None, **kwargs):
-        print(f"🚀 [CodeJudge] Đang nạp model: {model_name}")
+        print(f"🚀 [CodeEval] Đang nạp model: {model_name}")
         self.model_name = model_name
         self.use_cache = use_cache
         self.request_cache = load_cache() if use_cache else {}  # Cache LLM requests

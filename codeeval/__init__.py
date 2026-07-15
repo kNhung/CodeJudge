@@ -1,11 +1,11 @@
 """
-CodeJudge - Multi-agent auto-grading for programming assignments.
+CodeEval - Multi-agent auto-grading for programming assignments.
 """
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from codejudge.core import (
+from codeeval.core import (
     MultiAgentAssessor,
     LLMFactory,
     LLMConfig,
@@ -14,7 +14,7 @@ from codejudge.core import (
 )
 
 __version__ = "1.0.0"
-__author__ = "CodeJudge Team"
+__author__ = "CodeEval Team"
 
 __all__ = [
     "MultiAgentAssessor",

@@ -1,8 +1,11 @@
-# CodeEval / CodeJudge
+# CodeEval
+
+**Credits.** CodeEval is adapted from **[CodeJudge](https://github.com/VichyTong/CodeJudge)** (Tong et al.), an LLM-based framework for evaluating generated code without test cases. This fork keeps the Apache 2.0 license and extends the original work with a **multi-agent grading pipeline**, real **compiler syntax checks**, and evaluation on **HCMUS** / **CoNaLa**. See the upstream repository and paper for the original CodeJudge method.
 
 Multi-agent auto-grading for programming assignments: **compiler syntax check** → **Agent 1 (factor extract)** → **Agent 2 (factor grade)** → score + suggestions.
 
-Python package name remains `codejudge`. Conda environment name: **`codeeval`**.
+- Python package: `codeeval` (`from codeeval.core import MultiAgentAssessor`)
+- Conda environment: `codeeval`
 
 ## Pipeline
 
@@ -20,8 +23,8 @@ Python package name remains `codejudge`. Conda environment name: **`codeeval`**.
 ## Setup
 
 ```bash
-git clone <repo-url>
-cd CodeJudge
+git clone https://github.com/kNhung/CodeEval.git
+cd CodeEval
 conda create -n codeeval python=3.10 -y
 conda activate codeeval
 pip install -r requirements.txt
@@ -116,7 +119,7 @@ python evaluation/calculate_table_metrics.py
 
 ```bash
 conda activate codeeval
-pytest codejudge/tests/ -v
+pytest codeeval/tests/ -v
 ```
 
 Covers compiler helper, `MultiAgentAssessor` (mocked LLM), HITL weights, and cache policy.
@@ -125,7 +128,7 @@ Covers compiler helper, `MultiAgentAssessor` (mocked LLM), HITL weights, and cac
 
 ```
 app.py
-codejudge/
+codeeval/
   core/
     multi_agent_assessor.py
     compiler_helper.py

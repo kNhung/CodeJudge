@@ -15,7 +15,7 @@ if str(REPO_ROOT) not in sys.path:
 from dotenv import load_dotenv
 load_dotenv()
 
-from codejudge.core.compiler_helper import merge_folder_code
+from codeeval.core.compiler_helper import merge_folder_code
 
 
 HCMUS_ROOT = Path(__file__).resolve().parent
@@ -330,7 +330,7 @@ def main() -> None:
 
     assessor = None
     if not args.dry_run:
-        from codejudge.core import MultiAgentAssessor, LLMFactory
+        from codeeval.core import MultiAgentAssessor, LLMFactory
         llm_client = LLMFactory.create(
             provider=args.provider,
             model_name=args.model,

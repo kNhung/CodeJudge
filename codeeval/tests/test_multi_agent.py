@@ -1,8 +1,8 @@
 import pytest
 import json
 from unittest.mock import MagicMock, patch
-from codejudge.core.compiler_helper import check_syntax, _check_python_syntax
-from codejudge.core.multi_agent_assessor import MultiAgentAssessor
+from codeeval.core.compiler_helper import check_syntax, _check_python_syntax
+from codeeval.core.multi_agent_assessor import MultiAgentAssessor
 
 class TestCompilerHelper:
     def test_python_syntax_valid(self):
@@ -171,7 +171,7 @@ class TestMultiAgentAssessor:
         assert any("Factor 2" in s for s in suggestions)
         assert any("Thiếu vòng lặp" in s for s in suggestions)
 
-    @patch("codejudge.core.multi_agent_assessor.check_syntax")
+    @patch("codeeval.core.multi_agent_assessor.check_syntax")
     def test_assess_end_to_end_mocked(self, mock_check_syntax):
         mock_check_syntax.return_value = []
         
@@ -198,7 +198,7 @@ class TestMultiAgentAssessor:
         assert result["scoring"]["scaled_score"] == 4.0  # 8.0/10.0 * 5.0
         assert result["final_score"] == 4.0
 
-    @patch("codejudge.core.multi_agent_assessor.check_syntax")
+    @patch("codeeval.core.multi_agent_assessor.check_syntax")
     def test_assess_with_llm_error_mocked(self, mock_check_syntax):
         mock_check_syntax.return_value = []
         
@@ -224,10 +224,10 @@ class TestMultiAgentAssessor:
 
 
 class TestLLMClient:
-    @patch("codejudge.core.llm_client.BitsAndBytesConfig")
-    @patch("codejudge.core.llm_client.AutoTokenizer")
-    @patch("codejudge.core.llm_client.AutoModelForCausalLM")
-    @patch("codejudge.core.llm_client.pipeline")
+    @patch("codeeval.core.llm_client.BitsAndBytesConfig")
+    @patch("codeeval.core.llm_client.AutoTokenizer")
+    @patch("codeeval.core.llm_client.AutoModelForCausalLM")
+    @patch("codeeval.core.llm_client.pipeline")
     def test_llm_client_call_success_with_json_and_token_estimation(self, mock_pipeline, mock_model, mock_tokenizer, mock_bnb_config):
         # Setup mocks
         mock_tokenizer_instance = MagicMock()
@@ -241,7 +241,7 @@ class TestLLMClient:
         mock_pipe_instance.return_value = [{"generated_text": '{"result": "success"}'}]
         mock_pipeline.return_value = mock_pipe_instance
         
-        from codejudge.core.llm_client import LLMClient
+        from codeeval.core.llm_client import LLMClient
         client = LLMClient(model_name="mock-model", use_cache=False)
         
         # Test call
@@ -254,10 +254,10 @@ class TestLLMClient:
             "total_tokens": 5
         }
         
-    @patch("codejudge.core.llm_client.BitsAndBytesConfig")
-    @patch("codejudge.core.llm_client.AutoTokenizer")
-    @patch("codejudge.core.llm_client.AutoModelForCausalLM")
-    @patch("codejudge.core.llm_client.pipeline")
+    @patch("codeeval.core.llm_client.BitsAndBytesConfig")
+    @patch("codeeval.core.llm_client.AutoTokenizer")
+    @patch("codeeval.core.llm_client.AutoModelForCausalLM")
+    @patch("codeeval.core.llm_client.pipeline")
     def test_llm_client_call_retry_on_invalid_json(self, mock_pipeline, mock_model, mock_tokenizer, mock_bnb_config):
         # Setup mocks
         mock_tokenizer_instance = MagicMock()
@@ -271,7 +271,7 @@ class TestLLMClient:
         ]
         mock_pipeline.return_value = mock_pipe_instance
         
-        from codejudge.core.llm_client import LLMClient
+        from codeeval.core.llm_client import LLMClient
         client = LLMClient(model_name="mock-model", use_cache=False)
         
         with patch("time.sleep") as mock_sleep:

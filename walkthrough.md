@@ -10,8 +10,8 @@ Compiler syntax → Agent 1 (factors) → Agent 2 (per-factor grades) → score 
 
 Implemented in:
 
-- `codejudge/core/compiler_helper.py`
-- `codejudge/core/multi_agent_assessor.py`
+- `codeeval/core/compiler_helper.py`
+- `codeeval/core/multi_agent_assessor.py`
 - `app.py`
 - `evaluation/hcmus/score_with_multi_agent.py`
 - `evaluation/conala/score_conala_multi_agent.py`
@@ -20,7 +20,7 @@ Implemented in:
 
 ```bash
 conda activate codeeval
-pytest codejudge/tests/ -v
+pytest codeeval/tests/ -v
 ```
 
 ## Live smoke (needs API key)

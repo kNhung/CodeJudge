@@ -1,4 +1,7 @@
+import argparse
 import json
+from pathlib import Path
+
 import numpy as np
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
@@ -52,8 +55,30 @@ def calculate_metrics(group_records):
     }
 
 def main():
-    file_path = r'C:\\Users\\ADMIN\\Downloads\\CodeJudge\\evaluation\\conala\\output\\260511_1850_meta-llama-Meta-Llama-3-8B-Instruct_all.jsonl'
-    output_path = 'metrics_result.json'  # Tên file đầu ra bạn muốn lưu
+    here = Path(__file__).resolve().parent
+    default_input = here.parent / "output" / "260511_1850_meta-llama-Meta-Llama-3-8B-Instruct_all.jsonl"
+    parser = argparse.ArgumentParser(description="Compute CoNaLa summary metrics from a JSONL scoring file")
+    parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_input if default_input.exists() else None,
+        help="Path to input JSONL (default: evaluation/conala/output/... if present)",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=here / "metrics_result.json",
+        help="Output JSON path (default: evaluation/conala/summary/metrics_result.json)",
+    )
+    args = parser.parse_args()
+
+    if args.input is None or not args.input.exists():
+        raise SystemExit(
+            "Missing --input JSONL. Pass --input path/to/file.jsonl"
+        )
+
+    file_path = args.input
+    output_path = args.output
     records = []
     
     # Đọc file JSONL

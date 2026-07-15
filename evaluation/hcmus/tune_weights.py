@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from codejudge.core.multi_agent_assessor import MultiAgentAssessor
+from codeeval.core.multi_agent_assessor import MultiAgentAssessor
 
 HCMUS_ROOT = Path(__file__).resolve().parent
 DEFAULT_JSONL = HCMUS_ROOT / "ouput_to_share" / "report_9" / "260610_1430_multi_agent_gemini-2.5-flash.jsonl"

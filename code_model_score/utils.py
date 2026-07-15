@@ -188,19 +188,19 @@ def openai_request(message, model, temperature=0, top_p=1, stop=None):
     return ""
 
 def gemini_request(message, model, temperature=0, top_p=1, stop=None):
-    from codejudge.core.llm_client import GeminiClient
+    from codeeval.core.llm_client import GeminiClient
     client = GeminiClient(model_name=model)
     prompt = "".join([f"{m['role']}: {m['content']}\n" for m in message]) if isinstance(message, list) else message
     return client.generate(prompt, temperature=temperature, top_p=top_p, stop=stop)
 
 
 def qwen_request(message, model, temperature=0, top_p=1, stop=None):
-    """Adapter for Qwen-like providers. Requires an optional QwenClient in codejudge.core.llm_client.
+    """Adapter for Qwen-like providers. Requires an optional QwenClient in codeeval.core.llm_client.
     Falls back to raising ImportError with guidance if SDK not installed."""
     try:
-        from codejudge.core.llm_client import QwenClient
+        from codeeval.core.llm_client import QwenClient
     except Exception as e:
-        raise ImportError("Qwen client not available. Install Qwen SDK or add QwenClient to codejudge.core.llm_client")
+        raise ImportError("Qwen client not available. Install Qwen SDK or add QwenClient to codeeval.core.llm_client")
 
     client = QwenClient(model_name=model)
     prompt = "".join([f"{m['role']}: {m['content']}\n" for m in message]) if isinstance(message, list) else message

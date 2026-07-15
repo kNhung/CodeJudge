@@ -14,7 +14,7 @@ load_dotenv()
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("CodeJudgeWebDemo")
+logger = logging.getLogger("CodeEvalWebDemo")
 
 import tempfile
 import shutil
@@ -52,10 +52,10 @@ def extract_text_from_docx(content_bytes: bytes) -> str:
         logger.error(f"Error parsing DOCX: {e}")
         return f"[Lỗi đọc file DOCX: {str(e)}]"
 
-# Import CodeJudge Core Assessor and Factory
-from codejudge.core.multi_agent_assessor import MultiAgentAssessor
-from codejudge.core.llm_client import LLMFactory
-from codejudge.core.compiler_helper import check_syntax
+# Import CodeEval core assessor and factory
+from codeeval.core.multi_agent_assessor import MultiAgentAssessor
+from codeeval.core.llm_client import LLMFactory
+from codeeval.core.compiler_helper import check_syntax
 
 FILE_INPUT_CLS = (
     "upload-file-input file-input file-input-bordered file-input-sm w-full "
@@ -1067,7 +1067,7 @@ async def post(request):
     import tempfile
     import os
     import shutil
-    from codejudge.core.compiler_helper import merge_folder_code
+    from codeeval.core.compiler_helper import merge_folder_code
 
     form = await request.form()
     
@@ -1663,7 +1663,7 @@ async def evaluate_submission_core(
 ) -> dict:
     """Grade one student submission folder."""
     import asyncio
-    from codejudge.core.compiler_helper import merge_folder_code
+    from codeeval.core.compiler_helper import merge_folder_code
 
     assessor = MultiAgentAssessor(llm_client=LLMFactory.create(provider=provider, model_name=model_name))
     code_files = list_code_files(source_path) if source_path and os.path.isdir(source_path) else []
