@@ -1,0 +1,144 @@
+{
+  "1_final": {
+    "1": {
+      "pre_extracted_factors": [
+        "Khởi tạo trạng thái ban đầu của chồng đĩa đúng thứ tự",
+        "Xử lý thao tác rút đĩa và đặt lên trên cùng chính xác",
+        "Thực hiện đúng m lần thay đổi theo yêu cầu",
+        "In ra thứ tự cuối cùng của chồng đĩa theo định dạng yêu cầu"
+      ],
+      "factor_weights": {
+        "Khởi tạo trạng thái ban đầu của chồng đĩa đúng thứ tự": 0.246104,
+        "Xử lý thao tác rút đĩa và đặt lên trên cùng chính xác": 0.21209,
+        "Thực hiện đúng m lần thay đổi theo yêu cầu": 0.009275,
+        "In ra thứ tự cuối cùng của chồng đĩa theo định dạng yêu cầu": 0.532531
+      }
+    },
+    "2": {
+      "pre_extracted_factors": [
+        "Hàm nhận vào mảng hai chiều nguyên A và kích thước m",
+        "Hàm tạo ra mảng đối xứng của A theo chiều dọc",
+        "Kết quả trả về là mảng hai chiều mới đã được đối xứng"
+      ],
+      "factor_weights": {
+        "Hàm nhận vào mảng hai chiều nguyên A và kích thước m": 0.410166,
+        "Hàm tạo ra mảng đối xứng của A theo chiều dọc": 0.165531,
+        "Kết quả trả về là mảng hai chiều mới đã được đối xứng": 0.424303
+      }
+    },
+    "3": {
+      "pre_extracted_factors": [
+        "Định nghĩa struct Pokemon với đầy đủ thuộc tính id, name, type1, type2, speed, attack và kiểu dữ liệu phù hợp",
+        "Hàm ReadFile đọc dữ liệu từ file 'pokemon.txt' và lưu vào mảng pokemons đúng định dạng, xử lý trường hợp 'NULL' cho type2",
+        "Hàm PrintPokemonList in danh sách Pokemon theo đúng định dạng yêu cầu, xử lý hiển thị type2 khi là 'NULL'",
+        "Hàm Search tìm kiếm và trả về danh sách các Pokemon thuộc hệ đã cho (type1 hoặc type2) vào mảng result",
+        "Hàm main gọi các hàm ReadFile, Search và PrintPokemonList để thực hiện đúng yêu cầu của đề bài"
+      ],
+      "factor_weights": {
+        "Định nghĩa struct Pokemon với đầy đủ thuộc tính id, name, type1, type2, speed, attack và kiểu dữ liệu phù hợp": 0.806806,
+        "Hàm ReadFile đọc dữ liệu từ file 'pokemon.txt' và lưu vào mảng pokemons đúng định dạng, xử lý trường hợp 'NULL' cho type2": 0.018548,
+        "Hàm PrintPokemonList in danh sách Pokemon theo đúng định dạng yêu cầu, xử lý hiển thị type2 khi là 'NULL'": 0.003032,
+        "Hàm Search tìm kiếm và trả về danh sách các Pokemon thuộc hệ đã cho (type1 hoặc type2) vào mảng result": 0.003303,
+        "Hàm main gọi các hàm ReadFile, Search và PrintPokemonList để thực hiện đúng yêu cầu của đề bài": 0.168312
+      }
+    }
+  },
+  "48_midterm-123": {
+    "1": {
+      "pre_extracted_factors": [
+        "Chương trình đọc đúng hai số nguyên a và b từ bàn phím",
+        "Chương trình tính tổng các số chẵn trong khoảng [a, b] một cách chính xác",
+        "Chương trình in ra kết quả tổng đúng định dạng"
+      ],
+      "factor_weights": {
+        "Chương trình đọc đúng hai số nguyên a và b từ bàn phím": 0.765366,
+        "Chương trình tính tổng các số chẵn trong khoảng [a, b] một cách chính xác": 0.009001,
+        "Chương trình in ra kết quả tổng đúng định dạng": 0.225633
+      }
+    },
+    "2": {
+      "pre_extracted_factors": [
+        "Đọc số nguyên dương n từ input",
+        "Tính bình phương của số n",
+        "Kiểm tra xem các chữ số cuối cùng của bình phương có trùng với số n hay không",
+        "In ra 1 nếu là số automorphic, ngược lại in ra 0"
+      ],
+      "factor_weights": {
+        "Đọc số nguyên dương n từ input": 0.961373,
+        "Tính bình phương của số n": 0.004413,
+        "Kiểm tra xem các chữ số cuối cùng của bình phương có trùng với số n hay không": 0.009308,
+        "In ra 1 nếu là số automorphic, ngược lại in ra 0": 0.024906
+      }
+    },
+    "3": {
+      "pre_extracted_factors": [
+        "Đọc số nguyên dương n trong khoảng [1000, 9999]",
+        "Xác định tất cả các số đối xứng có thể tạo ra bằng cách xóa các chữ số của n",
+        "Tìm và in ra số đối xứng lớn nhất trong số các số đối xứng đã tìm được",
+        "Xử lý trường hợp không có số đối xứng nào được tạo ra (nếu có thể xảy ra)"
+      ],
+      "factor_weights": {
+        "Đọc số nguyên dương n trong khoảng [1000, 9999]": 0.164324,
+        "Xác định tất cả các số đối xứng có thể tạo ra bằng cách xóa các chữ số của n": 0.66419,
+        "Tìm và in ra số đối xứng lớn nhất trong số các số đối xứng đã tìm được": 0.013323,
+        "Xử lý trường hợp không có số đối xứng nào được tạo ra (nếu có thể xảy ra)": 0.158163
+      }
+    },
+    "4": {
+      "pre_extracted_factors": [
+        "Hàm tính tổng các ước số của một số nguyên dương (không bao gồm chính nó)",
+        "Kiểm tra điều kiện số bạn bè dựa trên tổng các ước số của cả hai số",
+        "In ra kết quả 0 hoặc 1 theo đúng yêu cầu"
+      ],
+      "factor_weights": {
+        "Hàm tính tổng các ước số của một số nguyên dương (không bao gồm chính nó)": 0.027148,
+        "Kiểm tra điều kiện số bạn bè dựa trên tổng các ước số của cả hai số": 0.757233,
+        "In ra kết quả 0 hoặc 1 theo đúng yêu cầu": 0.215619
+      }
+    }
+  },
+  "96_final-123": {
+    "1": {
+      "pre_extracted_factors": [
+        "Xử lý đọc dữ liệu đầu vào (kích thước ma trận và các phần tử) chính xác",
+        "Kiểm tra tính đối xứng qua đường chéo chính của ma trận",
+        "Kiểm tra tính đối xứng qua đường chéo phụ của ma trận",
+        "Trả về True nếu ma trận đối xứng qua ít nhất một trong hai đường chéo, ngược lại trả về False"
+      ],
+      "factor_weights": {
+        "Xử lý đọc dữ liệu đầu vào (kích thước ma trận và các phần tử) chính xác": 0.186175,
+        "Kiểm tra tính đối xứng qua đường chéo chính của ma trận": 0.401175,
+        "Kiểm tra tính đối xứng qua đường chéo phụ của ma trận": 0.14804,
+        "Trả về True nếu ma trận đối xứng qua ít nhất một trong hai đường chéo, ngược lại trả về False": 0.26461
+      }
+    },
+    "2": {
+      "pre_extracted_factors": [
+        "Xử lý xóa các ký tự trùng lặp liên tiếp trong chuỗi",
+        "Lặp lại quá trình xóa cho đến khi không còn ký tự trùng lặp liên tiếp nào",
+        "Đảm bảo việc xóa diễn ra từ trái sang phải theo đúng yêu cầu",
+        "Trả về chuỗi kết quả cuối cùng sau khi đã xử lý"
+      ],
+      "factor_weights": {
+        "Xử lý xóa các ký tự trùng lặp liên tiếp trong chuỗi": 0.018885,
+        "Lặp lại quá trình xóa cho đến khi không còn ký tự trùng lặp liên tiếp nào": 0.673409,
+        "Đảm bảo việc xóa diễn ra từ trái sang phải theo đúng yêu cầu": 0.011795,
+        "Trả về chuỗi kết quả cuối cùng sau khi đã xử lý": 0.295911
+      }
+    },
+    "3": {
+      "pre_extracted_factors": [
+        "Đọc và phân tích dữ liệu đầu vào cho từng đội, bao gồm tên, số lượt like, comment, share, và xử lý điều kiện dừng '000'",
+        "Tính toán tổng điểm cho mỗi đội dựa trên công thức: Like * 1 + Comment * 2 + Share * 3",
+        "Sắp xếp các đội theo tiêu chí điểm giảm dần, sau đó là Share giảm dần, Comment giảm dần, và Like giảm dần",
+        "Chọn và in ra tên của 3 đội có điểm cao nhất theo đúng thứ tự đã sắp xếp"
+      ],
+      "factor_weights": {
+        "Đọc và phân tích dữ liệu đầu vào cho từng đội, bao gồm tên, số lượt like, comment, share, và xử lý điều kiện dừng '000'": 0.052505,
+        "Tính toán tổng điểm cho mỗi đội dựa trên công thức: Like * 1 + Comment * 2 + Share * 3": 0.508744,
+        "Sắp xếp các đội theo tiêu chí điểm giảm dần, sau đó là Share giảm dần, Comment giảm dần, và Like giảm dần": 0.420309,
+        "Chọn và in ra tên của 3 đội có điểm cao nhất theo đúng thứ tự đã sắp xếp": 0.018442
+      }
+    }
+  }
+}

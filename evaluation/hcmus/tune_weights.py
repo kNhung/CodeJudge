@@ -113,22 +113,46 @@ def group_exams(records: Sequence[QuestionRecord]) -> List[ExamRecord]:
     return exams
 
 
-def extract_factors_config(records: Sequence[QuestionRecord]) -> Dict[str, Dict[str, Dict[str, Any]]]:
-    """Build config with stable pre_extracted_factors per (problem_id, question_index)."""
-    seen: Dict[QuestionKey, List[str]] = {}
+def extract_factors_config(
+    records: Sequence[QuestionRecord],
+    majority_vote: bool = True,
+) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    """Build config with stable pre_extracted_factors per (problem_id, question_index).
+
+    When majority_vote=True (default), picks the most common factor list per question
+  instead of failing on Agent-1 naming drift across students.
+    """
+    by_key: Dict[QuestionKey, List[List[str]]] = defaultdict(list)
     for rec in records:
         key = (rec.problem_id, rec.question_index)
-        if key not in seen:
-            seen[key] = rec.factor_names
-        elif seen[key] != rec.factor_names:
-            raise ValueError(
-                f"Inconsistent factor names for {key}. "
-                f"Re-run scoring with --config pre_extracted_factors."
-            )
+        by_key[key].append(list(rec.factor_names))
 
     config: Dict[str, Dict[str, Dict[str, Any]]] = defaultdict(dict)
-    for (problem_id, qidx), factors in sorted(seen.items()):
-        config[problem_id][str(qidx)] = {"pre_extracted_factors": factors}
+    for (problem_id, qidx), factor_lists in sorted(by_key.items()):
+        counts: Dict[Tuple[str, ...], int] = {}
+        for names in factor_lists:
+            t = tuple(names)
+            counts[t] = counts.get(t, 0) + 1
+        if len(counts) == 1:
+            chosen = factor_lists[0]
+        elif majority_vote:
+            chosen = list(max(counts.items(), key=lambda kv: (kv[1], -len(kv[0])))[0])
+            mode_freq = counts[tuple(chosen)]
+            if mode_freq < len(factor_lists):
+                print(
+                    f"  Majority factors for {problem_id} Q{qidx}: "
+                    f"{mode_freq}/{len(factor_lists)} records"
+                )
+        else:
+            # Strict mode: first vs second mismatch raises
+            seen_lists = list(counts.keys())
+            if len(seen_lists) > 1:
+                raise ValueError(
+                    f"Inconsistent factor names for {(problem_id, qidx)}. "
+                    f"Re-run scoring with --config pre_extracted_factors."
+                )
+            chosen = list(seen_lists[0])
+        config[problem_id][str(qidx)] = {"pre_extracted_factors": chosen}
     return dict(config)
 
 
@@ -185,16 +209,29 @@ class WeightOptimizer:
             weights[key] = {f: float(w[i]) for i, f in enumerate(factors)}
         return weights
 
+    def matched_weights(
+        self,
+        factor_names: Sequence[str],
+        factor_weights: Dict[str, float],
+    ) -> Optional[Dict[str, float]]:
+        matched = {f: factor_weights[f] for f in factor_names if f in factor_weights}
+        if not matched or set(matched.keys()) != set(factor_names):
+            return matched if matched else None
+        return factor_weights
+
     def score_question(
         self,
         rec: QuestionRecord,
         factor_weights: Dict[str, float],
     ) -> float:
+        # Map canonical tuned weights onto this record's actual factor names.
+        # When Agent 1 used different wording, fall back to equal weights.
+        use_weights = self.matched_weights(rec.factor_names, factor_weights)
         scoring = self.assessor.calculate_score(
             factor_eval=rec.factor_evaluation,
             syntax_errors=rec.syntax_errors,
             question_max=rec.question_max,
-            factor_weights=factor_weights,
+            factor_weights=use_weights,
             syntax_penalties=self.syntax_penalties,
         )
         return float(scoring.get("scaled_score", 0.0))
@@ -308,15 +345,23 @@ def merge_configs(
     return merged
 
 
+def config_to_weights(config: Dict[str, Any]) -> Dict[QuestionKey, Dict[str, float]]:
+    weights: Dict[QuestionKey, Dict[str, float]] = {}
+    for pid, questions in config.items():
+        for qidx, qcfg in questions.items():
+            fw = qcfg.get("factor_weights")
+            if fw:
+                weights[(pid, int(qidx))] = dict(fw)
+    return weights
+
+
 def rescore_jsonl(
     input_jsonl: Path,
     output_jsonl: Path,
     optimizer: WeightOptimizer,
-    params: np.ndarray,
+    weights: Dict[QuestionKey, Dict[str, float]],
 ) -> None:
-    weights = optimizer.vector_to_weights(params)
     per_exam_scores: Dict[str, float] = {}
-    per_exam_has_error: Dict[str, bool] = {}
 
     output_jsonl.parent.mkdir(parents=True, exist_ok=True)
     with input_jsonl.open("r", encoding="utf-8") as fin, output_jsonl.open("w", encoding="utf-8") as fout:
@@ -330,12 +375,14 @@ def rescore_jsonl(
                 result = data.get("result", {})
                 key = (str(data.get("problem_id", "")), int(data.get("question_index", 0)))
                 fw = weights.get(key, {})
+                factor_names = list(result.get("factors") or list((result.get("factor_evaluation") or {}).keys()))
+                use_weights = optimizer.matched_weights(factor_names, fw) if fw else None
                 qmax = float(data.get("question_max", 10.0))
                 scoring = optimizer.assessor.calculate_score(
                     factor_eval=result.get("factor_evaluation", {}),
                     syntax_errors=list(result.get("syntax_errors") or []),
                     question_max=qmax,
-                    factor_weights=fw or None,
+                    factor_weights=use_weights,
                     syntax_penalties=optimizer.syntax_penalties,
                 )
                 result["scoring"] = scoring
@@ -384,7 +431,7 @@ def run_tuning(args: argparse.Namespace) -> None:
         with args.factors_config.open("r", encoding="utf-8") as f:
             factors_config = json.load(f)
     else:
-        factors_config = extract_factors_config(records)
+        factors_config = extract_factors_config(records, majority_vote=not args.strict_factors)
         if args.write_factors_config:
             args.factors_config.parent.mkdir(parents=True, exist_ok=True)
             with args.factors_config.open("w", encoding="utf-8") as f:
@@ -478,18 +525,22 @@ def run_tuning(args: argparse.Namespace) -> None:
         json.dump(full_config, f, ensure_ascii=False, indent=2)
     print(f"\nSaved tuned config: {args.output_config}")
 
+    if args.rescore_jsonl:
+        out_path = args.rescore_jsonl
+        rescore_jsonl(args.jsonl, out_path, optimizer, tuned_weights)
+        print(f"\nRescored JSONL: {out_path}")
+        print("Validate with:")
+        print(f"  python evaluation/hcmus/calculate_metric.py {out_path}")
+
     print("\n=== Per-question tuned weights ===")
     for (pid, qidx), fw in sorted(tuned_weights.items()):
         print(f"\n  {pid} / Q{qidx}:")
         for name, w in sorted(fw.items(), key=lambda x: -x[1]):
-            print(f"    {w:.3f}  {name[:80]}{'...' if len(name) > 80 else ''}")
-
-    if args.rescore_jsonl:
-        out_path = args.rescore_jsonl
-        rescore_jsonl(args.jsonl, out_path, optimizer, best_params)
-        print(f"\nRescored JSONL: {out_path}")
-        print("Validate with:")
-        print(f"  python evaluation/hcmus/calculate_metric.py {out_path}")
+            short = name[:80] + ("..." if len(name) > 80 else "")
+            try:
+                print(f"    {w:.3f}  {short}")
+            except UnicodeEncodeError:
+                print(f"    {w:.3f}  {short.encode('ascii', 'replace').decode('ascii')}")
 
     # Leave-one-problem-out quick report
     if args.loocv:
@@ -508,10 +559,21 @@ def run_tuning(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser(description="Tune HCMUS multi-agent factor weights offline")
     parser.add_argument("--jsonl", type=Path, default=DEFAULT_JSONL, help="Input JSONL from score_with_multi_agent.py")
     parser.add_argument("--factors-config", type=Path, default=DEFAULT_FACTORS_CONFIG, help="Config with pre_extracted_factors")
     parser.add_argument("--write-factors-config", action="store_true", help="Write extracted factors config if missing")
+    parser.add_argument(
+        "--strict-factors",
+        action="store_true",
+        help="Fail if factor names differ across students (default: majority vote)",
+    )
     parser.add_argument("--output-config", type=Path, default=DEFAULT_TUNED_CONFIG, help="Output path for tuned weights JSON")
     parser.add_argument("--all-data", action="store_true", help="Optimize on full dataset (use with --l2-reg)")
     parser.add_argument("--l2-reg", type=float, default=0.0, help="L2 penalty toward uniform weights")
@@ -523,8 +585,34 @@ def main() -> None:
     parser.add_argument("--popsize", type=int, default=12, help="differential_evolution population multiplier")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--rescore-jsonl", type=Path, default=None, help="Write rescored JSONL with tuned weights applied")
+    parser.add_argument(
+        "--rescore-only",
+        type=Path,
+        default=None,
+        metavar="TUNED_CONFIG",
+        help="Skip optimization; rescore --jsonl using factor_weights from this config JSON",
+    )
     parser.add_argument("--loocv", action="store_true", help="Run leave-one-problem-out cross-validation report")
     args = parser.parse_args()
+
+    if args.rescore_only:
+        if not args.rescore_jsonl:
+            raise SystemExit("--rescore-only requires --rescore-jsonl")
+        records = load_per_question_records(args.jsonl)
+        exams = group_exams(records)
+        with args.factors_config.open("r", encoding="utf-8") as f:
+            factors_config = json.load(f)
+        with args.rescore_only.open("r", encoding="utf-8") as f:
+            tuned_config = json.load(f)
+        question_specs = build_question_specs(records, factors_config)
+        assessor = MultiAgentAssessor(llm_client=MagicMock())
+        optimizer = WeightOptimizer(exams, question_specs, assessor)
+        weights = config_to_weights(tuned_config)
+        rescore_jsonl(args.jsonl, args.rescore_jsonl, optimizer, weights)
+        print(f"Rescored JSONL: {args.rescore_jsonl}")
+        print(f"  python evaluation/hcmus/calculate_metric.py {args.rescore_jsonl}")
+        return
+
     run_tuning(args)
 
 

@@ -6,10 +6,17 @@ import numpy as np
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
 def analyze_model_performance(file_path):
-    print(f"📊 Đang xử lý tập dữ liệu CoNaLa: {file_path}")
+    # Windows console may default to cp1252, which breaks on emoji.
+    # Force UTF-8 if possible, and avoid printing emoji.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+    print(f"INFO: Dang xu ly tap du lieu CoNaLa: {file_path}")
     
     if not os.path.exists(file_path):
-        print(f"❌ Lỗi: Không tìm thấy file tại đường dẫn này.")
+        print("ERROR: Khong tim thay file tai duong dan nay.")
         return
 
     actual_grades = []
@@ -100,7 +107,7 @@ def analyze_model_performance(file_path):
                     example_groups[example_index] = (ex_refs, ex_preds)
                         
             except Exception as e:
-                print(f"⚠️ Cảnh báo dòng {idx}: Không parse được JSON thô hoặc lỗi kiểu dữ liệu. Chi tiết: {e}")
+                print(f"WARNING: Canh bao dong {idx}: Khong parse duoc JSON tho hoac loi kieu du lieu. Chi tiet: {e}")
                 skipped_rows += 1
                 continue
 
@@ -108,7 +115,7 @@ def analyze_model_performance(file_path):
     num_valid_samples = len(actual_grades)
     
     if num_valid_samples == 0:
-        print("❌ Không thu thập được cặp dữ liệu điểm (Thực tế - Dự đoán) nào hợp lệ.")
+        print("ERROR: Khong thu thap duoc cap du lieu diem (Thuc te - Du doan) nao hop le.")
         return
 
     valid_pct = (num_valid_samples / total_evaluations) * 100 if total_evaluations > 0 else 0.0
@@ -130,7 +137,7 @@ def analyze_model_performance(file_path):
             g_spearman, _ = spearmanr(actual_grades, predicted_grades)
             g_tau, _ = kendalltau(actual_grades, predicted_grades)
         except Exception as e:
-            print(f"⚠️ Không tính được tương quan toàn cục: {e}")
+            print(f"WARNING: Khong tinh duoc tuong quan toan cuc: {e}")
 
     # Tính toán các hệ số tương quan trung bình theo từng bài toán (Per-example Average Correlation - Khớp với Paper)
     k_list, s_list, p_list = [], [], []
@@ -140,7 +147,7 @@ def analyze_model_performance(file_path):
                 p_list.append(pearsonr(r, p)[0])
                 s_list.append(spearmanr(r, p)[0])
                 k_list.append(kendalltau(r, p)[0])
-            except:
+            except Exception:
                 pass
     avg_pearson = np.nanmean(p_list) if p_list else 0.0
     avg_spearman = np.nanmean(s_list) if s_list else 0.0
@@ -155,33 +162,33 @@ def analyze_model_performance(file_path):
 
     avg_time = np.mean(runtime_list) if runtime_list else 0.0
 
-    # ---- IN KẾT QUẢ ĐẸP MẮT ----
+    # ---- IN KẾT QUẢ ----
     print("\n" + "="*60)
-    print("🎯 BẢNG TỔNG HỢP METRICS ĐÁNH GIÁ MÔ HÌNH (CoNaLa)")
+    print("BANG TONG HOP METRICS DANH GIA MO HINH (CoNaLa)")
     print("="*60)
-    print(f"🔹 Tổng số lượt đánh giá đọc được: {total_evaluations}")
-    print(f"🔹 Số lượng mẫu hợp lệ (Valid)  : {num_valid_samples} ({valid_pct:.2f}%)")
-    print(f"🔹 Số lượng mẫu lỗi (Errors -1) : {error_samples} ({error_pct:.2f}%)")
-    print("\n📈 [Cách 1] Tương quan trung bình theo bài toán (Khớp với Paper):")
-    print(f"   + Hệ số tương quan Pearson R   : {avg_pearson:.4f}")
-    print(f"   + Hệ số tương quan Spearman R  : {avg_spearman:.4f}")
-    print(f"   + Hệ số tương quan Kendall Tau : {avg_kendall:.4f}")
-    print("\n📊 [Cách 2] Tương quan toàn cục (Global Flattened Correlation):")
-    print(f"   + Hệ số tương quan Pearson R   : {g_pearson:.4f}")
-    print(f"   + Hệ số tương quan Spearman R  : {g_spearman:.4f}")
-    print(f"   + Hệ số tương quan Kendall Tau : {g_tau:.4f}")
-    print("\n📉 Sai số và độ lệch (Thang điểm 4):")
-    print(f"   + Sai số tuyệt đối TB (MAE)    : {mae:.4f}")
-    print(f"   + Căn sai số bình phương (RMSE): {rmse:.4f}")
-    print(f"   + Độ lệch trung bình (Mean Bias): {mean_bias:+.4f} (>0: nới tay, <0: khắt khe)")
-    print(f"\n🔹 Tổng token tiêu thụ (Usage)  : {total_input_tokens + total_output_tokens:,} tokens")
-    print(f"   + Input Tokens               : {total_input_tokens:,} tokens")
-    print(f"   + Output Tokens              : {total_output_tokens:,} tokens")
-    print(f"🔹 Chi phí ước tính (Est. Cost) : {cost_usd:.5f} USD (~{cost_vnd:,.0f} VNĐ)")
-    print(f"   + Chi phí trung bình / mẫu   : {cost_per_sample_usd:.5f} USD (~{cost_per_sample_vnd:,.1f} VNĐ)")
-    print(f"🔹 Thời gian phản hồi trung bình: {avg_time:.3f} giây / lượt đánh giá")
+    print(f"TOTAL evaluations read: {total_evaluations}")
+    print(f"VALID samples         : {num_valid_samples} ({valid_pct:.2f}%)")
+    print(f"ERROR samples (-1)    : {error_samples} ({error_pct:.2f}%)")
+    print("\n[Cach 1] Tuong quan trung binh theo bai toan (khop Paper):")
+    print(f"  Pearson R           : {avg_pearson:.4f}")
+    print(f"  Spearman R          : {avg_spearman:.4f}")
+    print(f"  Kendall Tau         : {avg_kendall:.4f}")
+    print("\n[Cach 2] Tuong quan toan cuc (Global Flattened):")
+    print(f"  Pearson R           : {g_pearson:.4f}")
+    print(f"  Spearman R          : {g_spearman:.4f}")
+    print(f"  Kendall Tau         : {g_tau:.4f}")
+    print("\nSai so (thang diem 4):")
+    print(f"  MAE                 : {mae:.4f}")
+    print(f"  RMSE                : {rmse:.4f}")
+    print(f"  Mean Bias           : {mean_bias:+.4f} (>0: noi tay, <0: khat khe)")
+    print(f"\nTotal tokens consumed : {total_input_tokens + total_output_tokens:,} tokens")
+    print(f"  + Input tokens      : {total_input_tokens:,} tokens")
+    print(f"  + Output tokens     : {total_output_tokens:,} tokens")
+    print(f"Est. cost             : {cost_usd:.5f} USD (~{cost_vnd:,.0f} VND)")
+    print(f"Avg cost/sample       : {cost_per_sample_usd:.5f} USD (~{cost_per_sample_vnd:,.1f} VND)")
+    print(f"Avg runtime           : {avg_time:.3f} giay / luot danh gia")
     if skipped_rows > 0:
-        print(f"🔸 Số dòng bị bỏ qua do lỗi    : {skipped_rows}")
+        print(f"SKIPPED lines due to parse/error: {skipped_rows}")
     print("="*60 + "\n")
 
 if __name__ == "__main__":
@@ -196,7 +203,7 @@ if __name__ == "__main__":
         if jsonl_files:
             TARGET_FILE = max(jsonl_files, key=os.path.getmtime)
         else:
-            print("❌ Không tìm thấy file .jsonl nào trong thư mục output. Vui lòng truyền đường dẫn file.")
+            print("ERROR: Khong tim thay file .jsonl trong output. Vui long truyen duong dan file.")
             sys.exit(1)
             
     analyze_model_performance(TARGET_FILE)
