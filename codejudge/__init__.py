@@ -1,37 +1,25 @@
 """
-CodeJudge - Auto-Grading System for Programming Assignments
-Hệ thống chấm điểm code tự động cho bài tập lập trình
-
-Dựa trên paper: CodeJudge - Auto-Grading Code Assignments
+CodeJudge - Multi-agent auto-grading for programming assignments.
 """
 
 from dotenv import load_dotenv
 load_dotenv()
 
 from codejudge.core import (
-    IntegratedAssessor,
-    BinaryAssessor,
-    TaxonomyAssessor,
+    MultiAgentAssessor,
     LLMFactory,
     LLMConfig,
-)
-
-from codejudge.scoring import (
-    Scorer,
-    ScoreInterpreter,
-    ResultFormatter,
+    check_syntax,
+    merge_folder_code,
 )
 
 __version__ = "1.0.0"
 __author__ = "CodeJudge Team"
 
 __all__ = [
-    "IntegratedAssessor",
-    "BinaryAssessor",
-    "TaxonomyAssessor",
+    "MultiAgentAssessor",
     "LLMFactory",
     "LLMConfig",
-    "Scorer",
-    "ScoreInterpreter",
-    "ResultFormatter",
+    "check_syntax",
+    "merge_folder_code",
 ]

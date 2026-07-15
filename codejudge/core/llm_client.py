@@ -506,7 +506,7 @@ class QwenClient:
             raise
 
     def call(self, system_prompt, user_prompt, format_json=False, use_cache=None):
-        """Hàm call bổ trợ để TaxonomyAssessor có thể gọi được"""
+        """Chat-style call API aligned with other clients."""
         active_cache = use_cache if use_cache is not None else self.use_cache
 
         if active_cache:
@@ -766,7 +766,3 @@ class LLMFactory:
             )
         # Default: local model
         return LLMClient(model_name=model_name, use_cache=use_cache, **kwargs)
-
-# Thiết lập các Alias (Bí danh)
-AnthropicClient = LLMClient
-LocalLLMClient = LLMClient

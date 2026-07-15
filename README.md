@@ -1,101 +1,141 @@
-<p align="center">
-    <img src="paper/images/icon.png" width="150" style="margin-bottom: 0.2;"/>
-<p>
-<h2 align="center"> CodeJudge: Evaluating Code Generation with Large Language Models</h2>
-<h5 align="center"> If you like our project, please give us a star ⭐ on GitHub for the latest update.  </h2>
+# CodeEval / CodeJudge
 
-## 😮 Highlights
-CodeJudge is a code evaluation framework that leverages LLMs to evaluate the semantic correctness of generated code *without the need of test cases*. 
+Multi-agent auto-grading for programming assignments: **compiler syntax check** → **Agent 1 (factor extract)** → **Agent 2 (factor grade)** → score + suggestions.
 
-### 💡 Simple insight but efficient
-Results show that CodeJudge significantly outperformed existing methods across the four LLMs we tested. Furthermore, compared to a SOTA GPT-3.5-based code evaluation method, CodeJudge achieved better results even when using a much smaller model, Llama-3-8B-Instruct.
+Python package name remains `codejudge`. Conda environment name: **`codeeval`**.
 
-### ⚡ Off-the-shelf framework that is easy to use
-CodeJudge is an off-the-shelf evaluation framework that can be easily integrated into new LLM-based code generation systems.
+## Pipeline
 
-## 🛠️ Requirements and Installation
+1. **Compiler helper** — real syntax check (Python `compile`, C/C++ `g++ -fsyntax-only`, multi-file folders via temp dir).
+2. **Agent 1** — extract independent functional factors from the problem statement (LLM).
+3. **Agent 2** — grade each factor 0.0–1.0 (ignores syntax; scored separately).
+4. **Scoring** — convert to /10, apply syntax penalties, optionally scale to `question_max`; generate fix suggestions.
 
-* Python >= 3.10
-* Pytorch >= 2.2.0
-* CUDA Version >= 11.7
-* Install required packages:
+## Requirements
+
+- Python >= 3.10
+- For local HF models: CUDA-capable GPU recommended; `torch` + `bitsandbytes`
+- For C/C++ syntax checks: `g++` on `PATH`
+
+## Setup
+
 ```bash
-git clone https://github.com/VichyTong/CodeJudge
+git clone <repo-url>
 cd CodeJudge
-conda create -n codejudge python=3.10 -y
-conda activate codejudge
+conda create -n codeeval python=3.10 -y
+conda activate codeeval
 pip install -r requirements.txt
+cp .env_template .env   # fill API keys for providers you use
 ```
 
-## 💾 Dataset Preparation
-We uploaded datasets we used to test CodeJudge at [evaluation/data](evaluation/data). If you want to generate code samples by your self on HumanEval-X dataset, please follow the instruction in the [markdown file](evaluation/humaneval_generate_samples/readme.md).
+## Providers
 
-## 🔽 Model Preparation
+`LLMFactory.create(provider=..., model_name=..., api_key=...)` supports:
 
-### OpenAI models
+| Provider | SDK / backend | Env key | Notes |
+|---|---|---|---|
+| `openrouter` | OpenAI-compatible | `OPENROUTER_API_KEY` | Default UI presets in `app.py` |
+| `openai` | OpenAI | `OPENAI_API_KEY` | Also aliases `gpt` / `gpt-api` |
+| `gemini` | `google.generativeai` | `GOOGLE_API_KEY` | |
+| `qwen` | DashScope (remote) or HF local | `QWEN_API_KEY` / `HUGGINGFACE_TOKEN` | Remote if name contains `qwen-turbo` / `qwen-plus` |
+| `ollama` | OpenAI-compatible | — | Default `http://localhost:11434/v1` |
+| `vllm` | OpenAI-compatible | — | Default `http://localhost:8000/v1` |
+| `local` | transformers + 4-bit | `HUGGINGFACE_TOKEN` | Auto Kaggle path / HF cache |
+
+Example:
+
 ```bash
-export OPENAI_API_KEY=<YOUR_API_KEY>
+export OPENROUTER_API_KEY=sk-or-v1-...
+# or
+export GOOGLE_API_KEY=...
 ```
 
-### Meta Models
+## Web UI
 
-1. Please follow the instructions at the [official website](https://llama.meta.com/llama-downloads/) of Code Llama and LLama-3 to get download URLs.
-
-2. Download the model
-For Code Llama:
 ```bash
-cd evaluation/model/codellama
-bash download.sh
+conda activate codeeval
+python app.py
 ```
-For Llama-3:
+
+Supports text paste, single file, or folder submission for student code; problem statement from text / `.txt` / `.md` / `.pdf` / `.docx` (optional `pypdf`, `python-docx`).
+
+## Batch scoring
+
+### HCMUS
+
 ```bash
-cd evaluation/model/llama3
-bash download.sh
+python evaluation/hcmus/score_with_multi_agent.py \
+  --provider openrouter \
+  --model google/gemini-2.5-flash \
+  --limit 1
 ```
 
-3. Convert the model to Huggingface 🤗 format:
+Useful flags: `--config <weights.json>`, `--parallel-factors`, `--max-factor-workers`, `--resume`, `--start`, `--output`.
+
+### CoNaLa
+
 ```bash
-cd evaluation/model
-bash convert.sh
+python evaluation/conala/score_conala_multi_agent.py \
+  --provider gemini \
+  --model gemini-2.5-flash \
+  --limit 5
 ```
 
-## 🚀 Run CodeJudge
-Please refer to sample scripts under sample_scripts folder for every dataset ([HumanEval-X](evaluation/humaneval/sample_scripts/), [CoNaLa](evaluation/conala/sample_scripts/), [APPS](evaluation/apps/sample_scripts/), [BigCodeBench](evaluation/bigcodebench/sample_scripts/)).
+Useful flags: `--config`, `--parallel-factors`, `--source`, `--no-cache`, `--output`.
 
-You can choose models from: `gpt-3.5-turbo-1106`, `CodeLlama-34b-Instruct`, `Meta-Llama-3-8B-Instruct`, and `Meta-Llama-3-70B-Instruct`.
+## HITL (HCMUS weights / factors)
 
-For exmaple, you can run HumanEval-X test by:
+1. Extract factor config from a scored JSONL:
+
 ```bash
-cd evaluation
-bash humaneval/sample_script/gpt-3.5-turbo-python.sh
+python evaluation/hcmus/extract_factors_config.py --help
 ```
 
-You can also download our test results [here](https://drive.google.com/file/d/1uo4tBx6YDJjQmSUNOpgzZrdfv7lB7vxv/view?usp=sharing).
+2. Tune weights offline:
 
-## 👍 Acknowledgement
-
-We thank these greate works:
-- [HumanEval](https://github.com/openai/human-eval) is a widely used Python dataset to evaluate code generation. 
-- [HumanEval-X](https://github.com/THUDM/CodeGeeX/tree/main/codegeex/benchmark/humaneval-x) is a multi-language extension of HumanEval, including C++, Python, Java, JavaScript, Go, and Rust.
-- [CoNaLa](https://conala-corpus.github.io/) is a Python code generation benchmark with 472 tasks collected from StackOverflow.
-- We especially thank Dr. Evtikhiev of JetBrains Research for generously sharing the human-labeled data of the CoNaLa dataset.
-- [APPS](https://github.com/hendrycks/apps) is a Python code generation benchmark that includes introductory, interview-level, and competition-level tasks collected from coding competition websites.
-- [BigCodeBench](https://github.com/bigcode-project/bigcodebench) is a recently released code generation benchmark with 1,140 practical and challenging programming tasks.
-- We also thank [MuliPL-E](https://github.com/nuprl/MultiPL-E) for their excellent code for sampling programs using code generation LLMs.
-
-## Citation
-If you find our work helpful, please consider citing our paper:
+```bash
+python evaluation/hcmus/tune_weights.py --help
 ```
-@inproceedings{tong-zhang-2024-codejudge,
-    title = "{C}ode{J}udge: Evaluating Code Generation with Large Language Models",
-    author = "Tong, Weixi  and  Zhang, Tianyi",
-    editor = "Al-Onaizan, Yaser  and  Bansal, Mohit  and  Chen, Yun-Nung",
-    booktitle = "Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing",
-    month = nov,
-    year = "2024",
-    address = "Miami, Florida, USA",
-    publisher = "Association for Computational Linguistics",
-    url = "https://aclanthology.org/2024.emnlp-main.1118",
-    pages = "20032--20051"
-}
+
+Configs live under `evaluation/hcmus/configs/` (e.g. `1_final.json`, `noconfig_*`).
+
+## Metrics
+
+```bash
+# Single file
+python evaluation/hcmus/calculate_metric.py <path-to.jsonl>
+python evaluation/conala/calculate_metric.py <path-to.jsonl>
+
+# Batch / table (+ optional OpenRouter token cost)
+python evaluation/hcmus/calculate_all_metrics.py
+python evaluation/conala/calculate_all_metrics.py
+python evaluation/calculate_table_metrics.py
 ```
+
+## Tests
+
+```bash
+conda activate codeeval
+pytest codejudge/tests/ -v
+```
+
+Covers compiler helper, `MultiAgentAssessor` (mocked LLM), HITL weights, and cache policy.
+
+## Package layout (runtime)
+
+```
+app.py
+codejudge/
+  core/
+    multi_agent_assessor.py
+    compiler_helper.py
+    llm_client.py
+  tests/
+evaluation/
+  hcmus/          # score_with_multi_agent, HITL, metrics
+  conala/         # score_conala_multi_agent, metrics
+requirements.txt
+.env_template
+```
+
+Archive folders such as `paper/` and `code_model_score/` are thesis/reference only and are not part of the multi-agent runtime path.

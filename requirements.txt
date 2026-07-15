@@ -1,67 +1,33 @@
+# CodeEval / CodeJudge multi-agent runtime dependencies
+# Python >= 3.10 recommended
 
-# --- Core AI/ML Libs ---
+# --- Local HF models (provider=local / local Qwen) ---
+torch
 accelerate
 transformers
-datasets
 huggingface-hub
-scikit-learn
-scipy
+bitsandbytes
+
+# --- Metrics & tuning ---
 numpy
+scipy
 pandas
-matplotlib
-seaborn
 tqdm
 
-# --- CodeJudge Specifics ---
-# Các thư viện đặc thù để đánh giá code
-human_eval
-javalang
-tree-sitter
-code_bert_score
-rouge_score
-sacrebleu
-sacremoses
-nltk
-fuzzywuzzy
+# --- LLM provider SDKs ---
+openai>=1.0.0
+google-generativeai>=0.3.0
+dashscope
+requests>=2.31.0
 
-# --- Utilities ---
-editdistance  # Bản mới nhất
-fire
-jsonlines
-pyarrow
+# --- Config ---
+python-dotenv>=1.0.0
 
-# CodeJudge Core Requirements
-# Các thư viện cần thiết cho Core Engine
-
-# LLM Providers
-openai>=1.0.0              # OpenAI API (for GPT-4, GPT-3.5-turbo)
-anthropic>=0.7.0           # Anthropic API (for Claude)
-# Use the newer Google GenAI client; the older google-generativeai is deprecated.
-google-genai>=0.1.0        # Google Gemini / GenAI client (preferred)
-# google-generativeai>=0.3.0  # (deprecated) older Gemini client, kept for reference
-requests>=2.31.0           # HTTP requests for local LLM
-
-# Configuration
-python-dotenv>=1.0.0       # Environment variables management
-
-# Development & Testing  
-pytest>=7.4.0              # Testing framework
-pytest-asyncio>=0.21.0     # Async test support
-pytest-cov>=4.1.0          # Code coverage
-
-# Logging & Monitoring
-loguru>=0.7.0              # Better logging
-
-# Optional: For performance
-pydantic>=2.0.0            # Data validation
-
-# Optional vendor SDKs
-# Qwen SDK: package name depends on provider. Install the vendor-specific Qwen SDK if you plan
-# to use Qwen models (e.g. `pip install <qwen-sdk-package>`). Leave commented here to avoid
-# failing installs when the package name is unknown.
-# qwen-sdk>=0.0.1
-
-# Web Demo Requirements
+# --- Web UI ---
 python-fasthtml>=0.1.0
 uvicorn>=0.22.0
 
+# --- Dev / tests ---
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
